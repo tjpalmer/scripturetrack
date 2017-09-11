@@ -1,0 +1,19 @@
+{
+  "name": "scripturetrack",
+  "version": "0.0.1",
+  "description": "Scripture Track",
+  "repository": {
+    "type": "git",
+    "url": "about:blank"
+  },
+  "devDependencies": {
+    "awesome-typescript-loader": "^3.2.1",
+    "typescript": "^2.4.1",
+    "webpack": "^3.2.0",
+    "webpack-dev-server": "^2.5.1"
+  },
+  "scripts": {
+    "prepublish": "webpack --color",
+    "watch": "webpack-dev-server --color -d --port 52118"
+  }
+}
