@@ -8,10 +8,10 @@ module.exports = {
   },
   entry: {
     app: './src/main.tsx',
-    // vendor: [
-    //   'matter-js',
-    //   'three',
-    // ],
+    vendor: [
+      'preact',
+      'preact-compat',
+    ],
   },
   module: {
     loaders: [
@@ -23,16 +23,16 @@ module.exports = {
   },
   output: {filename: "app.js"},
   plugins: [
-    // new webpack.optimize.CommonsChunkPlugin({
-    //   name: 'vendor', filename: 'vendor.js',
-    // }),
+    new webpack.optimize.CommonsChunkPlugin({
+      name: 'vendor', filename: 'vendor.js',
+    }),
     new webpack.optimize.ModuleConcatenationPlugin(),
   ],
   resolve: {
+    alias: {
+      'react': 'preact-compat',
+      'react-dom': 'preact-compat',
+    },
     extensions: ['.js', '.ts', '.tsx'],
   },
 };
-
-// if (prod) {
-//   module.exports.resolve.alias.three = 'three/build/three.min.js';
-// }
