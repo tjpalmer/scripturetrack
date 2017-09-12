@@ -3,6 +3,7 @@ let webpack = require('webpack');
 
 module.exports = {
   devServer: {
+    compress: true,
     hot: false,
     inline: false,
   },

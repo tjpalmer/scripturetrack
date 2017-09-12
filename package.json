@@ -7,6 +7,7 @@
     "url": "about:blank"
   },
   "devDependencies": {
+    "@types/node": "^8.0.28",
     "@types/react": "^16.0.5",
     "@types/react-dom": "^15.5.4",
     "awesome-typescript-loader": "^3.2.1",
@@ -19,7 +20,9 @@
     "preact-compat": "^3.17.0"
   },
   "scripts": {
+    "build-scripts": "tsc --project scripts",
     "prepublish": "webpack --color",
-    "watch": "webpack-dev-server --color -d --port 52118"
+    "watch": "webpack-dev-server --color -d --port 52118",
+    "watch-scripts": "tsc --project scripts --watch"
   }
 }
