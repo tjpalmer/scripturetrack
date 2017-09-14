@@ -1,6 +1,6 @@
 import {usfmParse} from '../../src/index';
 import {load} from 'cheerio';
-import {open, readdirSync, readFileSync} from 'fs';
+import {open, readdirSync, readFileSync, writeFileSync} from 'fs';
 import {argv} from 'process';
 import {join} from 'path';
 
@@ -24,8 +24,11 @@ function summarizeTexts(baseDir: string) {
   let summary = {
     items: textDirs.map(key => ({key, ...summarizeText(join(baseDir, key))})),
   };
-  console.log(summary);
-  console.log(summary.items[0].items.slice(0, 3));
+  return summary;
 }
 
-summarizeTexts(argv[2]);
+let baseDir = argv[2];
+let summary = summarizeTexts(baseDir);
+console.log(summary);
+console.log(summary.items[0].items.slice(0, 3));
+writeFileSync(join(baseDir, 'texts.json'), JSON.stringify(summary));
