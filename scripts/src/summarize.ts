@@ -1,17 +1,22 @@
+import {usfmParse} from '../../src/index';
+import {load} from 'cheerio';
+import {open, readdirSync, readFileSync} from 'fs';
 import {argv} from 'process';
 import {join} from 'path';
-import {open, readdirSync, readFileSync} from 'fs';
-import {usfmParse} from '../../src/index';
 
 function summarizeText(dir: string) {
-  let names = readdirSync(dir).filter(name => name.endsWith('.usfm')).sort();
-  let items = names.map(key => {
+  // Overall metadata.
+  let coprDoc = load(readFileSync(join(dir, 'copr.htm')).toString());
+  let title = coprDoc('title').text().trim();
+  // Read info on each book file.
+  let keys = readdirSync(dir).filter(name => name.endsWith('.usfm')).sort();
+  let items = keys.map(key => {
     let path = join(dir, key);
     let content = readFileSync(path).toString();
     usfmParse(content);
     return {key, size: content.length};
   });
-  return {items};
+  return {items, title};
 }
 
 function summarizeTexts(baseDir: string) {
