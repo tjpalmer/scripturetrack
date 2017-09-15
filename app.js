@@ -22,7 +22,7 @@ class Clock extends __WEBPACK_IMPORTED_MODULE_0_react__["Component"] {
         this.state = { date: new Date() };
     }
     componentDidMount() {
-        this.timerID = setInterval(() => this.tick(), 1000);
+        this.timerID = window.setInterval(() => this.tick(), 1000);
     }
     componentWillUnmount() {
         clearInterval(this.timerID);
