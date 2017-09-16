@@ -1,4 +1,4 @@
-export interface Doc {
+export interface SelfDoc {
 
   size: number;
 
@@ -8,8 +8,30 @@ export interface Doc {
 
 }
 
+export interface Doc extends SelfDoc {
+
+  key: string;
+
+}
+
+export interface Volume {
+
+  items: Array<Doc>;
+
+  key: string;
+
+  title: string;
+
+}
+
+export interface Library {
+
+  items: Array<Volume>;
+
+}
+
 export function usfmParse(text: string) {
-  let doc = {} as Doc;
+  let doc = {} as SelfDoc;
   let lines = [];
   let size = 0;
   for (let line of text.split('\n')) {

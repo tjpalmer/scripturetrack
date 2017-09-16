@@ -1,19 +1,18 @@
 /// <reference path="../node_modules/@types/react/index.d.ts" />
 
+import {Doc, Library, Volume} from './index';
 import * as React from 'react';
-import * as ReactDOM from 'react-dom';
+import {Component} from 'react';
+import {render} from 'react-dom';
 
-function init() {
-  ReactDOM.render(
-    <Clock/>,
-    // document.getElementById('root'),
-    document.body,
-  );
+async function init() {
+  let library = await (await fetch('texts/texts.json')).json() as Library;
+  render(<LibraryView {...library}/>, document.getElementById('root'));
 }
 
 window.addEventListener('load', init);
 
-class Clock extends React.Component<{}, {date: Date}> {
+class Clock extends Component<{}, {date: Date}> {
 
   constructor(props: {}) {
     super(props);
@@ -43,4 +42,29 @@ class Clock extends React.Component<{}, {date: Date}> {
 
   timerID: number;
 
+}
+
+class DocView extends Component<Doc, {}> {
+  //
+}
+
+class LibraryView extends Component<Library, {}> {
+
+  constructor(props: Library) {
+    super(props);
+    console.log(props);
+  }
+
+  render() {
+    return (
+      <ul>
+        {this.props.items.map(volume => <li>{volume.title}</li>)}
+      </ul>
+    );
+  }
+
+}
+
+class VolumeView extends Component<Volume, {}> {
+  //
 }
