@@ -1,13 +1,14 @@
 /// <reference path="../node_modules/@types/react/index.d.ts" />
 
-import {Doc, Library, LibraryView, Volume} from './index';
+import {App, AppView, Library} from './index';
 import * as React from 'react';
 import {Component} from 'react';
 import {render} from 'react-dom';
 
 async function init() {
   let library = await (await fetch('texts/texts.json')).json() as Library;
-  render(<LibraryView {...library}/>, document.getElementById('root'));
+  let app = {library, path: []};
+  render(<AppView {...app}/>, document.getElementById('root'));
 }
 
 window.addEventListener('load', init);

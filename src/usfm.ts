@@ -2,6 +2,8 @@ export interface SelfDoc {
 
   size: number;
 
+  text?: string;
+
   title: string;
 
   titleFull: string;
@@ -30,7 +32,7 @@ export interface Library {
 
 }
 
-export function usfmParse(text: string) {
+export function usfmParse(text: string, includeText?: boolean) {
   let doc = {} as SelfDoc;
   let lines = [];
   let size = 0;
@@ -53,6 +55,9 @@ export function usfmParse(text: string) {
     }
   }
   doc.size = size;
+  if (includeText) {
+    doc.text = lines.join('\n') + '\n';
+  }
   return doc;
 }
 
