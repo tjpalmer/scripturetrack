@@ -1,6 +1,6 @@
 /// <reference path="../node_modules/@types/react/index.d.ts" />
 
-import {Doc, Library, Volume} from './index';
+import {Doc, Library, LibraryView, Volume} from './index';
 import * as React from 'react';
 import {Component} from 'react';
 import {render} from 'react-dom';
@@ -42,29 +42,4 @@ class Clock extends Component<{}, {date: Date}> {
 
   timerID: number;
 
-}
-
-class DocView extends Component<Doc, {}> {
-  //
-}
-
-class LibraryView extends Component<Library, {}> {
-
-  constructor(props: Library) {
-    super(props);
-    console.log(props);
-  }
-
-  render() {
-    return (
-      <ul>
-        {this.props.items.map(volume => <li>{volume.title}</li>)}
-      </ul>
-    );
-  }
-
-}
-
-class VolumeView extends Component<Volume, {}> {
-  //
 }
