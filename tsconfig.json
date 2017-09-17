@@ -2,6 +2,7 @@
   "compilerOptions": {
     "jsx": "react",
     "module": "es6",
+    "moduleResolution": "node",
     "outDir": "bin",
     "strict": true,
     "target": "es6"

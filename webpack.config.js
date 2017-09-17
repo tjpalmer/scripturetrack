@@ -10,8 +10,10 @@ module.exports = {
   entry: {
     app: './src/main.tsx',
     vendor: [
+      'csstips',
       'preact',
       'preact-compat',
+      'typestyle',
     ],
   },
   module: {

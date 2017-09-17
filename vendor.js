@@ -147,11 +147,625 @@
 /******/ 	__webpack_require__.oe = function(err) { console.error(err); throw err; };
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 12);
+/******/ 	return __webpack_require__(__webpack_require__.s = 24);
 /******/ })
 /************************************************************************/
 /******/ ([
 /* 0 */
+/***/ (function(module, exports) {
+
+// shim for using process in browser
+var process = module.exports = {};
+
+// cached from whatever global is present so that test runners that stub it
+// don't break things.  But we need to wrap it in a try catch in case it is
+// wrapped in strict mode code which doesn't define any globals.  It's inside a
+// function because try/catches deoptimize in certain engines.
+
+var cachedSetTimeout;
+var cachedClearTimeout;
+
+function defaultSetTimout() {
+    throw new Error('setTimeout has not been defined');
+}
+function defaultClearTimeout () {
+    throw new Error('clearTimeout has not been defined');
+}
+(function () {
+    try {
+        if (typeof setTimeout === 'function') {
+            cachedSetTimeout = setTimeout;
+        } else {
+            cachedSetTimeout = defaultSetTimout;
+        }
+    } catch (e) {
+        cachedSetTimeout = defaultSetTimout;
+    }
+    try {
+        if (typeof clearTimeout === 'function') {
+            cachedClearTimeout = clearTimeout;
+        } else {
+            cachedClearTimeout = defaultClearTimeout;
+        }
+    } catch (e) {
+        cachedClearTimeout = defaultClearTimeout;
+    }
+} ())
+function runTimeout(fun) {
+    if (cachedSetTimeout === setTimeout) {
+        //normal enviroments in sane situations
+        return setTimeout(fun, 0);
+    }
+    // if setTimeout wasn't available but was latter defined
+    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
+        cachedSetTimeout = setTimeout;
+        return setTimeout(fun, 0);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedSetTimeout(fun, 0);
+    } catch(e){
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
+            return cachedSetTimeout.call(null, fun, 0);
+        } catch(e){
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
+            return cachedSetTimeout.call(this, fun, 0);
+        }
+    }
+
+
+}
+function runClearTimeout(marker) {
+    if (cachedClearTimeout === clearTimeout) {
+        //normal enviroments in sane situations
+        return clearTimeout(marker);
+    }
+    // if clearTimeout wasn't available but was latter defined
+    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
+        cachedClearTimeout = clearTimeout;
+        return clearTimeout(marker);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedClearTimeout(marker);
+    } catch (e){
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
+            return cachedClearTimeout.call(null, marker);
+        } catch (e){
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
+            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
+            return cachedClearTimeout.call(this, marker);
+        }
+    }
+
+
+
+}
+var queue = [];
+var draining = false;
+var currentQueue;
+var queueIndex = -1;
+
+function cleanUpNextTick() {
+    if (!draining || !currentQueue) {
+        return;
+    }
+    draining = false;
+    if (currentQueue.length) {
+        queue = currentQueue.concat(queue);
+    } else {
+        queueIndex = -1;
+    }
+    if (queue.length) {
+        drainQueue();
+    }
+}
+
+function drainQueue() {
+    if (draining) {
+        return;
+    }
+    var timeout = runTimeout(cleanUpNextTick);
+    draining = true;
+
+    var len = queue.length;
+    while(len) {
+        currentQueue = queue;
+        queue = [];
+        while (++queueIndex < len) {
+            if (currentQueue) {
+                currentQueue[queueIndex].run();
+            }
+        }
+        queueIndex = -1;
+        len = queue.length;
+    }
+    currentQueue = null;
+    draining = false;
+    runClearTimeout(timeout);
+}
+
+process.nextTick = function (fun) {
+    var args = new Array(arguments.length - 1);
+    if (arguments.length > 1) {
+        for (var i = 1; i < arguments.length; i++) {
+            args[i - 1] = arguments[i];
+        }
+    }
+    queue.push(new Item(fun, args));
+    if (queue.length === 1 && !draining) {
+        runTimeout(drainQueue);
+    }
+};
+
+// v8 likes predictible objects
+function Item(fun, array) {
+    this.fun = fun;
+    this.array = array;
+}
+Item.prototype.run = function () {
+    this.fun.apply(null, this.array);
+};
+process.title = 'browser';
+process.browser = true;
+process.env = {};
+process.argv = [];
+process.version = ''; // empty string to avoid regexp issues
+process.versions = {};
+
+function noop() {}
+
+process.on = noop;
+process.addListener = noop;
+process.once = noop;
+process.off = noop;
+process.removeListener = noop;
+process.removeAllListeners = noop;
+process.emit = noop;
+process.prependListener = noop;
+process.prependOnceListener = noop;
+
+process.listeners = function (name) { return [] }
+
+process.binding = function (name) {
+    throw new Error('process.binding is not supported');
+};
+
+process.cwd = function () { return '/' };
+process.chdir = function (dir) {
+    throw new Error('process.chdir is not supported');
+};
+process.umask = function() { return 0; };
+
+
+/***/ }),
+/* 1 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+
+// EXTERNAL MODULE: ./node_modules/free-style/dist/free-style.js
+var free_style = __webpack_require__(7);
+var free_style_default = /*#__PURE__*/__webpack_require__.n(free_style);
+
+// CONCATENATED MODULE: ./node_modules/typestyle/lib.es2015/internal/formatting.js
+
+/**
+ * We need to do the following to *our* objects before passing to freestyle:
+ * - For any `$nest` directive move up to FreeStyle style nesting
+ * - For any `$unique` directive map to FreeStyle Unique
+ * - For any `$debugName` directive return the debug name
+ */
+function ensureStringObj(object) {
+    /** The final result we will return */
+    var result = {};
+    var debugName = '';
+    for (var key in object) {
+        /** Grab the value upfront */
+        var val = object[key];
+        /** TypeStyle configuration options */
+        if (key === '$unique') {
+            result[free_style["IS_UNIQUE"]] = val;
+        }
+        else if (key === '$nest') {
+            var nested = val;
+            for (var selector in nested) {
+                var subproperties = nested[selector];
+                result[selector] = ensureStringObj(subproperties).result;
+            }
+        }
+        else if (key === '$debugName') {
+            debugName = val;
+        }
+        else {
+            result[key] = val;
+        }
+    }
+    return { result: result, debugName: debugName };
+}
+// todo: better name here
+function explodeKeyframes(frames) {
+    var result = { $debugName: undefined, keyframes: {} };
+    for (var offset in frames) {
+        var val = frames[offset];
+        if (offset === '$debugName') {
+            result.$debugName = val;
+        }
+        else {
+            result.keyframes[offset] = val;
+        }
+    }
+    return result;
+}
+
+// CONCATENATED MODULE: ./node_modules/typestyle/lib.es2015/internal/utilities.js
+/** Raf for node + browser */
+var raf = typeof requestAnimationFrame === 'undefined' ? setTimeout : requestAnimationFrame.bind(window);
+/**
+ * Utility to join classes conditionally
+ */
+function classes() {
+    var classes = [];
+    for (var _i = 0; _i < arguments.length; _i++) {
+        classes[_i] = arguments[_i];
+    }
+    return classes.filter(function (c) { return !!c; }).join(' ');
+}
+/**
+ * Merges various styles into a single style object.
+ * Note: if two objects have the same property the last one wins
+ */
+function extend() {
+    var objects = [];
+    for (var _i = 0; _i < arguments.length; _i++) {
+        objects[_i] = arguments[_i];
+    }
+    /** The final result we will return */
+    var result = {};
+    for (var _a = 0, objects_1 = objects; _a < objects_1.length; _a++) {
+        var object = objects_1[_a];
+        if (object == null || object === false) {
+            continue;
+        }
+        for (var key in object) {
+            /** Falsy values except a explicit 0 is ignored */
+            var val = object[key];
+            if (!val && val !== 0) {
+                continue;
+            }
+            /** if nested media or pseudo selector */
+            if (key === '$nest' && val) {
+                result[key] = result['$nest'] ? extend(result['$nest'], val) : val;
+            }
+            else if ((key.indexOf('&') !== -1 || key.indexOf('@media') === 0)) {
+                result[key] = result[key] ? extend(result[key], val) : val;
+            }
+            else {
+                result[key] = val;
+            }
+        }
+    }
+    return result;
+}
+/**
+ * Utility to help customize styles with media queries. e.g.
+ * ```
+ * style(
+ *  media({maxWidth:500}, {color:'red'})
+ * )
+ * ```
+ */
+var media = function (mediaQuery) {
+    var objects = [];
+    for (var _i = 1; _i < arguments.length; _i++) {
+        objects[_i - 1] = arguments[_i];
+    }
+    var mediaQuerySections = [];
+    if (mediaQuery.type)
+        mediaQuerySections.push(mediaQuery.type);
+    if (mediaQuery.orientation)
+        mediaQuerySections.push(mediaQuery.orientation);
+    if (mediaQuery.minWidth)
+        mediaQuerySections.push("(min-width: " + mediaLength(mediaQuery.minWidth) + ")");
+    if (mediaQuery.maxWidth)
+        mediaQuerySections.push("(max-width: " + mediaLength(mediaQuery.maxWidth) + ")");
+    if (mediaQuery.minHeight)
+        mediaQuerySections.push("(min-height: " + mediaLength(mediaQuery.minHeight) + ")");
+    if (mediaQuery.maxHeight)
+        mediaQuerySections.push("(max-height: " + mediaLength(mediaQuery.maxHeight) + ")");
+    var stringMediaQuery = "@media " + mediaQuerySections.join(' and ');
+    var object = {
+        $nest: (_a = {},
+            _a[stringMediaQuery] = extend.apply(void 0, objects),
+            _a)
+    };
+    return object;
+    var _a;
+};
+var mediaLength = function (value) {
+    return typeof value === 'string' ? value : value + "px";
+};
+
+// CONCATENATED MODULE: ./node_modules/typestyle/lib.es2015/internal/typestyle.js
+
+
+
+/**
+ * Creates an instance of free style with our options
+ */
+var createFreeStyle = function () { return free_style["create"](
+/** Use the default hash function */
+undefined, 
+/** Preserve $debugName values */
+true); };
+/**
+ * Maintains a single stylesheet and keeps it in sync with requested styles
+ */
+var typestyle_TypeStyle = (function () {
+    function TypeStyle(_a) {
+        var autoGenerateTag = _a.autoGenerateTag;
+        var _this = this;
+        /**
+         * Insert `raw` CSS as a string. This is useful for e.g.
+         * - third party CSS that you are customizing with template strings
+         * - generating raw CSS in JavaScript
+         * - reset libraries like normalize.css that you can use without loaders
+         */
+        this.cssRaw = function (mustBeValidCSS) {
+            if (!mustBeValidCSS) {
+                return;
+            }
+            _this._raw += mustBeValidCSS || '';
+            _this._pendingRawChange = true;
+            _this._styleUpdated();
+        };
+        /**
+         * Takes CSSProperties and registers it to a global selector (body, html, etc.)
+         */
+        this.cssRule = function (selector) {
+            var objects = [];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                objects[_i - 1] = arguments[_i];
+            }
+            var object = ensureStringObj(extend.apply(void 0, objects)).result;
+            _this._freeStyle.registerRule(selector, object);
+            _this._styleUpdated();
+            return;
+        };
+        /**
+         * Renders styles to the singleton tag imediately
+         * NOTE: You should only call it on initial render to prevent any non CSS flash.
+         * After that it is kept sync using `requestAnimationFrame` and we haven't noticed any bad flashes.
+         **/
+        this.forceRenderStyles = function () {
+            var target = _this._getTag();
+            if (!target) {
+                return;
+            }
+            target.textContent = _this.getStyles();
+        };
+        /**
+         * Utility function to register an @font-face
+         */
+        this.fontFace = function () {
+            var fontFace = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                fontFace[_i] = arguments[_i];
+            }
+            var freeStyle = _this._freeStyle;
+            for (var _a = 0, _b = fontFace; _a < _b.length; _a++) {
+                var face = _b[_a];
+                freeStyle.registerRule('@font-face', face);
+            }
+            _this._styleUpdated();
+            return;
+        };
+        /**
+         * Allows use to use the stylesheet in a node.js environment
+         */
+        this.getStyles = function () {
+            return (_this._raw || '') + _this._freeStyle.getStyles();
+        };
+        /**
+         * Takes keyframes and returns a generated animationName
+         */
+        this.keyframes = function (frames) {
+            var _a = explodeKeyframes(frames), keyframes = _a.keyframes, $debugName = _a.$debugName;
+            // TODO: replace $debugName with display name
+            var animationName = _this._freeStyle.registerKeyframes(keyframes, $debugName);
+            _this._styleUpdated();
+            return animationName;
+        };
+        /**
+         * Helps with testing. Reinitializes FreeStyle + raw
+         */
+        this.reinit = function () {
+            /** reinit freestyle */
+            var freeStyle = createFreeStyle();
+            _this._freeStyle = freeStyle;
+            _this._lastFreeStyleChangeId = freeStyle.changeId;
+            /** reinit raw */
+            _this._raw = '';
+            _this._pendingRawChange = false;
+            /** Clear any styles that were flushed */
+            var target = _this._getTag();
+            if (target) {
+                target.textContent = '';
+            }
+        };
+        /** Sets the target tag where we write the css on style updates */
+        this.setStylesTarget = function (tag) {
+            /** Clear any data in any previous tag */
+            if (_this._tag) {
+                _this._tag.textContent = '';
+            }
+            _this._tag = tag;
+            /** This special time buffer immediately */
+            _this.forceRenderStyles();
+        };
+        /**
+         * Takes CSSProperties and return a generated className you can use on your component
+         */
+        this.style = function () {
+            var objects = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                objects[_i] = arguments[_i];
+            }
+            var freeStyle = _this._freeStyle;
+            var _a = ensureStringObj(extend.apply(void 0, objects)), result = _a.result, debugName = _a.debugName;
+            var className = debugName ? freeStyle.registerStyle(result, debugName) : freeStyle.registerStyle(result);
+            _this._styleUpdated();
+            return className;
+        };
+        var freeStyle = createFreeStyle();
+        this._autoGenerateTag = autoGenerateTag;
+        this._freeStyle = freeStyle;
+        this._lastFreeStyleChangeId = freeStyle.changeId;
+        this._pending = 0;
+        this._pendingRawChange = false;
+        this._raw = '';
+        this._tag = undefined;
+    }
+    /**
+     * Only calls cb all sync operations settle
+     */
+    TypeStyle.prototype._afterAllSync = function (cb) {
+        var _this = this;
+        this._pending++;
+        var pending = this._pending;
+        raf(function () {
+            if (pending !== _this._pending) {
+                return;
+            }
+            cb();
+        });
+    };
+    TypeStyle.prototype._getTag = function () {
+        if (this._tag) {
+            return this._tag;
+        }
+        if (this._autoGenerateTag) {
+            var tag = typeof window === 'undefined'
+                ? { textContent: '' }
+                : document.createElement('style');
+            if (typeof document !== 'undefined') {
+                document.head.appendChild(tag);
+            }
+            this._tag = tag;
+            return tag;
+        }
+        return undefined;
+    };
+    /** Checks if the style tag needs updating and if so queues up the change */
+    TypeStyle.prototype._styleUpdated = function () {
+        var _this = this;
+        var changeId = this._freeStyle.changeId;
+        var lastChangeId = this._lastFreeStyleChangeId;
+        if (!this._pendingRawChange && changeId === lastChangeId) {
+            return;
+        }
+        this._lastFreeStyleChangeId = changeId;
+        this._pendingRawChange = false;
+        this._afterAllSync(function () { return _this.forceRenderStyles(); });
+    };
+    return TypeStyle;
+}());
+
+
+// EXTERNAL MODULE: ./node_modules/typestyle/lib.es2015/types.js
+var types = __webpack_require__(14);
+var types_default = /*#__PURE__*/__webpack_require__.n(types);
+
+// CONCATENATED MODULE: ./node_modules/typestyle/lib.es2015/index.js
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "setStylesTarget", function() { return setStylesTarget; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "cssRaw", function() { return cssRaw; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "cssRule", function() { return cssRule; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "forceRenderStyles", function() { return forceRenderStyles; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "fontFace", function() { return fontFace; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getStyles", function() { return getStyles; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "keyframes", function() { return lib_es2015_keyframes; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "reinit", function() { return reinit; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "style", function() { return style; });
+/* harmony export (immutable) */ __webpack_exports__["createTypeStyle"] = createTypeStyle;
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, "TypeStyle", function() { return typestyle_TypeStyle; });
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, "types", function() { return types; });
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, "extend", function() { return extend; });
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, "classes", function() { return classes; });
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, "media", function() { return media; });
+
+
+/**
+ * All the CSS types in the 'types' namespace
+ */
+
+
+/**
+ * Export certain utilities
+ */
+
+/** Zero configuration, default instance of TypeStyle */
+var ts = new typestyle_TypeStyle({ autoGenerateTag: true });
+/** Sets the target tag where we write the css on style updates */
+var setStylesTarget = ts.setStylesTarget;
+/**
+ * Insert `raw` CSS as a string. This is useful for e.g.
+ * - third party CSS that you are customizing with template strings
+ * - generating raw CSS in JavaScript
+ * - reset libraries like normalize.css that you can use without loaders
+ */
+var cssRaw = ts.cssRaw;
+/**
+ * Takes CSSProperties and registers it to a global selector (body, html, etc.)
+ */
+var cssRule = ts.cssRule;
+/**
+ * Renders styles to the singleton tag imediately
+ * NOTE: You should only call it on initial render to prevent any non CSS flash.
+ * After that it is kept sync using `requestAnimationFrame` and we haven't noticed any bad flashes.
+ **/
+var forceRenderStyles = ts.forceRenderStyles;
+/**
+ * Utility function to register an @font-face
+ */
+var fontFace = ts.fontFace;
+/**
+ * Allows use to use the stylesheet in a node.js environment
+ */
+var getStyles = ts.getStyles;
+/**
+ * Takes keyframes and returns a generated animationName
+ */
+var lib_es2015_keyframes = ts.keyframes;
+/**
+ * Helps with testing. Reinitializes FreeStyle + raw
+ */
+var reinit = ts.reinit;
+/**
+ * Takes CSSProperties and return a generated className you can use on your component
+ */
+var style = ts.style;
+/**
+ * Creates a new instance of TypeStyle separate from the default instance.
+ *
+ * - Use this for creating a different typestyle instance for a shadow dom component.
+ * - Use this if you don't want an auto tag generated and you just want to collect the CSS.
+ *
+ * NOTE: styles aren't shared between different instances.
+ */
+function createTypeStyle(target) {
+    var instance = new typestyle_TypeStyle({ autoGenerateTag: false });
+    if (target) {
+        instance.setStylesTarget(target);
+    }
+    return instance;
+}
+
+
+/***/ }),
+/* 2 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -171,9 +785,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "PureComponent", function() { return PureComponent; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "unstable_renderSubtreeIntoContainer", function() { return renderSubtreeIntoContainer; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "__spread", function() { return extend; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_prop_types__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_prop_types__ = __webpack_require__(20);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_prop_types___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_prop_types__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_preact__ = __webpack_require__(6);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_preact__ = __webpack_require__(10);
 /* harmony reexport (default from non-hamory) */ __webpack_require__.d(__webpack_exports__, "PropTypes", function() { return __WEBPACK_IMPORTED_MODULE_0_prop_types___default.a; });
 
 
@@ -806,200 +1420,33 @@ var index = {
 /* harmony default export */ __webpack_exports__["default"] = (index);
 //# sourceMappingURL=preact-compat.es.js.map
 
-/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(1)))
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(0)))
 
 /***/ }),
-/* 1 */
-/***/ (function(module, exports) {
+/* 3 */
+/***/ (function(module, exports, __webpack_require__) {
 
-// shim for using process in browser
-var process = module.exports = {};
+"use strict";
 
-// cached from whatever global is present so that test runners that stub it
-// don't break things.  But we need to wrap it in a try catch in case it is
-// wrapped in strict mode code which doesn't define any globals.  It's inside a
-// function because try/catches deoptimize in certain engines.
-
-var cachedSetTimeout;
-var cachedClearTimeout;
-
-function defaultSetTimout() {
-    throw new Error('setTimeout has not been defined');
+function __export(m) {
+    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
 }
-function defaultClearTimeout () {
-    throw new Error('clearTimeout has not been defined');
-}
-(function () {
-    try {
-        if (typeof setTimeout === 'function') {
-            cachedSetTimeout = setTimeout;
-        } else {
-            cachedSetTimeout = defaultSetTimout;
-        }
-    } catch (e) {
-        cachedSetTimeout = defaultSetTimout;
-    }
-    try {
-        if (typeof clearTimeout === 'function') {
-            cachedClearTimeout = clearTimeout;
-        } else {
-            cachedClearTimeout = defaultClearTimeout;
-        }
-    } catch (e) {
-        cachedClearTimeout = defaultClearTimeout;
-    }
-} ())
-function runTimeout(fun) {
-    if (cachedSetTimeout === setTimeout) {
-        //normal enviroments in sane situations
-        return setTimeout(fun, 0);
-    }
-    // if setTimeout wasn't available but was latter defined
-    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
-        cachedSetTimeout = setTimeout;
-        return setTimeout(fun, 0);
-    }
-    try {
-        // when when somebody has screwed with setTimeout but no I.E. maddness
-        return cachedSetTimeout(fun, 0);
-    } catch(e){
-        try {
-            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
-            return cachedSetTimeout.call(null, fun, 0);
-        } catch(e){
-            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
-            return cachedSetTimeout.call(this, fun, 0);
-        }
-    }
-
-
-}
-function runClearTimeout(marker) {
-    if (cachedClearTimeout === clearTimeout) {
-        //normal enviroments in sane situations
-        return clearTimeout(marker);
-    }
-    // if clearTimeout wasn't available but was latter defined
-    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
-        cachedClearTimeout = clearTimeout;
-        return clearTimeout(marker);
-    }
-    try {
-        // when when somebody has screwed with setTimeout but no I.E. maddness
-        return cachedClearTimeout(marker);
-    } catch (e){
-        try {
-            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
-            return cachedClearTimeout.call(null, marker);
-        } catch (e){
-            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
-            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
-            return cachedClearTimeout.call(this, marker);
-        }
-    }
-
-
-
-}
-var queue = [];
-var draining = false;
-var currentQueue;
-var queueIndex = -1;
-
-function cleanUpNextTick() {
-    if (!draining || !currentQueue) {
-        return;
-    }
-    draining = false;
-    if (currentQueue.length) {
-        queue = currentQueue.concat(queue);
-    } else {
-        queueIndex = -1;
-    }
-    if (queue.length) {
-        drainQueue();
-    }
-}
-
-function drainQueue() {
-    if (draining) {
-        return;
-    }
-    var timeout = runTimeout(cleanUpNextTick);
-    draining = true;
-
-    var len = queue.length;
-    while(len) {
-        currentQueue = queue;
-        queue = [];
-        while (++queueIndex < len) {
-            if (currentQueue) {
-                currentQueue[queueIndex].run();
-            }
-        }
-        queueIndex = -1;
-        len = queue.length;
-    }
-    currentQueue = null;
-    draining = false;
-    runClearTimeout(timeout);
-}
-
-process.nextTick = function (fun) {
-    var args = new Array(arguments.length - 1);
-    if (arguments.length > 1) {
-        for (var i = 1; i < arguments.length; i++) {
-            args[i - 1] = arguments[i];
-        }
-    }
-    queue.push(new Item(fun, args));
-    if (queue.length === 1 && !draining) {
-        runTimeout(drainQueue);
-    }
-};
-
-// v8 likes predictible objects
-function Item(fun, array) {
-    this.fun = fun;
-    this.array = array;
-}
-Item.prototype.run = function () {
-    this.fun.apply(null, this.array);
-};
-process.title = 'browser';
-process.browser = true;
-process.env = {};
-process.argv = [];
-process.version = ''; // empty string to avoid regexp issues
-process.versions = {};
-
-function noop() {}
-
-process.on = noop;
-process.addListener = noop;
-process.once = noop;
-process.off = noop;
-process.removeListener = noop;
-process.removeAllListeners = noop;
-process.emit = noop;
-process.prependListener = noop;
-process.prependOnceListener = noop;
-
-process.listeners = function (name) { return [] }
-
-process.binding = function (name) {
-    throw new Error('process.binding is not supported');
-};
-
-process.cwd = function () { return '/' };
-process.chdir = function (dir) {
-    throw new Error('process.chdir is not supported');
-};
-process.umask = function() { return 0; };
+exports.__esModule = true;
+/**
+ * TODO: move out to csstips
+ */
+__export(__webpack_require__(12));
+__export(__webpack_require__(13));
+__export(__webpack_require__(15));
+__export(__webpack_require__(8));
+__export(__webpack_require__(16));
+__export(__webpack_require__(17));
+__export(__webpack_require__(18));
+__export(__webpack_require__(19));
 
 
 /***/ }),
-/* 2 */
+/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1043,7 +1490,7 @@ emptyFunction.thatReturnsArgument = function (arg) {
 module.exports = emptyFunction;
 
 /***/ }),
-/* 3 */
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1102,10 +1549,10 @@ function invariant(condition, format, a, b, c, d, e, f) {
 }
 
 module.exports = invariant;
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 4 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1126,7 +1573,608 @@ module.exports = ReactPropTypesSecret;
 
 
 /***/ }),
-/* 5 */
+/* 7 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(process) {
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+/**
+ * The unique id is used for unique hashes.
+ */
+var uniqueId = 0;
+/**
+ * Tag styles with this string to get unique hashes.
+ */
+exports.IS_UNIQUE = '__DO_NOT_DEDUPE_STYLE__';
+var upperCasePattern = /[A-Z]/g;
+var msPattern = /^ms-/;
+var interpolatePattern = /&/g;
+var propLower = function (m) { return "-" + m.toLowerCase(); };
+/**
+ * CSS properties that are valid unit-less numbers.
+ */
+var cssNumberProperties = [
+    'animation-iteration-count',
+    'box-flex',
+    'box-flex-group',
+    'column-count',
+    'counter-increment',
+    'counter-reset',
+    'flex',
+    'flex-grow',
+    'flex-positive',
+    'flex-shrink',
+    'flex-negative',
+    'font-weight',
+    'line-clamp',
+    'line-height',
+    'opacity',
+    'order',
+    'orphans',
+    'tab-size',
+    'widows',
+    'z-index',
+    'zoom',
+    // SVG properties.
+    'fill-opacity',
+    'stroke-dashoffset',
+    'stroke-opacity',
+    'stroke-width'
+];
+/**
+ * Map of css number properties.
+ */
+var CSS_NUMBER = Object.create(null);
+// Add vendor prefixes to all unit-less properties.
+for (var _i = 0, _a = ['-webkit-', '-ms-', '-moz-', '-o-', '']; _i < _a.length; _i++) {
+    var prefix = _a[_i];
+    for (var _b = 0, cssNumberProperties_1 = cssNumberProperties; _b < cssNumberProperties_1.length; _b++) {
+        var property = cssNumberProperties_1[_b];
+        CSS_NUMBER[prefix + property] = true;
+    }
+}
+/**
+ * Transform a JavaScript property into a CSS property.
+ */
+function hyphenate(propertyName) {
+    return propertyName
+        .replace(upperCasePattern, propLower)
+        .replace(msPattern, '-ms-'); // Internet Explorer vendor prefix.
+}
+/**
+ * Generate a hash value from a string.
+ */
+function stringHash(str) {
+    var value = 5381;
+    var len = str.length;
+    while (len--)
+        value = (value * 33) ^ str.charCodeAt(len);
+    return (value >>> 0).toString(36);
+}
+exports.stringHash = stringHash;
+/**
+ * Transform a style string to a CSS string.
+ */
+function styleToString(key, value) {
+    if (typeof value === 'number' && value !== 0 && !CSS_NUMBER[key]) {
+        return key + ":" + value + "px";
+    }
+    return key + ":" + value;
+}
+/**
+ * Sort an array of tuples by first value.
+ */
+function sortTuples(value) {
+    return value.sort(function (a, b) { return a[0] > b[0] ? 1 : -1; });
+}
+/**
+ * Categorize user styles.
+ */
+function parseStyles(styles, hasNestedStyles) {
+    var properties = [];
+    var nestedStyles = [];
+    var isUnique = false;
+    // Sort keys before adding to styles.
+    for (var _i = 0, _a = Object.keys(styles); _i < _a.length; _i++) {
+        var key = _a[_i];
+        var value = styles[key];
+        if (value !== null && value !== undefined) {
+            if (key === exports.IS_UNIQUE) {
+                isUnique = true;
+            }
+            else if (typeof value === 'object') {
+                if (Array.isArray(value)) {
+                    var prop = hyphenate(key.trim());
+                    for (var i = 0; i < value.length; i++) {
+                        properties.push([prop, value[i]]);
+                    }
+                }
+                else {
+                    nestedStyles.push([key.trim(), value]);
+                }
+            }
+            else {
+                properties.push([hyphenate(key.trim()), value]);
+            }
+        }
+    }
+    return {
+        styleString: stringifyProperties(sortTuples(properties)),
+        nestedStyles: hasNestedStyles ? nestedStyles : sortTuples(nestedStyles),
+        isUnique: isUnique
+    };
+}
+/**
+ * Stringify an array of property tuples.
+ */
+function stringifyProperties(properties) {
+    var end = properties.length - 1;
+    var result = '';
+    for (var i = 0; i < properties.length; i++) {
+        var _a = properties[i], name = _a[0], value = _a[1];
+        result += styleToString(name, value) + (i === end ? '' : ';');
+    }
+    return result;
+}
+/**
+ * Interpolate CSS selectors.
+ */
+function interpolate(selector, parent) {
+    if (selector.indexOf('&') > -1) {
+        return selector.replace(interpolatePattern, parent);
+    }
+    return parent + " " + selector;
+}
+/**
+ * Recursive loop building styles with deferred selectors.
+ */
+function stylize(cache, selector, styles, list, parent) {
+    var _a = parseStyles(styles, !!selector), styleString = _a.styleString, nestedStyles = _a.nestedStyles, isUnique = _a.isUnique;
+    var pid = styleString;
+    if (selector.charCodeAt(0) === 64 /* @ */) {
+        var rule = cache.add(new Rule(selector, parent ? undefined : styleString, cache.hash));
+        // Nested styles support (e.g. `.foo > @media > .bar`).
+        if (styleString && parent) {
+            var style = rule.add(new Style(styleString, rule.hash, isUnique ? "u" + (++uniqueId).toString(36) : undefined));
+            list.push([parent, style]);
+        }
+        for (var _i = 0, nestedStyles_1 = nestedStyles; _i < nestedStyles_1.length; _i++) {
+            var _b = nestedStyles_1[_i], name = _b[0], value = _b[1];
+            pid += name + stylize(rule, name, value, list, parent);
+        }
+    }
+    else {
+        var key = parent ? interpolate(selector, parent) : selector;
+        if (styleString) {
+            var style = cache.add(new Style(styleString, cache.hash, isUnique ? "u" + (++uniqueId).toString(36) : undefined));
+            list.push([key, style]);
+        }
+        for (var _c = 0, nestedStyles_2 = nestedStyles; _c < nestedStyles_2.length; _c++) {
+            var _d = nestedStyles_2[_c], name = _d[0], value = _d[1];
+            pid += name + stylize(cache, name, value, list, key);
+        }
+    }
+    return pid;
+}
+/**
+ * Register all styles, but collect for selector interpolation using the hash.
+ */
+function composeStyles(container, selector, styles, isStyle, displayName) {
+    var cache = new Cache(container.hash);
+    var list = [];
+    var pid = stylize(cache, selector, styles, list);
+    var hash = "f" + cache.hash(pid);
+    var id = displayName ? displayName + "_" + hash : hash;
+    for (var _i = 0, list_1 = list; _i < list_1.length; _i++) {
+        var _a = list_1[_i], selector_1 = _a[0], style = _a[1];
+        var key = isStyle ? interpolate(selector_1, "." + id) : selector_1;
+        style.add(new Selector(key, style.hash, undefined, pid));
+    }
+    return { cache: cache, pid: pid, id: id };
+}
+/**
+ * Cache to list to styles.
+ */
+function join(strings) {
+    var res = '';
+    for (var _i = 0, strings_1 = strings; _i < strings_1.length; _i++) {
+        var str = strings_1[_i];
+        res += str;
+    }
+    return res;
+}
+/**
+ * Noop changes.
+ */
+var noopChanges = {
+    add: function () { return undefined; },
+    change: function () { return undefined; },
+    remove: function () { return undefined; }
+};
+/**
+ * Implement a cache/event emitter.
+ */
+var Cache = /** @class */ (function () {
+    function Cache(hash, changes) {
+        if (hash === void 0) { hash = stringHash; }
+        if (changes === void 0) { changes = noopChanges; }
+        this.hash = hash;
+        this.changes = changes;
+        this.sheet = [];
+        this.changeId = 0;
+        this._keys = [];
+        this._children = Object.create(null);
+        this._counters = Object.create(null);
+    }
+    Cache.prototype.add = function (style) {
+        var count = this._counters[style.id] || 0;
+        var item = this._children[style.id] || style.clone();
+        this._counters[style.id] = count + 1;
+        if (count === 0) {
+            this._children[item.id] = item;
+            this._keys.push(item.id);
+            this.sheet.push(item.getStyles());
+            this.changeId++;
+            this.changes.add(item, this._keys.length - 1);
+        }
+        else {
+            // Check if contents are different.
+            if (item.getIdentifier() !== style.getIdentifier()) {
+                throw new TypeError("Hash collision: " + style.getStyles() + " === " + item.getStyles());
+            }
+            var oldIndex = this._keys.indexOf(style.id);
+            var newIndex = this._keys.length - 1;
+            var prevChangeId = this.changeId;
+            if (oldIndex !== newIndex) {
+                this._keys.splice(oldIndex, 1);
+                this._keys.push(style.id);
+                this.changeId++;
+            }
+            if (item instanceof Cache && style instanceof Cache) {
+                var prevChangeId_1 = item.changeId;
+                item.merge(style);
+                if (item.changeId !== prevChangeId_1) {
+                    this.changeId++;
+                }
+            }
+            if (this.changeId !== prevChangeId) {
+                if (oldIndex === newIndex) {
+                    this.sheet.splice(oldIndex, 1, item.getStyles());
+                }
+                else {
+                    this.sheet.splice(oldIndex, 1);
+                    this.sheet.splice(newIndex, 0, item.getStyles());
+                }
+                this.changes.change(item, oldIndex, newIndex);
+            }
+        }
+        return item;
+    };
+    Cache.prototype.remove = function (style) {
+        var count = this._counters[style.id];
+        if (count > 0) {
+            this._counters[style.id] = count - 1;
+            var item = this._children[style.id];
+            var index = this._keys.indexOf(item.id);
+            if (count === 1) {
+                delete this._counters[style.id];
+                delete this._children[style.id];
+                this._keys.splice(index, 1);
+                this.sheet.splice(index, 1);
+                this.changeId++;
+                this.changes.remove(item, index);
+            }
+            else if (item instanceof Cache && style instanceof Cache) {
+                var prevChangeId = item.changeId;
+                item.unmerge(style);
+                if (item.changeId !== prevChangeId) {
+                    this.sheet.splice(index, 1, item.getStyles());
+                    this.changeId++;
+                    this.changes.change(item, index, index);
+                }
+            }
+        }
+    };
+    Cache.prototype.merge = function (cache) {
+        for (var _i = 0, _a = cache._keys; _i < _a.length; _i++) {
+            var id = _a[_i];
+            this.add(cache._children[id]);
+        }
+        return this;
+    };
+    Cache.prototype.unmerge = function (cache) {
+        for (var _i = 0, _a = cache._keys; _i < _a.length; _i++) {
+            var id = _a[_i];
+            this.remove(cache._children[id]);
+        }
+        return this;
+    };
+    Cache.prototype.clone = function () {
+        return new Cache(this.hash).merge(this);
+    };
+    return Cache;
+}());
+exports.Cache = Cache;
+/**
+ * Selector is a dumb class made to represent nested CSS selectors.
+ */
+var Selector = /** @class */ (function () {
+    function Selector(selector, hash, id, pid) {
+        if (id === void 0) { id = "s" + hash(selector); }
+        if (pid === void 0) { pid = ''; }
+        this.selector = selector;
+        this.hash = hash;
+        this.id = id;
+        this.pid = pid;
+    }
+    Selector.prototype.getStyles = function () {
+        return this.selector;
+    };
+    Selector.prototype.getIdentifier = function () {
+        return this.pid + "." + this.selector;
+    };
+    Selector.prototype.clone = function () {
+        return new Selector(this.selector, this.hash, this.id, this.pid);
+    };
+    return Selector;
+}());
+exports.Selector = Selector;
+/**
+ * The style container registers a style string with selectors.
+ */
+var Style = /** @class */ (function (_super) {
+    __extends(Style, _super);
+    function Style(style, hash, id) {
+        if (id === void 0) { id = "c" + hash(style); }
+        var _this = _super.call(this, hash) || this;
+        _this.style = style;
+        _this.hash = hash;
+        _this.id = id;
+        return _this;
+    }
+    Style.prototype.getStyles = function () {
+        return this.sheet.join(',') + "{" + this.style + "}";
+    };
+    Style.prototype.getIdentifier = function () {
+        return this.style;
+    };
+    Style.prototype.clone = function () {
+        return new Style(this.style, this.hash, this.id).merge(this);
+    };
+    return Style;
+}(Cache));
+exports.Style = Style;
+/**
+ * Implement rule logic for style output.
+ */
+var Rule = /** @class */ (function (_super) {
+    __extends(Rule, _super);
+    function Rule(rule, style, hash, id, pid) {
+        if (style === void 0) { style = ''; }
+        if (id === void 0) { id = "a" + hash(rule + "." + style); }
+        if (pid === void 0) { pid = ''; }
+        var _this = _super.call(this, hash) || this;
+        _this.rule = rule;
+        _this.style = style;
+        _this.hash = hash;
+        _this.id = id;
+        _this.pid = pid;
+        return _this;
+    }
+    Rule.prototype.getStyles = function () {
+        return this.rule + "{" + this.style + join(this.sheet) + "}";
+    };
+    Rule.prototype.getIdentifier = function () {
+        return this.pid + "." + this.rule + "." + this.style;
+    };
+    Rule.prototype.clone = function () {
+        return new Rule(this.rule, this.style, this.hash, this.id, this.pid).merge(this);
+    };
+    return Rule;
+}(Cache));
+exports.Rule = Rule;
+/**
+ * The FreeStyle class implements the API for everything else.
+ */
+var FreeStyle = /** @class */ (function (_super) {
+    __extends(FreeStyle, _super);
+    function FreeStyle(hash, debug, id, changes) {
+        if (hash === void 0) { hash = stringHash; }
+        if (debug === void 0) { debug = typeof process !== 'undefined' && process.env['NODE_ENV'] !== 'production'; }
+        if (id === void 0) { id = "f" + (++uniqueId).toString(36); }
+        var _this = _super.call(this, hash, changes) || this;
+        _this.hash = hash;
+        _this.debug = debug;
+        _this.id = id;
+        return _this;
+    }
+    FreeStyle.prototype.registerStyle = function (styles, displayName) {
+        var _a = composeStyles(this, '&', styles, true, this.debug ? displayName : undefined), cache = _a.cache, id = _a.id;
+        this.merge(cache);
+        return id;
+    };
+    FreeStyle.prototype.registerKeyframes = function (keyframes, displayName) {
+        return this.registerHashRule('@keyframes', keyframes, displayName);
+    };
+    FreeStyle.prototype.registerHashRule = function (prefix, styles, displayName) {
+        var _a = composeStyles(this, '', styles, false, this.debug ? displayName : undefined), cache = _a.cache, pid = _a.pid, id = _a.id;
+        var rule = new Rule(prefix + " " + id, undefined, this.hash, undefined, pid);
+        this.add(rule.merge(cache));
+        return id;
+    };
+    FreeStyle.prototype.registerRule = function (rule, styles) {
+        this.merge(composeStyles(this, rule, styles, false).cache);
+    };
+    FreeStyle.prototype.registerCss = function (styles) {
+        this.merge(composeStyles(this, '', styles, false).cache);
+    };
+    FreeStyle.prototype.getStyles = function () {
+        return join(this.sheet);
+    };
+    FreeStyle.prototype.getIdentifier = function () {
+        return this.id;
+    };
+    FreeStyle.prototype.clone = function () {
+        return new FreeStyle(this.hash, this.debug, this.id, this.changes).merge(this);
+    };
+    return FreeStyle;
+}(Cache));
+exports.FreeStyle = FreeStyle;
+/**
+ * Exports a simple function to create a new instance.
+ */
+function create(hash, debug, changes) {
+    return new FreeStyle(hash, debug, undefined, changes);
+}
+exports.create = create;
+//# sourceMappingURL=free-style.js.map
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
+
+/***/ }),
+/* 8 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+exports.__esModule = true;
+function boxUnitToString(value) {
+    if (typeof value === 'number') {
+        return value.toString() + 'px';
+    }
+    else {
+        return value;
+    }
+}
+/**
+ * Takes a function that expects Box to be passed into it
+ * and creates a BoxFunction
+ */
+function createBoxFunction(mapFromBox) {
+    var result = function (a, b, c, d) {
+        if (b === undefined && c === undefined && d === undefined) {
+            b = c = d = a;
+        }
+        else if (c === undefined && d === undefined) {
+            c = a;
+            d = b;
+        }
+        var box = {
+            top: boxUnitToString(a),
+            right: boxUnitToString(b),
+            bottom: boxUnitToString(c),
+            left: boxUnitToString(d)
+        };
+        return mapFromBox(box);
+    };
+    return result;
+}
+exports.padding = createBoxFunction(function (box) {
+    return {
+        paddingTop: box.top,
+        paddingRight: box.right,
+        paddingBottom: box.bottom,
+        paddingLeft: box.left
+    };
+});
+exports.margin = createBoxFunction(function (box) {
+    return {
+        marginTop: box.top,
+        marginRight: box.right,
+        marginBottom: box.bottom,
+        marginLeft: box.left
+    };
+});
+exports.border = createBoxFunction(function (box) {
+    return {
+        borderTop: box.top,
+        borderRight: box.right,
+        borderBottom: box.bottom,
+        borderLeft: box.left
+    };
+});
+/**
+ * Puts a vertical margin between each child
+ */
+exports.verticallySpaced = function (margin) {
+    var spacing = boxUnitToString(margin);
+    return {
+        '&>*': {
+            marginBottom: spacing + ' !important'
+        },
+        '&>*:last-child': {
+            marginBottom: '0px !important'
+        }
+    };
+};
+/**
+ * Puts a horizontal margin between each child
+ */
+exports.horizontallySpaced = function (margin) {
+    var spacing = boxUnitToString(margin);
+    return {
+        '&>*': {
+            marginRight: spacing + ' !important'
+        },
+        '&>*:last-child': {
+            marginRight: '0px !important'
+        }
+    };
+};
+/**
+ * Gives this element the same size as the nearest offsetParent
+ */
+exports.fillParent = {
+    width: '100%',
+    height: '100%'
+};
+/** mixin: maxWidth */
+exports.maxWidth = function (value) {
+    var maxWidth = boxUnitToString(value);
+    return { maxWidth: maxWidth };
+};
+/** mixin: maxHeight */
+exports.maxHeight = function (value) {
+    var maxHeight = boxUnitToString(value);
+    return { maxHeight: maxHeight };
+};
+/**
+ * Block elements: Centering *self* using margins
+ */
+exports.horizontallyCenterSelf = {
+    marginLeft: 'auto',
+    marginRight: 'auto'
+};
+/**
+ * Block elements: Centering *child* elements using textAlign
+ */
+exports.horizontallyCenterChildren = {
+    textAlign: 'center'
+};
+/** mixin: height */
+exports.height = function (value) {
+    var height = boxUnitToString(value);
+    return { height: height };
+};
+/** mixin: width */
+exports.width = function (value) {
+    var width = boxUnitToString(value);
+    return { width: width };
+};
+
+
+/***/ }),
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1142,7 +2190,7 @@ module.exports = ReactPropTypesSecret;
 
 
 
-var emptyFunction = __webpack_require__(2);
+var emptyFunction = __webpack_require__(4);
 
 /**
  * Similar to invariant but only logs a warning if the condition is not met.
@@ -1194,10 +2242,10 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 module.exports = warning;
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 6 */
+/* 10 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -2176,8 +3224,434 @@ var preact = {
 
 
 /***/ }),
-/* 7 */,
-/* 8 */
+/* 11 */,
+/* 12 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+exports.__esModule = true;
+exports.fontStyleItalic = { fontStyle: 'italic' };
+exports.fontWeightNormal = { fontWeight: 'normal' };
+exports.fontWeightBold = { fontWeight: 'bold' };
+
+
+/***/ }),
+/* 13 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+exports.__esModule = true;
+/**
+ * @module Flexbox abstraction
+ *
+ * -webkit- is needed for mobile safari (iPhone / iPad)
+ * -ms- is needed for IE
+ */
+var typestyle_1 = __webpack_require__(1);
+/**
+ * If you have more than one child prefer horizontal,vertical
+ */
+exports.flexRoot = {
+    display: [
+        '-ms-flexbox',
+        '-webkit-flex',
+        'flex',
+    ]
+};
+/**
+ * A general grouping component that has no impact on the parent flexbox properties e.g.
+ * <vertical>
+ *    <pass>
+ *       <content/>
+ *    </pass>
+ * </vertical>
+ */
+exports.pass = {
+    display: 'inherit',
+    '-ms-flex-direction': 'inherit',
+    '-webkit-flex-direction': 'inherit',
+    flexDirection: 'inherit',
+    '-ms-flex-positive': 1,
+    '-webkit-flex-grow': 1,
+    flexGrow: 1
+};
+exports.inlineRoot = {
+    display: [
+        '-ms-inline-flexbox',
+        '-webkit-inline-flex',
+        'inline-flex'
+    ]
+};
+exports.horizontal = typestyle_1.extend(exports.flexRoot, {
+    '-ms-flex-direction': 'row',
+    '-webkit-flex-direction': 'row',
+    flexDirection: 'row'
+});
+exports.vertical = typestyle_1.extend(exports.flexRoot, {
+    '-ms-flex-direction': 'column',
+    '-webkit-flex-direction': 'column',
+    flexDirection: 'column'
+});
+exports.wrap = {
+    '-ms-flex-wrap': 'wrap',
+    '-webkit-flex-wrap': 'wrap',
+    flexWrap: 'wrap'
+};
+/**
+ * If you want items to be sized automatically by their children use this
+ * This is because of a bug in various flexbox implementations: http://philipwalton.com/articles/normalizing-cross-browser-flexbox-bugs/
+ * Specifically bug 1 : https://github.com/philipwalton/flexbugs#1-minimum-content-sizing-of-flex-items-not-honored
+ */
+exports.content = {
+    '-ms-flex-negative': 0,
+    '-webkit-flex-shrink': 0,
+    flexShrink: 0,
+    flexBasis: 'auto'
+};
+exports.flex = {
+    '-ms-flex': 1,
+    '-webkit-flex': 1,
+    flex: 1
+};
+exports.flex1 = exports.flex;
+exports.flex2 = {
+    '-ms-flex': 2,
+    '-webkit-flex': 2,
+    flex: 2
+};
+exports.flex3 = {
+    '-ms-flex': 3,
+    '-webkit-flex': 3,
+    flex: 3
+};
+exports.flex4 = {
+    '-ms-flex': 4,
+    '-webkit-flex': 4,
+    flex: 4
+};
+exports.flex5 = {
+    '-ms-flex': 5,
+    '-webkit-flex': 5,
+    flex: 5
+};
+exports.flex6 = {
+    '-ms-flex': 6,
+    '-webkit-flex': 6,
+    flex: 6
+};
+exports.flex7 = {
+    '-ms-flex': 7,
+    '-webkit-flex': 7,
+    flex: 7
+};
+exports.flex8 = {
+    '-ms-flex': 8,
+    '-webkit-flex': 8,
+    flex: 8
+};
+exports.flex9 = {
+    '-ms-flex': 9,
+    '-webkit-flex': 9,
+    flex: 9
+};
+exports.flex10 = {
+    '-ms-flex': 10,
+    '-webkit-flex': 10,
+    flex: 10
+};
+exports.flex11 = {
+    '-ms-flex': 11,
+    '-webkit-flex': 11,
+    flex: 11
+};
+exports.flex12 = {
+    '-ms-flex': 12,
+    '-webkit-flex': 12,
+    flex: 12
+};
+/////////////////////////////
+// Alignment in cross axis //
+/////////////////////////////
+exports.start = {
+    '-ms-flex-align': 'start',
+    '-webkit-align-items': 'flex-start',
+    alignItems: 'flex-start'
+};
+exports.center = {
+    '-ms-flex-align': 'center',
+    '-webkit-align-items': 'center',
+    alignItems: 'center'
+};
+exports.end = {
+    '-ms-flex-align': 'end',
+    '-webkit-align-items': 'flex-end',
+    alignItems: 'flex-end'
+};
+////////////////////////////
+// Alignment in main axis //
+////////////////////////////
+exports.startJustified = {
+    '-ms-flex-pack': 'start',
+    '-webkit-justify-content': 'flex-start',
+    justifyContent: 'flex-start'
+};
+exports.centerJustified = {
+    '-ms-flex-pack': 'center',
+    '-webkit-justify-content': 'center',
+    justifyContent: 'center'
+};
+exports.endJustified = {
+    '-ms-flex-pack': 'end',
+    '-webkit-justify-content': 'flex-end',
+    justifyContent: 'flex-end'
+};
+exports.aroundJustified = {
+    '-ms-flex-pack': 'distribute',
+    '-webkit-justify-content': 'space-around',
+    justifyContent: 'space-around'
+};
+exports.betweenJustified = {
+    '-ms-flex-pack': 'justify',
+    '-webkit-justify-content': 'space-between',
+    justifyContent: 'space-between'
+};
+////////////////////////////
+// Alignment in both axes //
+////////////////////////////
+exports.centerCenter = typestyle_1.extend(exports.flexRoot, exports.center, exports.centerJustified);
+////////////////////
+// Self alignment //
+////////////////////
+exports.selfStart = {
+    '-ms-flex-item-align': 'start',
+    '-webkit-align-self': 'flex-start',
+    alignSelf: 'flex-start'
+};
+exports.selfCenter = {
+    '-ms-flex-item-align': 'center',
+    '-webkit-align-self': 'center',
+    alignSelf: 'center'
+};
+exports.selfEnd = {
+    '-ms-flex-item-align': 'end',
+    '-webkit-align-self': 'flex-end',
+    alignSelf: 'flex-end'
+};
+exports.selfStretch = {
+    '-ms-flex-item-align': 'stretch',
+    '-webkit-align-self': 'stretch',
+    alignSelf: 'stretch'
+};
+
+
+/***/ }),
+/* 14 */
+/***/ (function(module, exports) {
+
+
+
+/***/ }),
+/* 15 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+exports.__esModule = true;
+/**
+ * @module Layers essentially allow you to create a new surface for layouts
+ */
+var typestyle_1 = __webpack_require__(1);
+/**
+ * New layer parent
+ */
+exports.layerParent = {
+    position: 'relative'
+};
+/**
+ * Use this to attach to any parent layer
+ * and then you can use `left`/`top` etc to position yourself
+ */
+exports.attachToLayerParent = {
+    position: 'absolute'
+};
+/**
+ * This new layer will attach itself to the nearest parent with `position:relative` or `position:absolute`
+ * And will become the new `layerParent`
+ */
+exports.newLayer = typestyle_1.extend(exports.attachToLayerParent, {
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0
+});
+exports.attachToTop = typestyle_1.extend(exports.attachToLayerParent, {
+    top: 0,
+    left: 0,
+    right: 0
+});
+exports.attachToRight = typestyle_1.extend(exports.attachToLayerParent, {
+    top: 0,
+    right: 0,
+    bottom: 0
+});
+exports.attachToBottom = typestyle_1.extend(exports.attachToLayerParent, {
+    right: 0,
+    bottom: 0,
+    left: 0
+});
+exports.attachToLeft = typestyle_1.extend(exports.attachToLayerParent, {
+    top: 0,
+    bottom: 0,
+    left: 0
+});
+/**
+ * Helps fixing to page
+ */
+var fixed = {
+    position: 'fixed'
+};
+exports.pageTop = typestyle_1.extend(fixed, {
+    top: 0,
+    left: 0,
+    right: 0
+});
+exports.pageRight = typestyle_1.extend(fixed, {
+    top: 0,
+    right: 0,
+    bottom: 0
+});
+exports.pageBottom = typestyle_1.extend(fixed, {
+    right: 0,
+    bottom: 0,
+    left: 0
+});
+exports.pageLeft = typestyle_1.extend(fixed, {
+    top: 0,
+    bottom: 0,
+    left: 0
+});
+
+
+/***/ }),
+/* 16 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+exports.__esModule = true;
+exports.scroll = {
+    '-webkit-overflow-scrolling': 'touch',
+    overflow: 'auto'
+};
+exports.scrollX = {
+    '-webkit-overflow-scrolling': 'touch',
+    overflowX: 'auto'
+};
+exports.scrollY = {
+    '-webkit-overflow-scrolling': 'touch',
+    overflowY: 'auto'
+};
+/**
+ * If you expect a child somewhere down in the tree to scroll
+ * you need to tell the browser to prevent a scroll bar here
+ */
+exports.someChildWillScroll = {
+    overflow: 'hidden'
+};
+
+
+/***/ }),
+/* 17 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+exports.__esModule = true;
+exports.block = {
+    display: 'block'
+};
+exports.none = {
+    display: 'none'
+};
+exports.inlineBlock = {
+    display: 'inline-block'
+};
+exports.invisible = {
+    visibility: 'hidden'
+};
+
+
+/***/ }),
+/* 18 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+exports.__esModule = true;
+var typestyle_1 = __webpack_require__(1);
+/**
+ * Adds normalize.css to the registerd outputs
+ */
+function normalize() {
+    /**
+     * To update:
+     * - https://cdnjs.com/libraries/normalize
+     * - then latest. Currently https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css
+     * - then copy paste raw below
+     * - remove the sourmap at the end of the file
+     * - fix the test (checks length of raw)
+     * - update the link in this comment
+     *
+     * Release
+     * - If its a major version change in nomalize. Release as a major change in typestyle.
+     * - otherwise minor
+     **/
+    typestyle_1.cssRaw("\n    button,hr,input{overflow:visible}audio,canvas,progress,video{display:inline-block}progress,sub,sup{vertical-align:baseline}html{font-family:sans-serif;line-height:1.15;-ms-text-size-adjust:100%;-webkit-text-size-adjust:100%}body{margin:0} menu,article,aside,details,footer,header,nav,section{display:block}h1{font-size:2em;margin:.67em 0}figcaption,figure,main{display:block}figure{margin:1em 40px}hr{box-sizing:content-box;height:0}code,kbd,pre,samp{font-family:monospace,monospace;font-size:1em}a{background-color:transparent;-webkit-text-decoration-skip:objects}a:active,a:hover{outline-width:0}abbr[title]{border-bottom:none;text-decoration:underline;text-decoration:underline dotted}b,strong{font-weight:bolder}dfn{font-style:italic}mark{background-color:#ff0;color:#000}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative}sub{bottom:-.25em}sup{top:-.5em}audio:not([controls]){display:none;height:0}img{border-style:none}svg:not(:root){overflow:hidden}button,input,optgroup,select,textarea{font-family:sans-serif;font-size:100%;line-height:1.15;margin:0}button,input{}button,select{text-transform:none}[type=submit], [type=reset],button,html [type=button]{-webkit-appearance:button}[type=button]::-moz-focus-inner,[type=reset]::-moz-focus-inner,[type=submit]::-moz-focus-inner,button::-moz-focus-inner{border-style:none;padding:0}[type=button]:-moz-focusring,[type=reset]:-moz-focusring,[type=submit]:-moz-focusring,button:-moz-focusring{outline:ButtonText dotted 1px}fieldset{border:1px solid silver;margin:0 2px;padding:.35em .625em .75em}legend{box-sizing:border-box;color:inherit;display:table;max-width:100%;padding:0;white-space:normal}progress{}textarea{overflow:auto}[type=checkbox],[type=radio]{box-sizing:border-box;padding:0}[type=number]::-webkit-inner-spin-button,[type=number]::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}[type=search]::-webkit-search-cancel-button,[type=search]::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}[hidden],template{display:none}\n    ".trim());
+}
+exports.normalize = normalize;
+
+
+/***/ }),
+/* 19 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+exports.__esModule = true;
+var typestyle_1 = __webpack_require__(1);
+var box_1 = __webpack_require__(8);
+/**
+ * Recommended Page setup
+ * - Sets up the body to be full size
+ * - Sets up box sizing to be border box
+ **/
+function setupPage(rootSelector) {
+    /** Use full window size for application */
+    typestyle_1.cssRule('html, body', {
+        height: '100%',
+        width: '100%',
+        padding: 0,
+        margin: 0
+    });
+    /** Use border box */
+    typestyle_1.cssRule('html', {
+        '-moz-box-sizing': 'border-box',
+        '-webkit-box-sizing': 'border-box',
+        boxSizing: 'border-box'
+    });
+    typestyle_1.cssRule('*,*:before,*:after', {
+        boxSizing: 'inherit'
+    });
+    /** Also root should fill parent */
+    typestyle_1.cssRule(rootSelector, box_1.fillParent);
+}
+exports.setupPage = setupPage;
+
+
+/***/ }),
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(process) {/**
@@ -2204,17 +3678,17 @@ if (process.env.NODE_ENV !== 'production') {
   // By explicitly using `prop-types` you are opting into new development behavior.
   // http://fb.me/prop-types-in-prod
   var throwOnDirectAccess = true;
-  module.exports = __webpack_require__(9)(isValidElement, throwOnDirectAccess);
+  module.exports = __webpack_require__(21)(isValidElement, throwOnDirectAccess);
 } else {
   // By explicitly using `prop-types` you are opting into new production behavior.
   // http://fb.me/prop-types-in-prod
-  module.exports = __webpack_require__(11)();
+  module.exports = __webpack_require__(23)();
 }
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 9 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2229,12 +3703,12 @@ if (process.env.NODE_ENV !== 'production') {
 
 
 
-var emptyFunction = __webpack_require__(2);
-var invariant = __webpack_require__(3);
-var warning = __webpack_require__(5);
+var emptyFunction = __webpack_require__(4);
+var invariant = __webpack_require__(5);
+var warning = __webpack_require__(9);
 
-var ReactPropTypesSecret = __webpack_require__(4);
-var checkPropTypes = __webpack_require__(10);
+var ReactPropTypesSecret = __webpack_require__(6);
+var checkPropTypes = __webpack_require__(22);
 
 module.exports = function(isValidElement, throwOnDirectAccess) {
   /* global Symbol */
@@ -2731,10 +4205,10 @@ module.exports = function(isValidElement, throwOnDirectAccess) {
   return ReactPropTypes;
 };
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 10 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2750,9 +4224,9 @@ module.exports = function(isValidElement, throwOnDirectAccess) {
 
 
 if (process.env.NODE_ENV !== 'production') {
-  var invariant = __webpack_require__(3);
-  var warning = __webpack_require__(5);
-  var ReactPropTypesSecret = __webpack_require__(4);
+  var invariant = __webpack_require__(5);
+  var warning = __webpack_require__(9);
+  var ReactPropTypesSecret = __webpack_require__(6);
   var loggedTypeFailures = {};
 }
 
@@ -2800,10 +4274,10 @@ function checkPropTypes(typeSpecs, values, location, componentName, getStack) {
 
 module.exports = checkPropTypes;
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 11 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2818,9 +4292,9 @@ module.exports = checkPropTypes;
 
 
 
-var emptyFunction = __webpack_require__(2);
-var invariant = __webpack_require__(3);
-var ReactPropTypesSecret = __webpack_require__(4);
+var emptyFunction = __webpack_require__(4);
+var invariant = __webpack_require__(5);
+var ReactPropTypesSecret = __webpack_require__(6);
 
 module.exports = function() {
   function shim(props, propName, componentName, location, propFullName, secret) {
@@ -2869,11 +4343,13 @@ module.exports = function() {
 
 
 /***/ }),
-/* 12 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(6);
-module.exports = __webpack_require__(0);
+__webpack_require__(3);
+__webpack_require__(10);
+__webpack_require__(2);
+module.exports = __webpack_require__(1);
 
 
 /***/ })

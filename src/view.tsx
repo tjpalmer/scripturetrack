@@ -1,6 +1,10 @@
-import {Doc, Library, Volume, usfmParse} from './index';
+import {Doc, Library, Volume, usfmParse} from './';
+import {
+  content, fillParent, flex, horizontal, margin, padding, scrollY, width,
+} from 'csstips';
 import * as React from 'react';
 import {Component} from 'react';
+import {style} from 'typestyle';
 
 export interface App {
 
@@ -62,8 +66,19 @@ export class AppView extends Component<App, AppState> {
   render() {
     let {offset, text} = this.state;
     return (
-      <div>
-        {text && <div>{text.slice(offset, offset + 1000)}</div>}
+      <div className={style(fillParent, horizontal)}>
+        <div className={style(
+          flex, {
+            fontFamily: ['Excerpt', 'sans-serif'],
+            fontSize: '200%',
+          },
+          padding(0, '1em'),
+          scrollY,
+        )}>
+          <p>
+            {text && text.slice(offset, offset + 1000)}
+          </p>
+        </div>
         <LibraryView {...this.props.library}/>
       </div>
     );
@@ -75,7 +90,7 @@ export class DocView extends Component<Doc, {}> {
 
   render() {
     return (
-      <div>{this.props.title} - {this.props.size}</div>
+      <div>{this.props.title}</div>
     );
   }
 
@@ -85,9 +100,11 @@ export class LibraryView extends Component<Library, {}> {
 
   render() {
     return (
-      <ul>
-        {this.props.items.map(volume => <li><VolumeView {...volume}/></li>)}
-      </ul>
+      <div className={style(
+        content, margin(0), padding(0, '1em'), scrollY, width('25%')
+      )}>
+        {this.props.items.map(volume => <p><VolumeView {...volume}/></p>)}
+      </div>
     );
   }
 

@@ -1,6 +1,6 @@
 webpackJsonp([0],{
 
-/***/ 7:
+/***/ 11:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -26,7 +26,7 @@ function usfmParse(text, includeText) {
             // Remove footnotes.
             line = line.replace(/\\f\b.*?\\f\*/g, '');
             // Remove other tags.
-            line = line.replace(/\\\w+\*?/g, '');
+            line = line.replace(/\\\+?\w+\*?/g, '');
             lines.push(line);
             size += line.length + 1;
         }
@@ -41,10 +41,19 @@ function stripTag(line) {
     return line.replace(/^\S+\s+/, '');
 }
 
+// EXTERNAL MODULE: ./node_modules/csstips/lib/index.js
+var lib = __webpack_require__(3);
+var lib_default = /*#__PURE__*/__webpack_require__.n(lib);
+
 // EXTERNAL MODULE: ./node_modules/preact-compat/dist/preact-compat.es.js
-var preact_compat_es = __webpack_require__(0);
+var preact_compat_es = __webpack_require__(2);
+
+// EXTERNAL MODULE: ./node_modules/typestyle/lib.es2015/index.js + 3 modules
+var lib_es2015 = __webpack_require__(1);
 
 // CONCATENATED MODULE: ./src/view.tsx
+
+
 
 
 
@@ -84,22 +93,23 @@ class view_AppView extends preact_compat_es["Component"] {
     }
     render() {
         let { offset, text } = this.state;
-        return (preact_compat_es["createElement"]("div", null,
-            text && preact_compat_es["createElement"]("div", null, text.slice(offset, offset + 1000)),
+        return (preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["fillParent"], lib["horizontal"]) },
+            preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["flex"], {
+                    fontFamily: ['Excerpt', 'sans-serif'],
+                    fontSize: '200%',
+                }, Object(lib["padding"])(0, '1em'), lib["scrollY"]) },
+                preact_compat_es["createElement"]("p", null, text && text.slice(offset, offset + 1000))),
             preact_compat_es["createElement"](view_LibraryView, Object.assign({}, this.props.library))));
     }
 }
 class view_DocView extends preact_compat_es["Component"] {
     render() {
-        return (preact_compat_es["createElement"]("div", null,
-            this.props.title,
-            " - ",
-            this.props.size));
+        return (preact_compat_es["createElement"]("div", null, this.props.title));
     }
 }
 class view_LibraryView extends preact_compat_es["Component"] {
     render() {
-        return (preact_compat_es["createElement"]("ul", null, this.props.items.map(volume => preact_compat_es["createElement"]("li", null,
+        return (preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["content"], Object(lib["margin"])(0), Object(lib["padding"])(0, '1em'), lib["scrollY"], Object(lib["width"])('25%')) }, this.props.items.map(volume => preact_compat_es["createElement"]("p", null,
             preact_compat_es["createElement"](view_VolumeView, Object.assign({}, volume))))));
     }
 }
@@ -124,7 +134,6 @@ function random() {
 
 
 // CONCATENATED MODULE: ./src/main.tsx
-/// <reference path="../node_modules/@types/react/index.d.ts" />
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -137,8 +146,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 
 
 
+
 function init() {
     return __awaiter(this, void 0, void 0, function* () {
+        document.getElementById('preload').remove();
+        Object(lib["normalize"])();
+        Object(lib["setupPage"])('#root');
         let library = yield (yield fetch('texts/texts.json')).json();
         let app = { library, path: [] };
         Object(preact_compat_es["render"])(preact_compat_es["createElement"](view_AppView, Object.assign({}, app)), document.getElementById('root'));
@@ -172,4 +185,4 @@ class main_Clock extends preact_compat_es["Component"] {
 
 /***/ })
 
-},[7]);
+},[11]);

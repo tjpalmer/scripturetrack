@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "module": "commonjs",
+    "moduleResolution": "node",
     "outDir": "bin",
     "strict": true,
     "target": "es6"

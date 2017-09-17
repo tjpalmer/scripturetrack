@@ -18,8 +18,10 @@
     "webpack-dev-server": "^2.5.1"
   },
   "dependencies": {
+    "csstips": "^0.2.2",
     "preact": "^8.2.5",
-    "preact-compat": "^3.17.0"
+    "preact-compat": "^3.17.0",
+    "typestyle": "^1.4.1"
   },
   "scripts": {
     "build-scripts": "tsc --project scripts",
