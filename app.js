@@ -60,7 +60,22 @@ var lib_es2015 = __webpack_require__(1);
 class view_AppView extends preact_compat_es["Component"] {
     constructor(props) {
         super(props);
-        let { library } = props;
+        this.shuffle();
+    }
+    render() {
+        let { offset, text } = this.state;
+        return (preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["fillParent"], lib["horizontal"]) },
+            preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["flex"], {
+                    // When I had 'sans-serif' as a fallback, Chrome used it, despite
+                    // the custom font being available.
+                    fontFamily: 'Excerpt',
+                    fontSize: '200%',
+                }, Object(lib["padding"])(0, '1em'), lib["scrollY"]) },
+                preact_compat_es["createElement"]("p", null, text && text.slice(offset, offset + 1000))),
+            preact_compat_es["createElement"](view_LibraryView, Object.assign({ appView: this }, this.props.library))));
+    }
+    shuffle() {
+        let { library } = this.props;
         let end = 0;
         let begins = library.items.map(volume => volume.items.map(doc => {
             let prev = end;
@@ -91,28 +106,38 @@ class view_AppView extends preact_compat_es["Component"] {
         });
         this.setState({ offset, path });
     }
-    render() {
-        let { offset, text } = this.state;
-        return (preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["fillParent"], lib["horizontal"]) },
-            preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["flex"], {
-                    // When I had 'sans-serif' as a fallback, Chrome used it, despite
-                    // the custom font being available.
-                    fontFamily: 'Excerpt',
-                    fontSize: '200%',
-                }, Object(lib["padding"])(0, '1em'), lib["scrollY"]) },
-                preact_compat_es["createElement"]("p", null, text && text.slice(offset, offset + 1000))),
-            preact_compat_es["createElement"](view_LibraryView, Object.assign({}, this.props.library))));
-    }
 }
 class view_DocView extends preact_compat_es["Component"] {
+    constructor() {
+        super(...arguments);
+        this.onClick = () => {
+            console.log(this.props.title);
+        };
+    }
     render() {
-        return (preact_compat_es["createElement"]("div", null, this.props.title));
+        return (preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])({
+                $nest: {
+                    '&:hover': {
+                        background: 'orange',
+                        fontWeight: 'bold',
+                    }
+                },
+            }), onClick: this.onClick }, this.props.title));
     }
 }
 class view_LibraryView extends preact_compat_es["Component"] {
+    constructor() {
+        super(...arguments);
+        this.makeGuess = () => {
+            this.props.appView.shuffle();
+        };
+    }
     render() {
-        return (preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["content"], Object(lib["margin"])(0), Object(lib["padding"])(0, '1em'), lib["scrollY"], Object(lib["width"])('25%')) }, this.props.items.map(volume => preact_compat_es["createElement"]("p", null,
-            preact_compat_es["createElement"](view_VolumeView, Object.assign({}, volume))))));
+        return (preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["content"], lib["vertical"], Object(lib["width"])('25%')) },
+            preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["flex"], Object(lib["margin"])(0), Object(lib["padding"])(0, '1em'), lib["scrollY"], { cursor: 'default' }) }, this.props.items.map(volume => preact_compat_es["createElement"]("p", null,
+                preact_compat_es["createElement"](view_VolumeView, Object.assign({}, volume))))),
+            preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["content"], Object(lib["padding"])('1em')) },
+                preact_compat_es["createElement"]("button", { onClick: this.makeGuess, type: 'button' }, "Make Guess"))));
     }
 }
 class view_VolumeView extends preact_compat_es["Component"] {
@@ -124,10 +149,13 @@ class view_VolumeView extends preact_compat_es["Component"] {
     }
 }
 function random() {
+    // Generate 8 bytes.
     let ints = new Uint8Array(8);
     crypto.getRandomValues(ints);
+    // Manipulate exponent and sign.
     ints[7] = 0x3f;
     ints[6] |= 0xf0;
+    // Read as little-endian double, and subtract 1 for just fraction.
     return new DataView(ints.buffer).getFloat64(0, true) - 1;
 }
 
