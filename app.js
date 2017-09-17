@@ -95,7 +95,9 @@ class view_AppView extends preact_compat_es["Component"] {
         let { offset, text } = this.state;
         return (preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["fillParent"], lib["horizontal"]) },
             preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["flex"], {
-                    fontFamily: ['Excerpt', 'sans-serif'],
+                    // When I had 'sans-serif' as a fallback, Chrome used it, despite
+                    // the custom font being available.
+                    fontFamily: 'Excerpt',
                     fontSize: '200%',
                 }, Object(lib["padding"])(0, '1em'), lib["scrollY"]) },
                 preact_compat_es["createElement"]("p", null, text && text.slice(offset, offset + 1000))),
@@ -149,9 +151,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 
 function init() {
     return __awaiter(this, void 0, void 0, function* () {
+        // Setup, including removing the preload element.
         document.getElementById('preload').remove();
         Object(lib["normalize"])();
         Object(lib["setupPage"])('#root');
+        // Now do our work.
         let library = yield (yield fetch('texts/texts.json')).json();
         let app = { library, path: [] };
         Object(preact_compat_es["render"])(preact_compat_es["createElement"](view_AppView, Object.assign({}, app)), document.getElementById('root'));

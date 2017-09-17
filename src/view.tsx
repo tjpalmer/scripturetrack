@@ -69,6 +69,8 @@ export class AppView extends Component<App, AppState> {
       <div className={style(fillParent, horizontal)}>
         <div className={style(
           flex, {
+            // When I had 'sans-serif' as a fallback, Chrome used it, despite
+            // the custom font being available.
             fontFamily: 'Excerpt',
             fontSize: '200%',
           },
