@@ -1,4 +1,4 @@
-import {usfmParse} from '../../src/index';
+import {usfmParse} from '../../src/usfm';
 import {load} from 'cheerio';
 import {open, readdirSync, readFileSync, statSync, writeFileSync} from 'fs';
 import {argv} from 'process';

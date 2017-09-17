@@ -49,7 +49,7 @@ export function usfmParse(text: string, includeText?: boolean) {
       // Remove footnotes.
       line = line.replace(/\\f\b.*?\\f\*/g, '');
       // Remove other tags.
-      line = line.replace(/\\\w+\*?/g, '');
+      line = line.replace(/\\\+?\w+\*?/g, '');
       lines.push(line);
       size += line.length + 1;
     }
