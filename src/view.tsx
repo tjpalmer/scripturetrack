@@ -69,7 +69,7 @@ export class AppView extends Component<App, AppState> {
       <div className={style(fillParent, horizontal)}>
         <div className={style(
           flex, {
-            fontFamily: ['Excerpt', 'sans-serif'],
+            fontFamily: 'Excerpt',
             fontSize: '200%',
           },
           padding(0, '1em'),
