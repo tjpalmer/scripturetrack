@@ -19,6 +19,8 @@ export interface AppState {
 
   path: Array<string>;
 
+  selected?: Array<string>;
+
   text?: string;
 
 }
@@ -48,9 +50,13 @@ export class AppView extends Component<App, AppState> {
             {text && text.slice(offset, offset + 1000)}
           </p>
         </div>
-        <LibraryView appView={this} {...this.props.library}/>
+        <LibraryView app={this} {...this.props.library}/>
       </div>
     );
+  }
+
+  select(path: Array<String>) {
+    //
   }
 
   shuffle() {
@@ -79,7 +85,7 @@ export class AppView extends Component<App, AppState> {
       library.items[volumeIndex].items[docIndex],
     );
     let volume = library.items[volumeIndex];
-    let path = [volume.key, volume.items[docIndex].key];
+    let path = [volume.name, volume.items[docIndex].name];
     let offset = charIndex - docBegin;
     fetch(['texts', ...path].join('/')).then(response => {
       response.text().then(text => {
@@ -93,10 +99,11 @@ export class AppView extends Component<App, AppState> {
 
 }
 
-export class DocView extends Component<Doc, {}> {
+export class DocView extends Component<Doc & {volume: VolumeView}, {}> {
 
   onClick = () => {
-    console.log(this.props.title);
+    let path = [this.props.volume.props.name, this.props.name];
+    console.log(this.props.title, path);
   }
 
   render() {
@@ -104,7 +111,7 @@ export class DocView extends Component<Doc, {}> {
       <div className={style({
         $nest: {
           '&:hover': {
-            background: 'orange',
+            background: 'silver',
             fontWeight: 'bold',
           }
         },
@@ -114,10 +121,10 @@ export class DocView extends Component<Doc, {}> {
 
 }
 
-export class LibraryView extends Component<Library & {appView: AppView}, {}> {
+export class LibraryView extends Component<Library & {app: AppView}, {}> {
 
   makeGuess = () => {
-    this.props.appView.shuffle();
+    this.props.app.shuffle();
   };
 
   render() {
@@ -126,7 +133,9 @@ export class LibraryView extends Component<Library & {appView: AppView}, {}> {
         <div className={style(
           flex, margin(0), padding(0, '1em'), scrollY, {cursor: 'default'},
         )}>
-          {this.props.items.map(volume => <p><VolumeView {...volume}/></p>)}
+          {this.props.items.map(volume =>
+            <p><VolumeView key={volume.name} library={this} {...volume}/></p>,
+          )}
         </div>
         <div className={style(content, padding('1em'))}>
           <button onClick={this.makeGuess} type='button'>Make Guess</button>
@@ -137,14 +146,16 @@ export class LibraryView extends Component<Library & {appView: AppView}, {}> {
 
 }
 
-export class VolumeView extends Component<Volume, {}> {
+export class VolumeView extends Component<Volume & {library: LibraryView}, {}> {
 
   render() {
     return (
       <div>
         {this.props.title}
         <ul>
-          {this.props.items.map(doc => <li><DocView {...doc}/></li>)}
+          {this.props.items.map(doc =>
+            <li><DocView key={doc.name} volume={this} {...doc}/></li>,
+          )}
         </ul>
       </div>
     );

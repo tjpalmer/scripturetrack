@@ -1,4 +1,4 @@
-import {usfmParse} from '../../src/usfm';
+import {Doc, Volume, usfmParse} from '../../src/usfm';
 import {load} from 'cheerio';
 import {open, readdirSync, readFileSync, statSync, writeFileSync} from 'fs';
 import {argv} from 'process';
@@ -9,12 +9,12 @@ function summarizeText(dir: string) {
   let coprDoc = load(readFileSync(join(dir, 'copr.htm')).toString());
   let title = coprDoc('title').text().trim();
   // Read info on each book file.
-  let keys = readdirSync(dir).filter(name => name.endsWith('.usfm')).sort();
-  let items = keys.map(key => {
-    let path = join(dir, key);
+  let names = readdirSync(dir).filter(name => name.endsWith('.usfm')).sort();
+  let items = names.map(name => {
+    let path = join(dir, name);
     let content = readFileSync(path).toString();
     let doc = usfmParse(content);
-    return {key, ...doc};
+    return {name, ...doc} as Doc;
   });
   return {items, title};
 }
@@ -24,7 +24,9 @@ function summarizeTexts(baseDir: string) {
     name => statSync(join(baseDir, name)).isDirectory()
   );
   let summary = {
-    items: textDirs.map(key => ({key, ...summarizeText(join(baseDir, key))})),
+    items: textDirs.map(name => ({
+      name, ...summarizeText(join(baseDir, name)),
+    }) as Volume),
   };
   return summary;
 }

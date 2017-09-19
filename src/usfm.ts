@@ -12,7 +12,7 @@ export interface SelfDoc {
 
 export interface Doc extends SelfDoc {
 
-  key: string;
+  name: string;
 
 }
 
@@ -20,7 +20,7 @@ export interface Volume {
 
   items: Array<Doc>;
 
-  key: string;
+  name: string;
 
   title: string;
 
