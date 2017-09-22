@@ -32,14 +32,6 @@ export class AppView extends Component<App, AppState> {
     this.shuffle();
   }
 
-  queryPath(path: [string, string]) {
-    for (let volume of this.props.library.items) {
-      if (volume.name == path[0]) {
-        for ()
-      }
-    }
-  }
-
   render() {
     let {offset, text} = this.state;
     return (

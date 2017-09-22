@@ -72,10 +72,11 @@ class view_AppView extends preact_compat_es["Component"] {
                     fontSize: '200%',
                 }, Object(lib["padding"])(0, '1em'), lib["scrollY"]) },
                 preact_compat_es["createElement"]("p", null, text && text.slice(offset, offset + 1000))),
-            preact_compat_es["createElement"](view_LibraryView, Object.assign({ app: this }, this.props.library))));
+            preact_compat_es["createElement"](view_LibraryView, Object.assign({ app: this, selected: this.state.selected }, this.props.library))));
     }
     select(path) {
-        //
+        console.log('select', path);
+        this.setState({ selected: path });
     }
     shuffle() {
         let { library } = this.props;
@@ -107,26 +108,21 @@ class view_AppView extends preact_compat_es["Component"] {
                 this.setState({ text });
             });
         });
-        this.setState({ offset, path });
+        this.setState({ offset, path, selected: undefined });
     }
 }
 class view_DocView extends preact_compat_es["Component"] {
     constructor() {
         super(...arguments);
         this.onClick = () => {
-            let path = [this.props.volume.props.name, this.props.name];
-            console.log(this.props.title, path);
+            let { name, volume } = this.props;
+            volume.props.library.props.app.select([volume.props.name, name]);
         };
     }
     render() {
-        return (preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])({
-                $nest: {
-                    '&:hover': {
-                        background: 'silver',
-                        fontWeight: 'bold',
-                    }
-                },
-            }), onClick: this.onClick }, this.props.title));
+        return (preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(Object.assign({}, (this.props.selected && highlight), { $nest: {
+                    '&:hover': highlight,
+                } })), onClick: this.onClick }, this.props.title));
     }
 }
 class view_LibraryView extends preact_compat_es["Component"] {
@@ -137,19 +133,21 @@ class view_LibraryView extends preact_compat_es["Component"] {
         };
     }
     render() {
+        let { selected } = this.props;
         return (preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["content"], lib["vertical"], Object(lib["width"])('25%')) },
             preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["flex"], Object(lib["margin"])(0), Object(lib["padding"])(0, '1em'), lib["scrollY"], { cursor: 'default' }) }, this.props.items.map(volume => preact_compat_es["createElement"]("p", null,
-                preact_compat_es["createElement"](view_VolumeView, Object.assign({ key: volume.name, library: this }, volume))))),
+                preact_compat_es["createElement"](view_VolumeView, Object.assign({ key: volume.name, library: this }, volume, { selected: selected && volume.name == selected[0] ? selected[1] : undefined }))))),
             preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["content"], Object(lib["padding"])('1em')) },
-                preact_compat_es["createElement"]("button", { onClick: this.makeGuess, type: 'button' }, "Make Guess"))));
+                preact_compat_es["createElement"]("button", { disabled: !selected, onClick: this.makeGuess, type: 'button' }, "Make Guess"))));
     }
 }
 class view_VolumeView extends preact_compat_es["Component"] {
     render() {
+        let { selected } = this.props;
         return (preact_compat_es["createElement"]("div", null,
             this.props.title,
             preact_compat_es["createElement"]("ul", null, this.props.items.map(doc => preact_compat_es["createElement"]("li", null,
-                preact_compat_es["createElement"](view_DocView, Object.assign({ key: doc.name, volume: this }, doc)))))));
+                preact_compat_es["createElement"](view_DocView, Object.assign({ key: doc.name, selected: selected == doc.name, volume: this }, doc)))))));
     }
 }
 function random() {
@@ -162,6 +160,10 @@ function random() {
     // Read as little-endian double, and subtract 1 for just fraction.
     return new DataView(ints.buffer).getFloat64(0, true) - 1;
 }
+let highlight = {
+    background: 'silver',
+    fontWeight: 'bold',
+};
 
 // CONCATENATED MODULE: ./src/index.ts
 
