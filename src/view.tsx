@@ -19,7 +19,7 @@ export interface AppState {
 
   path: Array<string>;
 
-  selected?: Array<string>;
+  selected?: [string, string];
 
   text?: string;
 
@@ -30,6 +30,14 @@ export class AppView extends Component<App, AppState> {
   constructor(props: App) {
     super(props);
     this.shuffle();
+  }
+
+  queryPath(path: [string, string]) {
+    for (let volume of this.props.library.items) {
+      if (volume.name == path[0]) {
+        for ()
+      }
+    }
   }
 
   render() {
@@ -50,13 +58,16 @@ export class AppView extends Component<App, AppState> {
             {text && text.slice(offset, offset + 1000)}
           </p>
         </div>
-        <LibraryView app={this} {...this.props.library}/>
+        <LibraryView
+          app={this} selected={this.state.selected} {...this.props.library}
+        />
       </div>
     );
   }
 
-  select(path: Array<String>) {
-    //
+  select(path?: [string, string]) {
+    console.log('select', path);
+    this.setState({selected: path});
   }
 
   shuffle() {
@@ -94,26 +105,29 @@ export class AppView extends Component<App, AppState> {
         this.setState({text});
       });
     });
-    this.setState({offset, path});
+    this.setState({offset, path, selected: undefined});
   }
 
 }
 
-export class DocView extends Component<Doc & {volume: VolumeView}, {}> {
+export class DocView extends Component<
+  Doc & {
+    selected: boolean,
+    volume: VolumeView,
+  }, {}
+> {
 
   onClick = () => {
-    let path = [this.props.volume.props.name, this.props.name];
-    console.log(this.props.title, path);
+    let {name, volume} = this.props;
+    volume.props.library.props.app.select([volume.props.name, name]);
   }
 
   render() {
     return (
       <div className={style({
+        ...(this.props.selected && highlight as any),
         $nest: {
-          '&:hover': {
-            background: 'silver',
-            fontWeight: 'bold',
-          }
+          '&:hover': highlight as any,
         },
       })} onClick={this.onClick}>{this.props.title}</div>
     );
@@ -121,24 +135,38 @@ export class DocView extends Component<Doc & {volume: VolumeView}, {}> {
 
 }
 
-export class LibraryView extends Component<Library & {app: AppView}, {}> {
+export class LibraryView extends Component<
+  Library & {
+    app: AppView,
+    selected: [string, string] | undefined,
+  }, {}
+> {
 
   makeGuess = () => {
     this.props.app.shuffle();
   };
 
   render() {
+    let {selected} = this.props;
     return (
       <div className={style(content, vertical, width('25%'))}>
         <div className={style(
           flex, margin(0), padding(0, '1em'), scrollY, {cursor: 'default'},
         )}>
           {this.props.items.map(volume =>
-            <p><VolumeView key={volume.name} library={this} {...volume}/></p>,
+            <p><VolumeView
+              key={volume.name}
+              library={this} {...volume}
+              selected={
+                selected && volume.name == selected[0] ? selected[1] : undefined
+              }
+            /></p>,
           )}
         </div>
         <div className={style(content, padding('1em'))}>
-          <button onClick={this.makeGuess} type='button'>Make Guess</button>
+          <button disabled={!selected} onClick={this.makeGuess} type='button'>
+            Make Guess
+          </button>
         </div>
       </div>
     );
@@ -146,15 +174,25 @@ export class LibraryView extends Component<Library & {app: AppView}, {}> {
 
 }
 
-export class VolumeView extends Component<Volume & {library: LibraryView}, {}> {
+export class VolumeView extends Component<
+  Volume & {
+    library: LibraryView,
+    selected: string | undefined,
+  }, {}
+> {
 
   render() {
+    let {selected} = this.props;
     return (
       <div>
         {this.props.title}
         <ul>
           {this.props.items.map(doc =>
-            <li><DocView key={doc.name} volume={this} {...doc}/></li>,
+            <li><DocView
+              key={doc.name}
+              selected={selected == doc.name}
+              volume={this} {...doc}
+            /></li>,
           )}
         </ul>
       </div>
@@ -173,3 +211,8 @@ export function random() {
   // Read as little-endian double, and subtract 1 for just fraction.
   return new DataView(ints.buffer).getFloat64(0, true) - 1;
 }
+
+let highlight = {
+  background: 'silver',
+  fontWeight: 'bold',
+};
