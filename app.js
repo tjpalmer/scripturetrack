@@ -67,6 +67,7 @@ function usfmParse(text, includeText) {
                 line = line.replace(/\|[^\\]*/g, '');
                 line = line.replace(/\\f\b.*?\\f\*/g, '');
                 line = line.replace(/\\\+?\w+\*?/g, '');
+                line = line.replace('\xb6', '');
                 let number;
                 switch (type) {
                     case 'v': {
@@ -90,6 +91,21 @@ function usfmParse(text, includeText) {
         doc.text = lines.join('\n') + '\n';
     }
     return doc;
+}
+function findIndexOffset(offset, items, sizer) {
+    let end = 0;
+    let chapterBegins = items.map(item => {
+        let prev = end;
+        end += sizer(item);
+        return prev;
+    });
+    let itemIndex = 0;
+    let itemBegin = chapterBegins.reverse().find((chapterBegin, index) => {
+        itemIndex = chapterBegins.length - index - 1;
+        return chapterBegin <= offset;
+    }) || 0;
+    let item = items[itemIndex];
+    return { index: itemIndex, item, offset: offset - itemBegin };
 }
 function stripTag(line) {
     return line.replace(/^\S+\s+/, '');
@@ -117,13 +133,9 @@ class view_AppView extends preact_compat_es["Component"] {
         this.shuffle();
     }
     render() {
-        let { offset, text } = this.state;
+        let { chapter, chapterOffset, offset, text } = this.state;
         return (preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["fillParent"], lib["horizontal"]) },
-            preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["flex"], {
-                    fontFamily: 'Excerpt',
-                    fontSize: '200%',
-                }, Object(lib["padding"])(0, '1em'), lib["scrollY"]) },
-                preact_compat_es["createElement"]("p", null, text && text.slice(offset, offset + 1000))),
+            preact_compat_es["createElement"](view_ExcerptView, Object.assign({}, { chapter, chapterOffset, offset, text })),
             preact_compat_es["createElement"](view_LibraryView, Object.assign({ app: this, selected: this.state.selected }, this.props.library))));
     }
     select(path) {
@@ -153,12 +165,17 @@ class view_AppView extends preact_compat_es["Component"] {
         let volume = library.items[volumeIndex];
         let path = [volume.name, volume.items[docIndex].name];
         let offset = charIndex - docBegin;
-        this.setState({ offset, path, selected: undefined, text: undefined });
+        this.setState({
+            chapter: undefined, chapterIndex: undefined, path, selected: undefined,
+            text: undefined,
+        });
         fetch(['texts', ...path].join('/')).then(response => {
             response.text().then(text => {
-                text = usfmParse(text, true).text;
+                let doc = usfmParse(text, true);
+                let { index: chapterIndex, item: chapter, offset: chapterOffset } = findIndexOffset(offset, doc.chapters, chapter => chapter.size);
+                text = doc.text;
                 console.log(offset, text.length);
-                this.setState({ text });
+                this.setState({ chapter, chapterIndex, chapterOffset, text, offset });
             });
         });
     }
@@ -175,6 +192,17 @@ class view_DocView extends preact_compat_es["Component"] {
         return (preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(Object.assign({}, (this.props.selected && highlight), { $nest: {
                     '&:hover': highlight,
                 } })), onClick: this.onClick }, this.props.title));
+    }
+}
+class view_ExcerptView extends preact_compat_es["Component"] {
+    render() {
+        let { chapter, chapterOffset, offset, text } = this.props;
+        return (preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["flex"], {
+                fontFamily: 'Excerpt',
+                fontSize: '200%',
+            }, Object(lib["padding"])(0, '1em'), lib["scrollY"]) }, chapter && chapter.paragraphs.map(paragraph => preact_compat_es["createElement"]("p", { className: Object(lib_es2015["style"])({ textIndent: '1.5em' }) }, paragraph.verses.map(verse => preact_compat_es["createElement"]("span", null,
+            verse.text,
+            " "))))));
     }
 }
 class view_LibraryView extends preact_compat_es["Component"] {
