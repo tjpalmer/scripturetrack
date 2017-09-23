@@ -194,13 +194,34 @@ class view_DocView extends preact_compat_es["Component"] {
                 } })), onClick: this.onClick }, this.props.title));
     }
 }
-class view_ExcerptView extends preact_compat_es["Component"] {
+class view_ExcerptView extends preact_compat_es["PureComponent"] {
+    componentDidUpdate() {
+        if (this.startElement) {
+            this.startElement.scrollIntoView(true);
+        }
+    }
     render() {
         let { chapter, chapterOffset, offset, text } = this.props;
+        let paragraphOffsetIndex = chapter && findIndexOffset(chapterOffset, chapter.paragraphs, paragraph => paragraph.size).index;
         return (preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["flex"], {
                 fontFamily: 'Excerpt',
                 fontSize: '200%',
-            }, Object(lib["padding"])(0, '1em'), lib["scrollY"]) }, chapter && chapter.paragraphs.map(paragraph => preact_compat_es["createElement"]("p", { className: Object(lib_es2015["style"])({ textIndent: '1.5em' }) }, paragraph.verses.map(verse => preact_compat_es["createElement"]("span", null,
+            }, Object(lib["padding"])(0, '1em'), lib["scrollY"]) }, chapter && chapter.paragraphs.map((paragraph, paragraphIndex) => preact_compat_es["createElement"]("p", { className: Object(lib_es2015["style"])({
+                margin: '0.5em 0',
+                textIndent: '1.5em',
+                $nest: {
+                    '&:first-child': {
+                        marginTop: '1em',
+                    },
+                    '&:last-child': {
+                        marginBottom: '1em',
+                    },
+                },
+            }), ref: element => {
+                if (paragraphIndex == paragraphOffsetIndex) {
+                    this.startElement = element;
+                }
+            } }, paragraph.verses.map(verse => preact_compat_es["createElement"]("span", null,
             verse.text,
             " "))))));
     }
