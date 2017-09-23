@@ -13,7 +13,6 @@ function usfmParse(text, includeText) {
     let size = 0;
     for (let line of text.split('\n')) {
         line = line.trim();
-        // TODO Extract start first.
         if (line.startsWith('\\h')) {
             doc.title = stripTag(line);
         }
@@ -21,11 +20,8 @@ function usfmParse(text, includeText) {
             doc.titleFull = stripTag(line);
         }
         else {
-            // Remove Strong's references.
             line = line.replace(/\|[^\\]*/g, '');
-            // Remove footnotes.
             line = line.replace(/\\f\b.*?\\f\*/g, '');
-            // Remove other tags.
             line = line.replace(/\\\+?\w+\*?/g, '');
             lines.push(line);
             size += line.length + 1;
@@ -66,8 +62,6 @@ class view_AppView extends preact_compat_es["Component"] {
         let { offset, text } = this.state;
         return (preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["fillParent"], lib["horizontal"]) },
             preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["flex"], {
-                    // When I had 'sans-serif' as a fallback, Chrome used it, despite
-                    // the custom font being available.
                     fontFamily: 'Excerpt',
                     fontSize: '200%',
                 }, Object(lib["padding"])(0, '1em'), lib["scrollY"]) },
@@ -101,6 +95,7 @@ class view_AppView extends preact_compat_es["Component"] {
         let volume = library.items[volumeIndex];
         let path = [volume.name, volume.items[docIndex].name];
         let offset = charIndex - docBegin;
+        this.setState({ offset, path, selected: undefined, text: undefined });
         fetch(['texts', ...path].join('/')).then(response => {
             response.text().then(text => {
                 text = usfmParse(text, true).text;
@@ -108,7 +103,6 @@ class view_AppView extends preact_compat_es["Component"] {
                 this.setState({ text });
             });
         });
-        this.setState({ offset, path, selected: undefined });
     }
 }
 class view_DocView extends preact_compat_es["Component"] {
@@ -151,13 +145,10 @@ class view_VolumeView extends preact_compat_es["Component"] {
     }
 }
 function random() {
-    // Generate 8 bytes.
     let ints = new Uint8Array(8);
     crypto.getRandomValues(ints);
-    // Manipulate exponent and sign.
     ints[7] = 0x3f;
     ints[6] |= 0xf0;
-    // Read as little-endian double, and subtract 1 for just fraction.
     return new DataView(ints.buffer).getFloat64(0, true) - 1;
 }
 let highlight = {
@@ -185,11 +176,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 
 function init() {
     return __awaiter(this, void 0, void 0, function* () {
-        // Setup, including removing the preload element.
         document.getElementById('preload').remove();
         Object(lib["normalize"])();
         Object(lib["setupPage"])('#root');
-        // Now do our work.
         let library = yield (yield fetch('texts/texts.json')).json();
         let app = { library, path: [] };
         Object(preact_compat_es["render"])(preact_compat_es["createElement"](view_AppView, Object.assign({}, app)), document.getElementById('root'));

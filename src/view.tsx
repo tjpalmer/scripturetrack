@@ -90,6 +90,9 @@ export class AppView extends Component<App, AppState> {
     let volume = library.items[volumeIndex];
     let path = [volume.name, volume.items[docIndex].name];
     let offset = charIndex - docBegin;
+    // Set text to undefined before we try loading, so we don't flash to random
+    // spot of current text.
+    this.setState({offset, path, selected: undefined, text: undefined});
     fetch(['texts', ...path].join('/')).then(response => {
       response.text().then(text => {
         text = usfmParse(text, true).text!;
@@ -97,7 +100,6 @@ export class AppView extends Component<App, AppState> {
         this.setState({text});
       });
     });
-    this.setState({offset, path, selected: undefined});
   }
 
 }
