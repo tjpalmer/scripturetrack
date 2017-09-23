@@ -1,10 +1,12 @@
-import {Chapter, Doc, Library, Volume, findIndexOffset, usfmParse} from './';
+import {
+  Chapter, Doc, Library, Paragraph, Volume, findIndexOffset, usfmParse,
+} from './';
 import {
   content, fillParent, flex, horizontal, margin, padding, scrollY, vertical,
   width,
 } from 'csstips';
 import * as React from 'react';
-import {Component} from 'react';
+import {Component, PureComponent} from 'react';
 import {style} from 'typestyle';
 
 export interface App {
@@ -130,15 +132,24 @@ export class DocView extends Component<
 
 }
 
-export class ExcerptView extends Component<{
+export class ExcerptView extends PureComponent<{
   chapter?: Chapter, chapterOffset?: number, offset?: number, text?: string,
 }, {}> {
+  // This is a PureComponent, because chapter object identity should stay
+  // constant for a single shuffle, so it avoids needless rerender.
+
+  componentDidUpdate() {
+    // TODO Replace this with random y offset!!!
+    if (this.startElement) {
+      this.startElement.scrollIntoView(true);
+    }
+  }
 
   render() {
     let {chapter, chapterOffset, offset, text} = this.props;
-    // let {item: verse} = findIndexOffset(
-    //   offset, doc.chapters!, chapter => chapter.size,
-    // );
+    let paragraphOffsetIndex = chapter && findIndexOffset(
+      chapterOffset!, chapter.paragraphs, paragraph => paragraph.size,
+    ).index;
     return (
       <div className={style(
         flex, {
@@ -150,14 +161,36 @@ export class ExcerptView extends Component<{
         padding(0, '1em'),
         scrollY,
       )}>{
-        chapter && chapter.paragraphs.map(paragraph =>
-          <p className={style({textIndent: '1.5em'})}>{
+        chapter && chapter.paragraphs.map((paragraph, paragraphIndex) =>
+          <p
+            className={style({
+              // Narrow betweens, with indent for contrast.
+              margin: '0.5em 0',
+              textIndent: '1.5em',
+              // Full margin at ends.
+              $nest: {
+                '&:first-child': {
+                  marginTop: '1em',
+                },
+                '&:last-child': {
+                  marginBottom: '1em',
+                },
+              },
+            })}
+            ref={element => {
+              if (paragraphIndex == paragraphOffsetIndex) {
+                this.startElement = element!;
+              }
+            }}
+          >{
             paragraph.verses.map(verse => <span>{verse.text} </span>)
           }</p>
         )
       }</div>
     );
   }
+
+  startElement?: HTMLElement;
 
 }
 
