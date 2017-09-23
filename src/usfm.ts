@@ -130,6 +130,8 @@ export function usfmParse(text: string, includeText?: boolean) {
         line = line.replace(/\\f\b.*?\\f\*/g, '');
         // Remove other tags.
         line = line.replace(/\\\+?\w+\*?/g, '');
+        // Remove paragraph chars.
+        line = line.replace('\xb6', '');
         let number: number | undefined;
         switch (type) {
           // TODO ip
@@ -155,6 +157,26 @@ export function usfmParse(text: string, includeText?: boolean) {
     doc.text = lines.join('\n') + '\n';
   }
   return doc;
+}
+
+export function findIndexOffset<Item>(
+  offset: number, items: Array<Item>, sizer: (item: Item) => number,
+) {
+  let end = 0;
+  let chapterBegins = items.map(item => {
+    let prev = end;
+    end += sizer(item);
+    return prev;
+  });
+  let itemIndex = 0;
+  let itemBegin = chapterBegins.reverse().find(
+    (chapterBegin, index) => {
+      itemIndex = chapterBegins.length - index - 1;
+      return chapterBegin <= offset;
+    },
+  ) || 0;
+  let item = items[itemIndex];
+  return {index: itemIndex, item, offset: offset - itemBegin};
 }
 
 function stripTag(line: string) {

@@ -1,4 +1,4 @@
-import {Doc, Library, Volume, usfmParse} from './';
+import {Chapter, Doc, Library, Volume, findIndexOffset, usfmParse} from './';
 import {
   content, fillParent, flex, horizontal, margin, padding, scrollY, vertical,
   width,
@@ -14,6 +14,12 @@ export interface App {
 }
 
 export interface AppState {
+
+  chapter?: Chapter;
+
+  chapterIndex?: number;
+
+  chapterOffset?: number;
 
   offset: number;
 
@@ -33,23 +39,10 @@ export class AppView extends Component<App, AppState> {
   }
 
   render() {
-    let {offset, text} = this.state;
+    let {chapter, chapterOffset, offset, text} = this.state;
     return (
       <div className={style(fillParent, horizontal)}>
-        <div className={style(
-          flex, {
-            // When I had 'sans-serif' as a fallback, Chrome used it, despite
-            // the custom font being available.
-            fontFamily: 'Excerpt',
-            fontSize: '200%',
-          },
-          padding(0, '1em'),
-          scrollY,
-        )}>
-          <p>
-            {text && text.slice(offset, offset + 1000)}
-          </p>
-        </div>
+        <ExcerptView {...{chapter, chapterOffset, offset, text}}/>
         <LibraryView
           app={this} selected={this.state.selected} {...this.props.library}
         />
@@ -92,12 +85,20 @@ export class AppView extends Component<App, AppState> {
     let offset = charIndex - docBegin;
     // Set text to undefined before we try loading, so we don't flash to random
     // spot of current text.
-    this.setState({offset, path, selected: undefined, text: undefined});
+    this.setState({
+      chapter: undefined, chapterIndex: undefined, path, selected: undefined,
+      text: undefined,
+    });
     fetch(['texts', ...path].join('/')).then(response => {
       response.text().then(text => {
-        text = usfmParse(text, true).text!;
+        let doc = usfmParse(text, true);
+        let {index: chapterIndex, item: chapter, offset: chapterOffset} =
+          findIndexOffset(
+            offset, doc.chapters!, chapter => chapter.size,
+          );
+        text = doc.text!;
         console.log(offset, text.length);
-        this.setState({text});
+        this.setState({chapter, chapterIndex, chapterOffset, text, offset});
       });
     });
   }
@@ -124,6 +125,37 @@ export class DocView extends Component<
           '&:hover': highlight as any,
         },
       })} onClick={this.onClick}>{this.props.title}</div>
+    );
+  }
+
+}
+
+export class ExcerptView extends Component<{
+  chapter?: Chapter, chapterOffset?: number, offset?: number, text?: string,
+}, {}> {
+
+  render() {
+    let {chapter, chapterOffset, offset, text} = this.props;
+    // let {item: verse} = findIndexOffset(
+    //   offset, doc.chapters!, chapter => chapter.size,
+    // );
+    return (
+      <div className={style(
+        flex, {
+          // When I had 'sans-serif' as a fallback, Chrome used it, despite
+          // the custom font being available.
+          fontFamily: 'Excerpt',
+          fontSize: '200%',
+        },
+        padding(0, '1em'),
+        scrollY,
+      )}>{
+        chapter && chapter.paragraphs.map(paragraph =>
+          <p className={style({textIndent: '1.5em'})}>{
+            paragraph.verses.map(verse => <span>{verse.text} </span>)
+          }</p>
+        )
+      }</div>
     );
   }
 
