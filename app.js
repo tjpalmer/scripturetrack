@@ -11,24 +11,82 @@ function usfmParse(text, includeText) {
     let doc = {};
     let lines = [];
     let size = 0;
-    for (let line of text.split('\n')) {
+    let chapter = { paragraphs: [], size: 0 };
+    let chapters = [];
+    let paragraph = { size: 0, verses: [] };
+    let line;
+    let finishChapter = () => {
+        if (includeText) {
+            finishParagraph();
+            if (chapter.number || chapter.paragraphs.length) {
+                chapter.size = chapter.paragraphs.reduce((size, paragraph) => size + paragraph.size, 0);
+                chapters.push(chapter);
+            }
+            chapter = { number: +line, paragraphs: [], size: 0 };
+        }
+    };
+    let finishParagraph = () => {
+        if (includeText) {
+            if (paragraph.verses.length) {
+                paragraph.size = paragraph.verses.reduce((size, verse) => size + verse.text.length, 0);
+                chapter.paragraphs.push(paragraph);
+            }
+            paragraph = { size: 0, verses: [] };
+        }
+    };
+    for (line of text.split('\n')) {
         line = line.trim();
-        if (line.startsWith('\\h')) {
-            doc.title = stripTag(line);
-        }
-        else if (line.startsWith('\\mt1') || line.startsWith('\\imt1')) {
-            doc.titleFull = stripTag(line);
-        }
-        else {
-            line = line.replace(/\|[^\\]*/g, '');
-            line = line.replace(/\\f\b.*?\\f\*/g, '');
-            line = line.replace(/\\\+?\w+\*?/g, '');
-            lines.push(line);
-            size += line.length + 1;
+        let split = line.search(/\s|$/);
+        let type = line.slice(1, split);
+        line = line.slice(split).trim();
+        switch (type) {
+            case 'c': {
+                finishChapter();
+                break;
+            }
+            case 'h': {
+                doc.title = stripTag(line);
+                break;
+            }
+            case 'id':
+            case 'toc1':
+            case 'toc2':
+            case 'toc3': {
+                break;
+            }
+            case 'imt1':
+            case 'mt1': {
+                doc.titleFull = stripTag(line);
+                break;
+            }
+            case 'p': {
+                finishParagraph();
+                break;
+            }
+            default: {
+                line = line.replace(/\|[^\\]*/g, '');
+                line = line.replace(/\\f\b.*?\\f\*/g, '');
+                line = line.replace(/\\\+?\w+\*?/g, '');
+                let number;
+                switch (type) {
+                    case 'v': {
+                        let split = line.search(/\s|$/);
+                        number = +line.slice(0, split);
+                        line = line.slice(split).trim();
+                        break;
+                    }
+                    default: break;
+                }
+                paragraph.verses.push({ number, text: line });
+                lines.push(line);
+                size += line.length + 1;
+            }
         }
     }
+    finishChapter();
     doc.size = size;
     if (includeText) {
+        doc.chapters = chapters;
         doc.text = lines.join('\n') + '\n';
     }
     return doc;
