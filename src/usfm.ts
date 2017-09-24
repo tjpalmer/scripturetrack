@@ -8,8 +8,17 @@ export interface Chapter {
 
 }
 
-export interface DocSelf {
+export interface Doc extends DocSelf {
 
+  name: string;
+
+}
+
+export interface DocSelf {
+  // DocSelf doesn't know its context.
+  // It gets the uglier name because usually I care about docs with names on
+  // them.
+  
   chapters?: Array<Chapter>;
 
   size: number;
@@ -19,15 +28,9 @@ export interface DocSelf {
   title: string;
 
   titleFull: string;
-
-}
-
-export interface Doc extends DocSelf {
-
-  name: string;
-
-}
-
+  
+  }
+  
 export interface Paragraph {
 
   size: number;
@@ -41,6 +44,8 @@ export interface Volume {
   items: Array<Doc>;
 
   name: string;
+
+  size?: number;
 
   title: string;
 
@@ -159,13 +164,31 @@ export function usfmParse(text: string, includeText?: boolean) {
   return doc;
 }
 
+export interface IndexItemOffset<Item> {
+  index: number;
+  item: Item;
+  offset: number;
+}
+
+// Default sizer.
+export function findIndexOffset<Item extends {size: number}>(
+  offset: number, items: Array<Item>,
+): IndexItemOffset<Item>;
+// Explicit sizer.
 export function findIndexOffset<Item>(
   offset: number, items: Array<Item>, sizer: (item: Item) => number,
+): IndexItemOffset<Item>;
+// Implementation.
+export function findIndexOffset<Item>(
+  offset: number, items: Array<Item>, sizer?: (item: Item) => number,
 ) {
+  if (!sizer) {
+    sizer = (item: Item) => (item as any).size;
+  }
   let end = 0;
   let chapterBegins = items.map(item => {
     let prev = end;
-    end += sizer(item);
+    end += sizer!(item);
     return prev;
   });
   let itemIndex = 0;

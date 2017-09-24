@@ -21,15 +21,9 @@ export interface AppState {
 
   chapterIndex?: number;
 
-  chapterOffset?: number;
-
-  offset: number;
-
   path: Array<string>;
 
   selected?: [string, string];
-
-  text?: string;
 
 }
 
@@ -41,13 +35,11 @@ export class AppView extends Component<App, AppState> {
   }
 
   render() {
-    let {chapter, chapterOffset, offset, text} = this.state;
+    let {chapter, selected} = this.state;
     return (
       <div className={style(fillParent, horizontal)}>
-        <ExcerptView {...{chapter, chapterOffset, offset, text}}/>
-        <LibraryView
-          app={this} selected={this.state.selected} {...this.props.library}
-        />
+        <ExcerptView {...{chapter}}/>
+        <LibraryView app={this} {...{selected}} {...this.props.library}/>
       </div>
     );
   }
@@ -59,48 +51,29 @@ export class AppView extends Component<App, AppState> {
 
   shuffle() {
     let {library} = this.props;
-    let end = 0;
-    let begins = library.items.map(volume =>
-      volume.items.map(doc => {
-        let prev = end;
-        end += doc.size;
-        return prev;
-      })
-    );
+    for (let volume of library.items) {
+      volume.size = volume.items.reduce((size, doc) => size + doc.size, 0);
+    }
+    let end = library.items.reduce((size, volume) => size + volume.size!, 0);
     let charIndex = random() * end;
-    let volumeIndex = -1;
-    let volumeBegins = begins.reverse().find((docBegins, index) => {
-      volumeIndex = begins.length - index - 1;
-      return docBegins[0] <= charIndex;
-    })!;
-    let docIndex = -1;
-    let docBegin = volumeBegins.reverse().find((docBegin, index) => {
-      docIndex = volumeBegins.length - index - 1;
-      return docBegin <= charIndex;
-    })!;
-    console.log(
-      charIndex, volumeIndex, docIndex,
-      library.items[volumeIndex].items[docIndex],
-    );
-    let volume = library.items[volumeIndex];
+    let {item: volume, offset: volumeOffset} =
+      findIndexOffset(charIndex, library.items as any);
+    let {index: docIndex, offset} = findIndexOffset(volumeOffset, volume.items);
     let path = [volume.name, volume.items[docIndex].name];
-    let offset = charIndex - docBegin;
     // Set text to undefined before we try loading, so we don't flash to random
     // spot of current text.
     this.setState({
       chapter: undefined, chapterIndex: undefined, path, selected: undefined,
-      text: undefined,
     });
     fetch(['texts', ...path].join('/')).then(response => {
       response.text().then(text => {
         let doc = usfmParse(text, true);
         let {index: chapterIndex, item: chapter, offset: chapterOffset} =
-          findIndexOffset(
-            offset, doc.chapters!, chapter => chapter.size,
-          );
+          findIndexOffset(offset, doc.chapters!);
+        console.log(path, chapterIndex);
         text = doc.text!;
         console.log(offset, text.length);
-        this.setState({chapter, chapterIndex, chapterOffset, text, offset});
+        this.setState({chapter, chapterIndex});
       });
     });
   }
@@ -132,40 +105,43 @@ export class DocView extends Component<
 
 }
 
-export class ExcerptView extends PureComponent<{
-  chapter?: Chapter, chapterOffset?: number, offset?: number, text?: string,
-}, {}> {
+export class ExcerptView extends PureComponent<{chapter?: Chapter}, {}> {
   // This is a PureComponent, because chapter object identity should stay
   // constant for a single shuffle, so it avoids needless rerender.
 
   componentDidUpdate() {
-    // TODO Replace this with random y offset!!!
-    if (this.startElement) {
-      this.startElement.scrollIntoView(true);
+    let {container} = this;
+    if (container) {
+      let extraHeight = container.scrollHeight - container.offsetHeight;
+      let offset = extraHeight * random();
+      container.scrollTop = offset;
     }
   }
 
+  container?: HTMLElement;
+
   render() {
-    let {chapter, chapterOffset, offset, text} = this.props;
-    let paragraphOffsetIndex = chapter && findIndexOffset(
-      chapterOffset!, chapter.paragraphs, paragraph => paragraph.size,
-    ).index;
+    let {chapter} = this.props;
     return (
-      <div className={style(
-        flex, {
-          // When I had 'sans-serif' as a fallback, Chrome used it, despite
-          // the custom font being available.
-          fontFamily: 'Excerpt',
-          fontSize: '200%',
-        },
-        padding(0, '1em'),
-        scrollY,
-      )}>{
+      <div
+        className={style(
+          flex, {
+            // When I had 'sans-serif' as a fallback, Chrome used it, despite
+            // the custom font being available.
+            fontFamily: 'Excerpt',
+            fontSize: '200%',
+          },
+          padding(0, '1em'),
+          scrollY,
+        )}
+        ref={element => this.container = element!}
+      >{
         chapter && chapter.paragraphs.map((paragraph, paragraphIndex) =>
           <p
             className={style({
               // Narrow betweens, with indent for contrast.
-              margin: '0.5em 0',
+              margin: '0.3em auto',
+              maxWidth: '30em',
               textIndent: '1.5em',
               // Full margin at ends.
               $nest: {
@@ -177,11 +153,6 @@ export class ExcerptView extends PureComponent<{
                 },
               },
             })}
-            ref={element => {
-              if (paragraphIndex == paragraphOffsetIndex) {
-                this.startElement = element!;
-              }
-            }}
           >{
             paragraph.verses.map(verse => <span>{verse.text} </span>)
           }</p>
@@ -189,8 +160,6 @@ export class ExcerptView extends PureComponent<{
       }</div>
     );
   }
-
-  startElement?: HTMLElement;
 
 }
 

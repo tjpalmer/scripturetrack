@@ -93,6 +93,9 @@ function usfmParse(text, includeText) {
     return doc;
 }
 function findIndexOffset(offset, items, sizer) {
+    if (!sizer) {
+        sizer = (item) => item.size;
+    }
     let end = 0;
     let chapterBegins = items.map(item => {
         let prev = end;
@@ -133,10 +136,10 @@ class view_AppView extends preact_compat_es["Component"] {
         this.shuffle();
     }
     render() {
-        let { chapter, chapterOffset, offset, text } = this.state;
+        let { chapter, selected } = this.state;
         return (preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["fillParent"], lib["horizontal"]) },
-            preact_compat_es["createElement"](view_ExcerptView, Object.assign({}, { chapter, chapterOffset, offset, text })),
-            preact_compat_es["createElement"](view_LibraryView, Object.assign({ app: this, selected: this.state.selected }, this.props.library))));
+            preact_compat_es["createElement"](view_ExcerptView, Object.assign({}, { chapter })),
+            preact_compat_es["createElement"](view_LibraryView, Object.assign({ app: this }, { selected }, this.props.library))));
     }
     select(path) {
         console.log('select', path);
@@ -144,38 +147,25 @@ class view_AppView extends preact_compat_es["Component"] {
     }
     shuffle() {
         let { library } = this.props;
-        let end = 0;
-        let begins = library.items.map(volume => volume.items.map(doc => {
-            let prev = end;
-            end += doc.size;
-            return prev;
-        }));
+        for (let volume of library.items) {
+            volume.size = volume.items.reduce((size, doc) => size + doc.size, 0);
+        }
+        let end = library.items.reduce((size, volume) => size + volume.size, 0);
         let charIndex = random() * end;
-        let volumeIndex = -1;
-        let volumeBegins = begins.reverse().find((docBegins, index) => {
-            volumeIndex = begins.length - index - 1;
-            return docBegins[0] <= charIndex;
-        });
-        let docIndex = -1;
-        let docBegin = volumeBegins.reverse().find((docBegin, index) => {
-            docIndex = volumeBegins.length - index - 1;
-            return docBegin <= charIndex;
-        });
-        console.log(charIndex, volumeIndex, docIndex, library.items[volumeIndex].items[docIndex]);
-        let volume = library.items[volumeIndex];
+        let { item: volume, offset: volumeOffset } = findIndexOffset(charIndex, library.items);
+        let { index: docIndex, offset } = findIndexOffset(volumeOffset, volume.items);
         let path = [volume.name, volume.items[docIndex].name];
-        let offset = charIndex - docBegin;
         this.setState({
             chapter: undefined, chapterIndex: undefined, path, selected: undefined,
-            text: undefined,
         });
         fetch(['texts', ...path].join('/')).then(response => {
             response.text().then(text => {
                 let doc = usfmParse(text, true);
-                let { index: chapterIndex, item: chapter, offset: chapterOffset } = findIndexOffset(offset, doc.chapters, chapter => chapter.size);
+                let { index: chapterIndex, item: chapter, offset: chapterOffset } = findIndexOffset(offset, doc.chapters);
+                console.log(path, chapterIndex);
                 text = doc.text;
                 console.log(offset, text.length);
-                this.setState({ chapter, chapterIndex, chapterOffset, text, offset });
+                this.setState({ chapter, chapterIndex });
             });
         });
     }
@@ -196,18 +186,21 @@ class view_DocView extends preact_compat_es["Component"] {
 }
 class view_ExcerptView extends preact_compat_es["PureComponent"] {
     componentDidUpdate() {
-        if (this.startElement) {
-            this.startElement.scrollIntoView(true);
+        let { container } = this;
+        if (container) {
+            let extraHeight = container.scrollHeight - container.offsetHeight;
+            let offset = extraHeight * random();
+            container.scrollTop = offset;
         }
     }
     render() {
-        let { chapter, chapterOffset, offset, text } = this.props;
-        let paragraphOffsetIndex = chapter && findIndexOffset(chapterOffset, chapter.paragraphs, paragraph => paragraph.size).index;
+        let { chapter } = this.props;
         return (preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["flex"], {
                 fontFamily: 'Excerpt',
                 fontSize: '200%',
-            }, Object(lib["padding"])(0, '1em'), lib["scrollY"]) }, chapter && chapter.paragraphs.map((paragraph, paragraphIndex) => preact_compat_es["createElement"]("p", { className: Object(lib_es2015["style"])({
-                margin: '0.5em 0',
+            }, Object(lib["padding"])(0, '1em'), lib["scrollY"]), ref: element => this.container = element }, chapter && chapter.paragraphs.map((paragraph, paragraphIndex) => preact_compat_es["createElement"]("p", { className: Object(lib_es2015["style"])({
+                margin: '0.3em auto',
+                maxWidth: '30em',
                 textIndent: '1.5em',
                 $nest: {
                     '&:first-child': {
@@ -217,11 +210,7 @@ class view_ExcerptView extends preact_compat_es["PureComponent"] {
                         marginBottom: '1em',
                     },
                 },
-            }), ref: element => {
-                if (paragraphIndex == paragraphOffsetIndex) {
-                    this.startElement = element;
-                }
-            } }, paragraph.verses.map(verse => preact_compat_es["createElement"]("span", null,
+            }) }, paragraph.verses.map(verse => preact_compat_es["createElement"]("span", null,
             verse.text,
             " "))))));
     }
