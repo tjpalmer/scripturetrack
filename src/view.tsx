@@ -130,7 +130,7 @@ export class DocView extends Component<
   }
 
   render() {
-    let {answer, selected, title} = this.props;
+    let {answer, selected, title, volume} = this.props;
     let className: string;
     if (answer) {
       className = style({
@@ -146,7 +146,17 @@ export class DocView extends Component<
       });
     }
     return (
-      <div {...{className}} onClick={this.onClick}>{title}</div>
+      <div
+        {...{className}}
+        onClick={this.onClick}
+        ref={element => {
+          if (answer) {
+            volume.props.library.answerElement = element!;
+          }
+        }}
+      >{
+        title
+      }</div>
     );
   }
 
@@ -218,6 +228,15 @@ export class LibraryView extends Component<
   }, {}
 > {
 
+  answerElement?: HTMLElement;
+
+  componentDidUpdate() {
+    let {answerElement} = this;
+    if (answerElement) {
+      answerElement.scrollIntoView({behavior: 'smooth'});
+    }
+  }
+
   makeGuess = () => {
     let {answer, app} = this.props;
     if (answer) {
@@ -229,6 +248,9 @@ export class LibraryView extends Component<
 
   render() {
     let {answer, selected} = this.props;
+    if (!answer) {
+      this.answerElement = undefined;
+    }
     return (
       <div className={style(content, vertical, width('25%'))}>
         <div className={style(
