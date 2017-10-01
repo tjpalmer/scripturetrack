@@ -21,6 +21,8 @@ export interface DocSelf {
   
   chapters?: Array<Chapter>;
 
+  id: string;
+
   size: number;
 
   text?: string;
@@ -109,30 +111,34 @@ export function usfmParse(text: string, includeText?: boolean) {
         break;
       }
       case 'h': {
-        doc.title = stripTag(line);
+        doc.title = line;
         break;
       }
-      case 'id':
-      case 'toc1':
-      case 'toc2':
-      case 'toc3': {
-        // Just skip these extra titles and such.
+      case 'id': {
+        doc.id = line.slice(0, line.search(/\s|$/));
         break;
       }
       case 'imt1':
       case 'mt1': {
-        doc.titleFull = stripTag(line);
+        doc.titleFull = line;
         break;
       }
       case 'p': {
         finishParagraph();
         break;
       }
+      case 'toc1':
+      case 'toc2':
+      case 'toc3': {
+        // Just skip these extra titles and such.
+        break;
+      }
       default: {
         // Remove Strong's references.
         line = line.replace(/\|[^\\]*/g, '')
-        // Remove footnotes.
+        // Remove footnotes and cross references.
         line = line.replace(/\\f\b.*?\\f\*/g, '');
+        line = line.replace(/\\x\b.*?\\x\*/g, '');
         // Remove other tags.
         line = line.replace(/\\\+?\w+\*?/g, '');
         // Remove degree and paragraph chars.

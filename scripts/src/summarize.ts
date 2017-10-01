@@ -9,7 +9,9 @@ function summarizeText(dir: string) {
   let coprDoc = load(readFileSync(join(dir, 'copr.htm')).toString());
   let title = coprDoc('title').text().trim();
   // Read info on each book file.
-  let names = readdirSync(dir).filter(name => name.endsWith('.usfm')).sort();
+  let names = readdirSync(dir).filter(name => name.endsWith('.usfm')).sort(
+    (a, b) => Number(a.split('-')[0]) - Number(b.split('-')[0]),
+  );
   let items = names.map(name => {
     let path = join(dir, name);
     let content = readFileSync(path).toString();

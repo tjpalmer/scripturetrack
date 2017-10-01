@@ -45,27 +45,31 @@ function usfmParse(text, includeText) {
                 break;
             }
             case 'h': {
-                doc.title = stripTag(line);
+                doc.title = line;
                 break;
             }
-            case 'id':
-            case 'toc1':
-            case 'toc2':
-            case 'toc3': {
+            case 'id': {
+                doc.id = line.slice(0, line.search(/\s|$/));
                 break;
             }
             case 'imt1':
             case 'mt1': {
-                doc.titleFull = stripTag(line);
+                doc.titleFull = line;
                 break;
             }
             case 'p': {
                 finishParagraph();
                 break;
             }
+            case 'toc1':
+            case 'toc2':
+            case 'toc3': {
+                break;
+            }
             default: {
                 line = line.replace(/\|[^\\]*/g, '');
                 line = line.replace(/\\f\b.*?\\f\*/g, '');
+                line = line.replace(/\\x\b.*?\\x\*/g, '');
                 line = line.replace(/\\\+?\w+\*?/g, '');
                 line = line.replace(/\xb0|\xb6/g, '');
                 let number;
@@ -184,21 +188,28 @@ class view_DocView extends preact_compat_es["Component"] {
         super(...arguments);
         this.onClick = () => {
             let { name, volume } = this.props;
-            volume.props.library.props.app.select([volume.props.name, name]);
+            let { library } = volume.props;
+            if (!library.props.answer) {
+                library.props.app.select([volume.props.name, name]);
+            }
         };
     }
     render() {
-        let { answer, selected, title } = this.props;
+        let { answer, selected, title, volume } = this.props;
         let className;
         if (answer) {
             className = Object(lib_es2015["style"])(Object.assign({ color: 'green', fontSize: '150%', fontWeight: 'bold' }, (selected && highlight)));
         }
         else {
-            className = Object(lib_es2015["style"])(Object.assign({}, (selected && highlight), { $nest: {
+            className = Object(lib_es2015["style"])(Object.assign({}, (selected && highlight), { $nest: !volume.props.library.props.answer && {
                     '&:hover': highlight,
                 } }));
         }
-        return (preact_compat_es["createElement"]("div", Object.assign({}, { className }, { onClick: this.onClick }), title));
+        return (preact_compat_es["createElement"]("div", Object.assign({}, { className }, { onClick: this.onClick, ref: element => {
+                if (answer) {
+                    volume.props.library.answerElement = element;
+                }
+            } }), title));
     }
 }
 class view_ExcerptView extends preact_compat_es["PureComponent"] {
@@ -245,8 +256,17 @@ class view_LibraryView extends preact_compat_es["Component"] {
             }
         };
     }
+    componentDidUpdate() {
+        let { answerElement } = this;
+        if (answerElement) {
+            answerElement.scrollIntoView({ behavior: 'smooth' });
+        }
+    }
     render() {
         let { answer, selected } = this.props;
+        if (!answer) {
+            this.answerElement = undefined;
+        }
         return (preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["content"], lib["vertical"], Object(lib["width"])('25%')) },
             preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["flex"], Object(lib["margin"])(0), Object(lib["padding"])(0, '1em'), lib["scrollY"], { cursor: 'default' }) }, this.props.items.map(volume => preact_compat_es["createElement"]("p", null,
                 preact_compat_es["createElement"](view_VolumeView, Object.assign({ answer: answer && volume.name == answer[0] ? answer[1] : undefined, key: volume.name, library: this, selected: selected && volume.name == selected[0] ? selected[1] : undefined }, volume))))),
