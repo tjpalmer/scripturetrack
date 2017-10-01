@@ -126,7 +126,9 @@ export class DocView extends Component<
 
   onClick = () => {
     let {name, volume} = this.props;
-    volume.props.library.props.app.select([volume.props.name, name]);
+    if (!volume.props.answer) {
+      volume.props.library.props.app.select([volume.props.name, name]);
+    }
   }
 
   render() {
@@ -140,7 +142,7 @@ export class DocView extends Component<
     } else {
       className = style({
         ...(selected && highlight as any),
-        $nest: {
+        $nest: !volume.props.answer && {
           '&:hover': highlight as any,
         },
       });
