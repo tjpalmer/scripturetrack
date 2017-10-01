@@ -67,7 +67,7 @@ function usfmParse(text, includeText) {
                 line = line.replace(/\|[^\\]*/g, '');
                 line = line.replace(/\\f\b.*?\\f\*/g, '');
                 line = line.replace(/\\\+?\w+\*?/g, '');
-                line = line.replace('\xb6', '');
+                line = line.replace(/\xb0|\xb6/g, '');
                 let number;
                 switch (type) {
                     case 'v': {
@@ -133,17 +133,22 @@ var lib_es2015 = __webpack_require__(1);
 class view_AppView extends preact_compat_es["Component"] {
     constructor(props) {
         super(props);
+        this.setState({ scores: [] });
         this.shuffle();
     }
     render() {
-        let { chapter, selected } = this.state;
+        let { chapter, path, selected, showAnswer } = this.state;
+        let answer = showAnswer ? path : undefined;
         return (preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["fillParent"], lib["horizontal"]) },
             preact_compat_es["createElement"](view_ExcerptView, Object.assign({}, { chapter })),
-            preact_compat_es["createElement"](view_LibraryView, Object.assign({ app: this }, { selected }, this.props.library))));
+            preact_compat_es["createElement"](view_LibraryView, Object.assign({ app: this }, { answer, selected }, this.props.library))));
     }
     select(path) {
         console.log('select', path);
         this.setState({ selected: path });
+    }
+    showAnswer() {
+        this.setState({ showAnswer: true });
     }
     shuffle() {
         let { library } = this.props;
@@ -156,7 +161,11 @@ class view_AppView extends preact_compat_es["Component"] {
         let { index: docIndex, offset } = findIndexOffset(volumeOffset, volume.items);
         let path = [volume.name, volume.items[docIndex].name];
         this.setState({
-            chapter: undefined, chapterIndex: undefined, path, selected: undefined,
+            chapter: undefined,
+            chapterIndex: undefined,
+            path,
+            selected: undefined,
+            showAnswer: false,
         });
         fetch(['texts', ...path].join('/')).then(response => {
             response.text().then(text => {
@@ -179,9 +188,17 @@ class view_DocView extends preact_compat_es["Component"] {
         };
     }
     render() {
-        return (preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(Object.assign({}, (this.props.selected && highlight), { $nest: {
+        let { answer, selected, title } = this.props;
+        let className;
+        if (answer) {
+            className = Object(lib_es2015["style"])(Object.assign({ color: 'green', fontSize: '150%', fontWeight: 'bold' }, (selected && highlight)));
+        }
+        else {
+            className = Object(lib_es2015["style"])(Object.assign({}, (selected && highlight), { $nest: {
                     '&:hover': highlight,
-                } })), onClick: this.onClick }, this.props.title));
+                } }));
+        }
+        return (preact_compat_es["createElement"]("div", Object.assign({}, { className }, { onClick: this.onClick }), title));
     }
 }
 class view_ExcerptView extends preact_compat_es["PureComponent"] {
@@ -219,25 +236,31 @@ class view_LibraryView extends preact_compat_es["Component"] {
     constructor() {
         super(...arguments);
         this.makeGuess = () => {
-            this.props.app.shuffle();
+            let { answer, app } = this.props;
+            if (answer) {
+                app.shuffle();
+            }
+            else {
+                app.showAnswer();
+            }
         };
     }
     render() {
-        let { selected } = this.props;
+        let { answer, selected } = this.props;
         return (preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["content"], lib["vertical"], Object(lib["width"])('25%')) },
             preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["flex"], Object(lib["margin"])(0), Object(lib["padding"])(0, '1em'), lib["scrollY"], { cursor: 'default' }) }, this.props.items.map(volume => preact_compat_es["createElement"]("p", null,
-                preact_compat_es["createElement"](view_VolumeView, Object.assign({ key: volume.name, library: this }, volume, { selected: selected && volume.name == selected[0] ? selected[1] : undefined }))))),
+                preact_compat_es["createElement"](view_VolumeView, Object.assign({ answer: answer && volume.name == answer[0] ? answer[1] : undefined, key: volume.name, library: this, selected: selected && volume.name == selected[0] ? selected[1] : undefined }, volume))))),
             preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["content"], Object(lib["padding"])('1em')) },
-                preact_compat_es["createElement"]("button", { disabled: !selected, onClick: this.makeGuess, type: 'button' }, "Make Guess"))));
+                preact_compat_es["createElement"]("button", { disabled: !selected, onClick: this.makeGuess, type: 'button' }, answer ? "Next Excerpt" : "Make Guess"))));
     }
 }
 class view_VolumeView extends preact_compat_es["Component"] {
     render() {
-        let { selected } = this.props;
+        let { answer, selected } = this.props;
         return (preact_compat_es["createElement"]("div", null,
             this.props.title,
             preact_compat_es["createElement"]("ul", null, this.props.items.map(doc => preact_compat_es["createElement"]("li", null,
-                preact_compat_es["createElement"](view_DocView, Object.assign({ key: doc.name, selected: selected == doc.name, volume: this }, doc)))))));
+                preact_compat_es["createElement"](view_DocView, Object.assign({}, doc, { answer: answer == doc.name, key: doc.name, selected: selected == doc.name, volume: this })))))));
     }
 }
 function random() {
