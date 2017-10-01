@@ -23,7 +23,11 @@ export interface AppState {
 
   path: Array<string>;
 
+  scores: Array<{guess: Array<string>, path: Array<string>, score: number}>;
+
   selected?: [string, string];
+
+  showAnswer?: boolean;
 
 }
 
@@ -31,15 +35,38 @@ export class AppView extends Component<App, AppState> {
 
   constructor(props: App) {
     super(props);
+    this.setState({scores: []});
     this.shuffle();
   }
 
   render() {
-    let {chapter, selected} = this.state;
+    let {chapter, path, selected, showAnswer} = this.state;
+    let answer = showAnswer ? path : undefined;
     return (
       <div className={style(fillParent, horizontal)}>
+        {/* {
+          this.state.showAnswer &&
+          <div className={style({
+            background: 'white',
+            border: '0.1em solid black',
+            fontSize: '200%',
+            left: '50%',
+            padding: '1em',
+            position: 'fixed',
+            top: '50%',
+          })}>
+            <div className={style({marginBottom: '1em'})}>
+              Yo, dawg!
+            </div>
+            <div className={style({textAlign: 'center'})}>
+              <button type="button">Next</button>
+            </div>
+          </div>
+        } */}
         <ExcerptView {...{chapter}}/>
-        <LibraryView app={this} {...{selected}} {...this.props.library}/>
+        <LibraryView
+          app={this} {...{answer, selected}} {...this.props.library}
+        />
       </div>
     );
   }
@@ -47,6 +74,11 @@ export class AppView extends Component<App, AppState> {
   select(path?: [string, string]) {
     console.log('select', path);
     this.setState({selected: path});
+  }
+
+  showAnswer() {
+    this.setState({showAnswer: true});
+    // this.shuffle();
   }
 
   shuffle() {
@@ -63,7 +95,11 @@ export class AppView extends Component<App, AppState> {
     // Set text to undefined before we try loading, so we don't flash to random
     // spot of current text.
     this.setState({
-      chapter: undefined, chapterIndex: undefined, path, selected: undefined,
+      chapter: undefined,
+      chapterIndex: undefined,
+      path,
+      selected: undefined,
+      showAnswer: false,
     });
     fetch(['texts', ...path].join('/')).then(response => {
       response.text().then(text => {
@@ -82,6 +118,7 @@ export class AppView extends Component<App, AppState> {
 
 export class DocView extends Component<
   Doc & {
+    answer: boolean,
     selected: boolean,
     volume: VolumeView,
   }, {}
@@ -93,13 +130,23 @@ export class DocView extends Component<
   }
 
   render() {
-    return (
-      <div className={style({
-        ...(this.props.selected && highlight as any),
+    let {answer, selected, title} = this.props;
+    let className: string;
+    if (answer) {
+      className = style({
+        color: 'green', fontSize: '150%', fontWeight: 'bold',
+        ...(selected && highlight as any)
+      });
+    } else {
+      className = style({
+        ...(selected && highlight as any),
         $nest: {
           '&:hover': highlight as any,
         },
-      })} onClick={this.onClick}>{this.props.title}</div>
+      });
+    }
+    return (
+      <div {...{className}} onClick={this.onClick}>{title}</div>
     );
   }
 
@@ -165,17 +212,23 @@ export class ExcerptView extends PureComponent<{chapter?: Chapter}, {}> {
 
 export class LibraryView extends Component<
   Library & {
+    answer?: Array<string>,
     app: AppView,
     selected: [string, string] | undefined,
   }, {}
 > {
 
   makeGuess = () => {
-    this.props.app.shuffle();
+    let {answer, app} = this.props;
+    if (answer) {
+      app.shuffle();
+    } else {
+      app.showAnswer();
+    }
   };
 
   render() {
-    let {selected} = this.props;
+    let {answer, selected} = this.props;
     return (
       <div className={style(content, vertical, width('25%'))}>
         <div className={style(
@@ -183,17 +236,21 @@ export class LibraryView extends Component<
         )}>
           {this.props.items.map(volume =>
             <p><VolumeView
+              answer={
+                answer && volume.name == answer[0] ? answer[1] : undefined
+              }
               key={volume.name}
-              library={this} {...volume}
+              library={this}
               selected={
                 selected && volume.name == selected[0] ? selected[1] : undefined
               }
+              {...volume}
             /></p>,
           )}
         </div>
         <div className={style(content, padding('1em'))}>
           <button disabled={!selected} onClick={this.makeGuess} type='button'>
-            Make Guess
+            {answer ? "Next Excerpt" : "Make Guess"}
           </button>
         </div>
       </div>
@@ -204,22 +261,25 @@ export class LibraryView extends Component<
 
 export class VolumeView extends Component<
   Volume & {
+    answer: string | undefined,
     library: LibraryView,
     selected: string | undefined,
   }, {}
 > {
 
   render() {
-    let {selected} = this.props;
+    let {answer, selected} = this.props;
     return (
       <div>
         {this.props.title}
         <ul>
           {this.props.items.map(doc =>
             <li><DocView
+              {...doc}
+              answer={answer == doc.name}
               key={doc.name}
               selected={selected == doc.name}
-              volume={this} {...doc}
+              volume={this}
             /></li>,
           )}
         </ul>

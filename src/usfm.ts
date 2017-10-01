@@ -135,8 +135,9 @@ export function usfmParse(text: string, includeText?: boolean) {
         line = line.replace(/\\f\b.*?\\f\*/g, '');
         // Remove other tags.
         line = line.replace(/\\\+?\w+\*?/g, '');
-        // Remove paragraph chars.
-        line = line.replace('\xb6', '');
+        // Remove degree and paragraph chars.
+        // I don't know why there are degree chars.
+        line = line.replace(/\xb0|\xb6/g, '');
         let number: number | undefined;
         switch (type) {
           // TODO ip
