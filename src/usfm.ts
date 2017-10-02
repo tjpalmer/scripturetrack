@@ -18,20 +18,20 @@ export interface DocSelf {
   // DocSelf doesn't know its context.
   // It gets the uglier name because usually I care about docs with names on
   // them.
-  
+
+  chapterSizes?: Array<number>;
+
   chapters?: Array<Chapter>;
 
   id: string;
 
   size: number;
 
-  text?: string;
-
   title: string;
 
-  titleFull: string;
+  // titleFull: string;
   
-  }
+}
   
 export interface Paragraph {
 
@@ -66,37 +66,34 @@ export interface Verse {
   text: string;
 
 }
-  
+
 export function usfmParse(text: string, includeText?: boolean) {
   let doc = {} as DocSelf;
   let lines = [];
   let size = 0;
   let chapter = {paragraphs: [], size: 0} as Chapter;
+  let chapterCount = 0;
   let chapters = [] as Array<Chapter>;
   let paragraph = {size: 0, verses: []} as Paragraph;
   let line: string;
   let finishChapter = () => {
-    if (includeText) {
-      finishParagraph();
-      if (chapter.number || chapter.paragraphs.length) {
-        chapter.size = chapter.paragraphs.reduce(
-          (size, paragraph) => size + paragraph.size, 0,
-        );
-        chapters.push(chapter);
-      }
-      chapter = {number: +line, paragraphs: [], size: 0};
+    finishParagraph();
+    if (chapter.number || chapter.paragraphs!.length) {
+      chapter.size = chapter.paragraphs!.reduce(
+        (size, paragraph) => size + paragraph.size, 0,
+      );
+      chapters.push(chapter);
     }
+    chapter = {number: +line, paragraphs: [], size: 0};
   };
   let finishParagraph = () => {
-    if (includeText) {
-      if (paragraph.verses.length) {
-        paragraph.size = paragraph.verses.reduce(
-          (size, verse) => size + verse.text.length, 0,
-        );
-        chapter.paragraphs.push(paragraph);
-      }
-      paragraph = {size: 0, verses: []};
+    if (paragraph.verses.length) {
+      paragraph.size = paragraph.verses.reduce(
+        (size, verse) => size + verse.text.length, 0,
+      );
+      chapter.paragraphs!.push(paragraph);
     }
+    paragraph = {size: 0, verses: []};
   };
   for (line of text.split('\n')) {
     line = line.trim();
@@ -120,7 +117,8 @@ export function usfmParse(text: string, includeText?: boolean) {
       }
       case 'imt1':
       case 'mt1': {
-        doc.titleFull = line;
+        // We're not using this so far, so don't take up space.
+        // doc.titleFull = line;
         break;
       }
       case 'p': {
@@ -166,7 +164,8 @@ export function usfmParse(text: string, includeText?: boolean) {
   doc.size = size;
   if (includeText) {
     doc.chapters = chapters;
-    doc.text = lines.join('\n') + '\n';
+  } else {
+    doc.chapterSizes = chapters.map(chapter => chapter.size);
   }
   return doc;
 }

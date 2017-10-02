@@ -107,8 +107,6 @@ export class AppView extends Component<App, AppState> {
         let {index: chapterIndex, item: chapter, offset: chapterOffset} =
           findIndexOffset(offset, doc.chapters!);
         console.log(path, chapterIndex);
-        text = doc.text!;
-        console.log(offset, text.length);
         this.setState({chapter, chapterIndex});
       });
     });
@@ -196,7 +194,7 @@ export class ExcerptView extends PureComponent<{chapter?: Chapter}, {}> {
         )}
         ref={element => this.container = element!}
       >{
-        chapter && chapter.paragraphs.map((paragraph, paragraphIndex) =>
+        chapter && chapter.paragraphs!.map((paragraph, paragraphIndex) =>
           <p
             className={style({
               // Narrow betweens, with indent for contrast.
