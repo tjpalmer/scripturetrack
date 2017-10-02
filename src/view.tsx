@@ -123,10 +123,12 @@ export class DocView extends Component<
 > {
 
   onClick = () => {
-    let {name, volume} = this.props;
+    let {name, selected, volume} = this.props;
     let {library} = volume.props;
     if (!library.props.answer) {
-      library.props.app.select([volume.props.name, name]);
+      library.props.app.select(
+        selected ? undefined : [volume.props.name, name],
+      );
     }
   }
 
@@ -155,9 +157,14 @@ export class DocView extends Component<
             volume.props.library.answerElement = element!;
           }
         }}
-      >{
-        title
-      }</div>
+      >
+        <div>{title}</div>
+        <ul className={style(!selected && {display: 'none'})}>
+          {this.props.chapterSizes!.map((_, chapterIndex) =>
+            <li>{chapterIndex + 1}</li>,
+          )}
+        </ul>
+      </div>
     );
   }
 
