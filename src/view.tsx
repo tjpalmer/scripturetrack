@@ -1,5 +1,6 @@
 import {
-  Chapter, Doc, Library, Paragraph, Volume, findIndexOffset, usfmParse,
+  Chapter, Doc, IndexItemOffset, Library, Paragraph, Volume, findIndexOffset,
+  usfmParse,
 } from './';
 import {
   content, fillParent, flex, horizontal, margin, padding, scrollY, vertical,
@@ -17,13 +18,19 @@ export interface App {
 
 export interface AppState {
 
+  actual?: Path;
+
   chapter?: Chapter;
 
   chapterIndex?: number;
 
+  expanded: Array<string>;
+
+  guess?: Path;
+
   path: Array<string>;
 
-  scores: Array<{guess: Array<string>, path: Array<string>, score: number}>;
+  // scores: Array<{guess: Array<string>, path: Array<string>, score: number}>;
 
   selected?: [string, string];
 
@@ -31,41 +38,36 @@ export interface AppState {
 
 }
 
+export interface Path {
+  chapterIndex: number;
+  names: Array<string>;
+}
+
 export class AppView extends Component<App, AppState> {
 
   constructor(props: App) {
     super(props);
-    this.setState({scores: []});
+    this.setState({
+      expanded: [],
+      // scores: [],
+    });
     this.shuffle();
   }
 
+  guess(guess?: Path) {
+    this.setState({guess});
+  }
+
   render() {
-    let {chapter, path, selected, showAnswer} = this.state;
+    let {chapter, guess, expanded, path, selected, showAnswer} = this.state;
     let answer = showAnswer ? path : undefined;
     return (
       <div className={style(fillParent, horizontal)}>
-        {/* {
-          this.state.showAnswer &&
-          <div className={style({
-            background: 'white',
-            border: '0.1em solid black',
-            fontSize: '200%',
-            left: '50%',
-            padding: '1em',
-            position: 'fixed',
-            top: '50%',
-          })}>
-            <div className={style({marginBottom: '1em'})}>
-              Yo, dawg!
-            </div>
-            <div className={style({textAlign: 'center'})}>
-              <button type="button">Next</button>
-            </div>
-          </div>
-        } */}
         <ExcerptView {...{chapter}}/>
         <LibraryView
-          app={this} {...{answer, selected}} {...this.props.library}
+          app={this}
+          {...{answer, expanded, guess, selected}}
+          {...this.props.library}
         />
       </div>
     );
@@ -73,7 +75,7 @@ export class AppView extends Component<App, AppState> {
 
   select(path?: [string, string]) {
     console.log('select', path);
-    this.setState({selected: path});
+    this.setState({expanded: path || [], selected: path});
   }
 
   showAnswer() {
@@ -83,33 +85,72 @@ export class AppView extends Component<App, AppState> {
 
   shuffle() {
     let {library} = this.props;
+    // Calculate total text size, and choose a point in all the text.
     for (let volume of library.items) {
       volume.size = volume.items.reduce((size, doc) => size + doc.size, 0);
     }
     let end = library.items.reduce((size, volume) => size + volume.size!, 0);
     let charIndex = random() * end;
+    // Figure out what document and chapter we're in.
     let {item: volume, offset: volumeOffset} =
-      findIndexOffset(charIndex, library.items as any);
-    let {index: docIndex, offset} = findIndexOffset(volumeOffset, volume.items);
+      findIndexOffset(charIndex, library.items as any) as
+      IndexItemOffset<Volume>;
+    let {index: docIndex, item: doc, offset} =
+      findIndexOffset(volumeOffset, volume.items);
     let path = [volume.name, volume.items[docIndex].name];
+    let {index: chapterIndex} =
+      findIndexOffset(offset, doc.chapterSizes!, size => size);
     // Set text to undefined before we try loading, so we don't flash to random
     // spot of current text.
     this.setState({
+      actual: {chapterIndex, names: path},
       chapter: undefined,
-      chapterIndex: undefined,
+      chapterIndex,
+      guess: undefined,
       path,
       selected: undefined,
       showAnswer: false,
     });
+    // TODO Store and load individual chapters rather than whole docs.
     fetch(['texts', ...path].join('/')).then(response => {
       response.text().then(text => {
         let doc = usfmParse(text, true);
-        let {index: chapterIndex, item: chapter, offset: chapterOffset} =
-          findIndexOffset(offset, doc.chapters!);
-        console.log(path, chapterIndex);
-        this.setState({chapter, chapterIndex});
+        this.setState({chapter: doc.chapters![chapterIndex], chapterIndex});
       });
     });
+  }
+
+}
+
+export class ChapterView extends Component<
+  {doc: DocView, guess?: Path, index: number, selected: boolean}, {}
+> {
+
+  onClick = () => {
+    let {doc, index, guess} = this.props;
+    let {volume} = doc.props;
+    let {library} = volume.props;
+    let {app} = library.props;
+    if (guess) {
+      // Unguess this.
+      app.guess();
+    } else {
+      // Guess it.
+      app.guess({
+        chapterIndex: index, names: [volume.props.name, doc.props.name],
+      });
+    }
+  }
+
+  render() {
+    let {guess, index} = this.props;
+    let className: string;
+    if (guess) {
+      className = style({color: 'red'});
+    } else {
+      className = style();
+    }
+    return <li {...{className}} onClick={this.onClick}>{index + 1}</li>;    
   }
 
 }
@@ -117,6 +158,8 @@ export class AppView extends Component<App, AppState> {
 export class DocView extends Component<
   Doc & {
     answer: boolean,
+    expanded: boolean,
+    guess?: Path,
     selected: boolean,
     volume: VolumeView,
   }, {}
@@ -133,7 +176,7 @@ export class DocView extends Component<
   }
 
   render() {
-    let {answer, selected, title, volume} = this.props;
+    let {answer, expanded, guess, selected, title, volume} = this.props;
     let className: string;
     if (answer) {
       className = style({
@@ -151,17 +194,23 @@ export class DocView extends Component<
     return (
       <div
         {...{className}}
-        onClick={this.onClick}
         ref={element => {
           if (answer) {
             volume.props.library.answerElement = element!;
           }
         }}
       >
-        <div>{title}</div>
-        <ul className={style(!selected && {display: 'none'})}>
+        <div onClick={this.onClick}>{title}</div>
+        <ul className={style(!expanded && {display: 'none'})}>
           {this.props.chapterSizes!.map((_, chapterIndex) =>
-            <li>{chapterIndex + 1}</li>,
+            <ChapterView
+              doc={this}
+              guess={
+                guess && guess.chapterIndex == chapterIndex ? guess : undefined
+              }
+              index={chapterIndex}
+              selected={false}
+            />,
           )}
         </ul>
       </div>
@@ -232,6 +281,8 @@ export class LibraryView extends Component<
   Library & {
     answer?: Array<string>,
     app: AppView,
+    expanded: Array<string>,
+    guess?: Path,
     selected: [string, string] | undefined,
   }, {}
 > {
@@ -255,7 +306,7 @@ export class LibraryView extends Component<
   };
 
   render() {
-    let {answer, selected} = this.props;
+    let {answer, expanded, guess, selected} = this.props;
     if (!answer) {
       this.answerElement = undefined;
     }
@@ -269,6 +320,8 @@ export class LibraryView extends Component<
               answer={
                 answer && volume.name == answer[0] ? answer[1] : undefined
               }
+              expanded={expanded[0] == volume.name ? expanded[1] : undefined}
+              guess={guess && guess.names[0] == volume.name ? guess : undefined}
               key={volume.name}
               library={this}
               selected={
@@ -292,13 +345,15 @@ export class LibraryView extends Component<
 export class VolumeView extends Component<
   Volume & {
     answer: string | undefined,
+    expanded: string | undefined,
+    guess?: Path,
     library: LibraryView,
     selected: string | undefined,
   }, {}
 > {
 
   render() {
-    let {answer, selected} = this.props;
+    let {answer, expanded, guess, selected} = this.props;
     return (
       <div>
         {this.props.title}
@@ -307,6 +362,8 @@ export class VolumeView extends Component<
             <li><DocView
               {...doc}
               answer={answer == doc.name}
+              expanded={expanded == doc.name}
+              guess={guess && guess.names[1] == doc.name ? guess : undefined}
               key={doc.name}
               selected={selected == doc.name}
               volume={this}
