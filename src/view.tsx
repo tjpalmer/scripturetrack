@@ -32,8 +32,6 @@ export interface AppState {
 
   // scores: Array<{guess: Array<string>, path: Array<string>, score: number}>;
 
-  selected?: [string, string];
-
   showAnswer?: boolean;
 
 }
@@ -54,28 +52,28 @@ export class AppView extends Component<App, AppState> {
     this.shuffle();
   }
 
+  expand(path?: [string, string]) {
+    console.log('select', path);
+    this.setState({expanded: path || []});
+  }
+
   guess(guess?: Path) {
     this.setState({guess});
   }
 
   render() {
-    let {chapter, guess, expanded, path, selected, showAnswer} = this.state;
-    let answer = showAnswer ? path : undefined;
+    let {actual, chapter, guess, expanded, showAnswer} = this.state;
+    let answer = showAnswer ? actual : undefined;
     return (
       <div className={style(fillParent, horizontal)}>
         <ExcerptView {...{chapter}}/>
         <LibraryView
           app={this}
-          {...{answer, expanded, guess, selected}}
+          {...{answer, expanded, guess}}
           {...this.props.library}
         />
       </div>
     );
-  }
-
-  select(path?: [string, string]) {
-    console.log('select', path);
-    this.setState({expanded: path || [], selected: path});
   }
 
   showAnswer() {
@@ -106,9 +104,9 @@ export class AppView extends Component<App, AppState> {
       actual: {chapterIndex, names: path},
       chapter: undefined,
       chapterIndex,
+      expanded: [],
       guess: undefined,
       path,
-      selected: undefined,
       showAnswer: false,
     });
     // TODO Store and load individual chapters rather than whole docs.
@@ -123,17 +121,24 @@ export class AppView extends Component<App, AppState> {
 }
 
 export class ChapterView extends Component<
-  {doc: DocView, guess?: Path, index: number, selected: boolean}, {}
+  {answer?: Path, doc: DocView, guess?: Path, index: number}, {}
 > {
 
   onClick = () => {
     let {doc, index, guess} = this.props;
     let {volume} = doc.props;
-    let {library} = volume.props;
-    let {app} = library.props;
+    let {app} = volume.props.library.props;
+    // TODO Guessing (and unguessing) can collapse above, causing scrolls.
+    // TODO This applies even just to doc expansions, even without guesses.
+    // TODO Need to allow multiple expansions so things don't change on clicks?
+    // TODO But we also don't want arbitrary expansions.
+    // TODO Only do that when collapsing would force a snap?
+    // TODO Or smooth animate collapses just a bit to see context?
+    // TODO Or never force collapse?
     if (guess) {
       // Unguess this.
       app.guess();
+      app.setState({expanded: guess.names});
     } else {
       // Guess it.
       app.guess({
@@ -143,73 +148,74 @@ export class ChapterView extends Component<
   }
 
   render() {
-    let {guess, index} = this.props;
+    let {answer, doc, guess, index} = this.props;
+    let {library} = doc.props.volume.props;
     let className: string;
-    if (guess) {
-      className = style({color: 'red'});
+    if (answer) {
+      className = style({
+        color: 'green', fontSize: '150%', fontWeight: 'bold',
+        ...(guess && highlight as any)
+      });
     } else {
-      className = style();
+      className = style({
+        ...(guess && highlight as any),
+        $nest: !library.props.answer && {
+          '&:hover': highlight as any,
+        },
+      });
     }
-    return <li {...{className}} onClick={this.onClick}>{index + 1}</li>;    
+    return <li
+      {...{className}}
+      ref={element => {
+        if (answer) {
+          library.answerElement = element!;
+        }
+      }}
+      onClick={this.onClick}
+    >{index + 1}</li>;    
   }
 
 }
 
 export class DocView extends Component<
   Doc & {
-    answer: boolean,
+    answer? :Path,
     expanded: boolean,
     guess?: Path,
-    selected: boolean,
     volume: VolumeView,
   }, {}
 > {
 
   onClick = () => {
-    let {name, selected, volume} = this.props;
+    let {expanded, name, volume} = this.props;
     let {library} = volume.props;
     if (!library.props.answer) {
-      library.props.app.select(
-        selected ? undefined : [volume.props.name, name],
+      library.props.app.expand(
+        expanded ? undefined : [volume.props.name, name],
       );
     }
   }
 
   render() {
-    let {answer, expanded, guess, selected, title, volume} = this.props;
-    let className: string;
-    if (answer) {
-      className = style({
-        color: 'green', fontSize: '150%', fontWeight: 'bold',
-        ...(selected && highlight as any)
-      });
-    } else {
-      className = style({
-        ...(selected && highlight as any),
-        $nest: !volume.props.library.props.answer && {
-          '&:hover': highlight as any,
-        },
-      });
-    }
+    let {answer, expanded, guess, title, volume} = this.props;
     return (
-      <div
-        {...{className}}
-        ref={element => {
-          if (answer) {
-            volume.props.library.answerElement = element!;
-          }
-        }}
-      >
-        <div onClick={this.onClick}>{title}</div>
-        <ul className={style(!expanded && {display: 'none'})}>
-          {this.props.chapterSizes!.map((_, chapterIndex) =>
-            <ChapterView
+      <div>
+        <div
+          className={style({$nest: {'&:hover': {fontWeight: 'bold'}}})}
+          onClick={this.onClick}
+        >{title}</div>
+        <ul>
+          {(answer || expanded || guess) && this.props.chapterSizes!.map(
+            (_, chapterIndex) => <ChapterView
+              answer={
+                answer && answer.chapterIndex == chapterIndex ?
+                  answer : undefined
+              }
               doc={this}
               guess={
                 guess && guess.chapterIndex == chapterIndex ? guess : undefined
               }
               index={chapterIndex}
-              selected={false}
             />,
           )}
         </ul>
@@ -279,11 +285,10 @@ export class ExcerptView extends PureComponent<{chapter?: Chapter}, {}> {
 
 export class LibraryView extends Component<
   Library & {
-    answer?: Array<string>,
+    answer?: Path,
     app: AppView,
     expanded: Array<string>,
     guess?: Path,
-    selected: [string, string] | undefined,
   }, {}
 > {
 
@@ -306,7 +311,7 @@ export class LibraryView extends Component<
   };
 
   render() {
-    let {answer, expanded, guess, selected} = this.props;
+    let {answer, expanded, guess} = this.props;
     if (!answer) {
       this.answerElement = undefined;
     }
@@ -318,21 +323,18 @@ export class LibraryView extends Component<
           {this.props.items.map(volume =>
             <p><VolumeView
               answer={
-                answer && volume.name == answer[0] ? answer[1] : undefined
+                answer && answer.names[0] == volume.name ? answer : undefined
               }
               expanded={expanded[0] == volume.name ? expanded[1] : undefined}
               guess={guess && guess.names[0] == volume.name ? guess : undefined}
               key={volume.name}
               library={this}
-              selected={
-                selected && volume.name == selected[0] ? selected[1] : undefined
-              }
               {...volume}
             /></p>,
           )}
         </div>
         <div className={style(content, padding('1em'))}>
-          <button disabled={!selected} onClick={this.makeGuess} type='button'>
+          <button disabled={!guess} onClick={this.makeGuess} type='button'>
             {answer ? "Next Excerpt" : "Make Guess"}
           </button>
         </div>
@@ -344,16 +346,15 @@ export class LibraryView extends Component<
 
 export class VolumeView extends Component<
   Volume & {
-    answer: string | undefined,
-    expanded: string | undefined,
+    answer?: Path,
+    expanded?: string,
     guess?: Path,
     library: LibraryView,
-    selected: string | undefined,
   }, {}
 > {
 
   render() {
-    let {answer, expanded, guess, selected} = this.props;
+    let {answer, expanded, guess} = this.props;
     return (
       <div>
         {this.props.title}
@@ -361,11 +362,12 @@ export class VolumeView extends Component<
           {this.props.items.map(doc =>
             <li><DocView
               {...doc}
-              answer={answer == doc.name}
+              answer={
+                answer && answer.names[1] == doc.name ? answer : undefined
+              }
               expanded={expanded == doc.name}
               guess={guess && guess.names[1] == doc.name ? guess : undefined}
               key={doc.name}
-              selected={selected == doc.name}
               volume={this}
             /></li>,
           )}
