@@ -24,11 +24,7 @@ export interface AppState {
 
   chapterIndex?: number;
 
-  expanded: Array<string>;
-
   guess?: Path;
-
-  path: Array<string>;
 
   // scores: Array<{guess: Array<string>, path: Array<string>, score: number}>;
 
@@ -46,15 +42,9 @@ export class AppView extends Component<App, AppState> {
   constructor(props: App) {
     super(props);
     this.setState({
-      expanded: [],
       // scores: [],
     });
     this.shuffle();
-  }
-
-  expand(path?: [string, string]) {
-    console.log('select', path);
-    this.setState({expanded: path || []});
   }
 
   guess(guess?: Path) {
@@ -62,14 +52,14 @@ export class AppView extends Component<App, AppState> {
   }
 
   render() {
-    let {actual, chapter, guess, expanded, showAnswer} = this.state;
+    let {actual, chapter, guess, showAnswer} = this.state;
     let answer = showAnswer ? actual : undefined;
     return (
       <div className={style(fillParent, horizontal)}>
         <ExcerptView {...{chapter}}/>
         <LibraryView
           app={this}
-          {...{answer, expanded, guess}}
+          {...{answer, guess}}
           {...this.props.library}
         />
       </div>
@@ -78,7 +68,6 @@ export class AppView extends Component<App, AppState> {
 
   showAnswer() {
     this.setState({showAnswer: true});
-    // this.shuffle();
   }
 
   shuffle() {
@@ -95,22 +84,20 @@ export class AppView extends Component<App, AppState> {
       IndexItemOffset<Volume>;
     let {index: docIndex, item: doc, offset} =
       findIndexOffset(volumeOffset, volume.items);
-    let path = [volume.name, volume.items[docIndex].name];
+    let names = [volume.name, volume.items[docIndex].name];
     let {index: chapterIndex} =
       findIndexOffset(offset, doc.chapterSizes!, size => size);
     // Set text to undefined before we try loading, so we don't flash to random
     // spot of current text.
     this.setState({
-      actual: {chapterIndex, names: path},
+      actual: {chapterIndex, names},
       chapter: undefined,
       chapterIndex,
-      expanded: [],
       guess: undefined,
-      path,
       showAnswer: false,
     });
     // TODO Store and load individual chapters rather than whole docs.
-    fetch(['texts', ...path].join('/')).then(response => {
+    fetch(['texts', ...names].join('/')).then(response => {
       response.text().then(text => {
         let doc = usfmParse(text, true);
         this.setState({chapter: doc.chapters![chapterIndex], chapterIndex});
@@ -128,17 +115,9 @@ export class ChapterView extends Component<
     let {doc, index, guess} = this.props;
     let {volume} = doc.props;
     let {app} = volume.props.library.props;
-    // TODO Guessing (and unguessing) can collapse above, causing scrolls.
-    // TODO This applies even just to doc expansions, even without guesses.
-    // TODO Need to allow multiple expansions so things don't change on clicks?
-    // TODO But we also don't want arbitrary expansions.
-    // TODO Only do that when collapsing would force a snap?
-    // TODO Or smooth animate collapses just a bit to see context?
-    // TODO Or never force collapse?
     if (guess) {
       // Unguess this.
       app.guess();
-      app.setState({expanded: guess.names});
     } else {
       // Guess it.
       app.guess({
@@ -177,27 +156,32 @@ export class ChapterView extends Component<
 
 }
 
-export class DocView extends Component<
-  Doc & {
-    answer? :Path,
-    expanded: boolean,
-    guess?: Path,
-    volume: VolumeView,
-  }, {}
-> {
+export interface DocProps extends Doc {
+  answer? :Path,
+  guess?: Path,
+  volume: VolumeView,
+}
+
+export class DocView extends Component<DocProps, {expanded: boolean}> {
+
+  constructor(props: DocProps) {
+    super(props);
+    // TODO This resets on answer change, I guess since the props change.
+    // TODO Really, though, I want all collapsed on fresh. How to do that?
+    this.setState({expanded: !!props.answer});
+  }
 
   onClick = () => {
-    let {expanded, name, volume} = this.props;
+    let {name, volume} = this.props;
     let {library} = volume.props;
     if (!library.props.answer) {
-      library.props.app.expand(
-        expanded ? undefined : [volume.props.name, name],
-      );
+      this.setState({expanded: !this.state.expanded})
     }
   }
 
   render() {
-    let {answer, expanded, guess, title, volume} = this.props;
+    let {answer, guess, title, volume} = this.props;
+    let {expanded} = this.state;
     return (
       <div>
         <div
@@ -287,7 +271,6 @@ export class LibraryView extends Component<
   Library & {
     answer?: Path,
     app: AppView,
-    expanded: Array<string>,
     guess?: Path,
   }, {}
 > {
@@ -311,7 +294,7 @@ export class LibraryView extends Component<
   };
 
   render() {
-    let {answer, expanded, guess} = this.props;
+    let {answer, guess} = this.props;
     if (!answer) {
       this.answerElement = undefined;
     }
@@ -325,7 +308,6 @@ export class LibraryView extends Component<
               answer={
                 answer && answer.names[0] == volume.name ? answer : undefined
               }
-              expanded={expanded[0] == volume.name ? expanded[1] : undefined}
               guess={guess && guess.names[0] == volume.name ? guess : undefined}
               key={volume.name}
               library={this}
@@ -347,14 +329,13 @@ export class LibraryView extends Component<
 export class VolumeView extends Component<
   Volume & {
     answer?: Path,
-    expanded?: string,
     guess?: Path,
     library: LibraryView,
   }, {}
 > {
 
   render() {
-    let {answer, expanded, guess} = this.props;
+    let {answer, guess} = this.props;
     return (
       <div>
         {this.props.title}
@@ -365,7 +346,6 @@ export class VolumeView extends Component<
               answer={
                 answer && answer.names[1] == doc.name ? answer : undefined
               }
-              expanded={expanded == doc.name}
               guess={guess && guess.names[1] == doc.name ? guess : undefined}
               key={doc.name}
               volume={this}

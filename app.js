@@ -12,27 +12,24 @@ function usfmParse(text, includeText) {
     let lines = [];
     let size = 0;
     let chapter = { paragraphs: [], size: 0 };
+    let chapterCount = 0;
     let chapters = [];
     let paragraph = { size: 0, verses: [] };
     let line;
     let finishChapter = () => {
-        if (includeText) {
-            finishParagraph();
-            if (chapter.number || chapter.paragraphs.length) {
-                chapter.size = chapter.paragraphs.reduce((size, paragraph) => size + paragraph.size, 0);
-                chapters.push(chapter);
-            }
-            chapter = { number: +line, paragraphs: [], size: 0 };
+        finishParagraph();
+        if (chapter.number || chapter.paragraphs.length) {
+            chapter.size = chapter.paragraphs.reduce((size, paragraph) => size + paragraph.size, 0);
+            chapters.push(chapter);
         }
+        chapter = { number: +line, paragraphs: [], size: 0 };
     };
     let finishParagraph = () => {
-        if (includeText) {
-            if (paragraph.verses.length) {
-                paragraph.size = paragraph.verses.reduce((size, verse) => size + verse.text.length, 0);
-                chapter.paragraphs.push(paragraph);
-            }
-            paragraph = { size: 0, verses: [] };
+        if (paragraph.verses.length) {
+            paragraph.size = paragraph.verses.reduce((size, verse) => size + verse.text.length, 0);
+            chapter.paragraphs.push(paragraph);
         }
+        paragraph = { size: 0, verses: [] };
     };
     for (line of text.split('\n')) {
         line = line.trim();
@@ -54,7 +51,6 @@ function usfmParse(text, includeText) {
             }
             case 'imt1':
             case 'mt1': {
-                doc.titleFull = line;
                 break;
             }
             case 'p': {
@@ -92,7 +88,9 @@ function usfmParse(text, includeText) {
     doc.size = size;
     if (includeText) {
         doc.chapters = chapters;
-        doc.text = lines.join('\n') + '\n';
+    }
+    else {
+        doc.chapterSizes = chapters.map(chapter => chapter.size);
     }
     return doc;
 }
@@ -137,19 +135,18 @@ var lib_es2015 = __webpack_require__(1);
 class view_AppView extends preact_compat_es["Component"] {
     constructor(props) {
         super(props);
-        this.setState({ scores: [] });
+        this.setState({});
         this.shuffle();
     }
+    guess(guess) {
+        this.setState({ guess });
+    }
     render() {
-        let { chapter, path, selected, showAnswer } = this.state;
-        let answer = showAnswer ? path : undefined;
+        let { actual, chapter, guess, showAnswer } = this.state;
+        let answer = showAnswer ? actual : undefined;
         return (preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["fillParent"], lib["horizontal"]) },
             preact_compat_es["createElement"](view_ExcerptView, Object.assign({}, { chapter })),
-            preact_compat_es["createElement"](view_LibraryView, Object.assign({ app: this }, { answer, selected }, this.props.library))));
-    }
-    select(path) {
-        console.log('select', path);
-        this.setState({ selected: path });
+            preact_compat_es["createElement"](view_LibraryView, Object.assign({ app: this }, { answer, guess }, this.props.library))));
     }
     showAnswer() {
         this.setState({ showAnswer: true });
@@ -162,54 +159,79 @@ class view_AppView extends preact_compat_es["Component"] {
         let end = library.items.reduce((size, volume) => size + volume.size, 0);
         let charIndex = random() * end;
         let { item: volume, offset: volumeOffset } = findIndexOffset(charIndex, library.items);
-        let { index: docIndex, offset } = findIndexOffset(volumeOffset, volume.items);
-        let path = [volume.name, volume.items[docIndex].name];
+        let { index: docIndex, item: doc, offset } = findIndexOffset(volumeOffset, volume.items);
+        let names = [volume.name, volume.items[docIndex].name];
+        let { index: chapterIndex } = findIndexOffset(offset, doc.chapterSizes, size => size);
         this.setState({
+            actual: { chapterIndex, names },
             chapter: undefined,
-            chapterIndex: undefined,
-            path,
-            selected: undefined,
+            chapterIndex,
+            guess: undefined,
             showAnswer: false,
         });
-        fetch(['texts', ...path].join('/')).then(response => {
+        fetch(['texts', ...names].join('/')).then(response => {
             response.text().then(text => {
                 let doc = usfmParse(text, true);
-                let { index: chapterIndex, item: chapter, offset: chapterOffset } = findIndexOffset(offset, doc.chapters);
-                console.log(path, chapterIndex);
-                text = doc.text;
-                console.log(offset, text.length);
-                this.setState({ chapter, chapterIndex });
+                this.setState({ chapter: doc.chapters[chapterIndex], chapterIndex });
             });
         });
     }
 }
-class view_DocView extends preact_compat_es["Component"] {
+class view_ChapterView extends preact_compat_es["Component"] {
     constructor() {
         super(...arguments);
         this.onClick = () => {
-            let { name, volume } = this.props;
-            let { library } = volume.props;
-            if (!library.props.answer) {
-                library.props.app.select([volume.props.name, name]);
+            let { doc, index, guess } = this.props;
+            let { volume } = doc.props;
+            let { app } = volume.props.library.props;
+            if (guess) {
+                app.guess();
+            }
+            else {
+                app.guess({
+                    chapterIndex: index, names: [volume.props.name, doc.props.name],
+                });
             }
         };
     }
     render() {
-        let { answer, selected, title, volume } = this.props;
+        let { answer, doc, guess, index } = this.props;
+        let { library } = doc.props.volume.props;
         let className;
         if (answer) {
-            className = Object(lib_es2015["style"])(Object.assign({ color: 'green', fontSize: '150%', fontWeight: 'bold' }, (selected && highlight)));
+            className = Object(lib_es2015["style"])(Object.assign({ color: 'green', fontSize: '150%', fontWeight: 'bold' }, (guess && highlight)));
         }
         else {
-            className = Object(lib_es2015["style"])(Object.assign({}, (selected && highlight), { $nest: !volume.props.library.props.answer && {
+            className = Object(lib_es2015["style"])(Object.assign({}, (guess && highlight), { $nest: !library.props.answer && {
                     '&:hover': highlight,
                 } }));
         }
-        return (preact_compat_es["createElement"]("div", Object.assign({}, { className }, { onClick: this.onClick, ref: element => {
+        return preact_compat_es["createElement"]("li", Object.assign({}, { className }, { ref: element => {
                 if (answer) {
-                    volume.props.library.answerElement = element;
+                    library.answerElement = element;
                 }
-            } }), title));
+            }, onClick: this.onClick }), index + 1);
+    }
+}
+class view_DocView extends preact_compat_es["Component"] {
+    constructor(props) {
+        super(props);
+        this.onClick = () => {
+            let { name, volume } = this.props;
+            let { library } = volume.props;
+            if (!library.props.answer) {
+                this.setState({ expanded: !this.state.expanded });
+            }
+        };
+        this.setState({ expanded: !!props.answer });
+    }
+    render() {
+        let { answer, guess, title, volume } = this.props;
+        let { expanded } = this.state;
+        return (preact_compat_es["createElement"]("div", null,
+            preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])({ $nest: { '&:hover': { fontWeight: 'bold' } } }), onClick: this.onClick }, title),
+            preact_compat_es["createElement"]("ul", null, (answer || expanded || guess) && this.props.chapterSizes.map((_, chapterIndex) => preact_compat_es["createElement"](view_ChapterView, { answer: answer && answer.chapterIndex == chapterIndex ?
+                    answer : undefined, doc: this, guess: guess && guess.chapterIndex == chapterIndex ? guess : undefined, index: chapterIndex })))));
     }
 }
 class view_ExcerptView extends preact_compat_es["PureComponent"] {
@@ -263,24 +285,24 @@ class view_LibraryView extends preact_compat_es["Component"] {
         }
     }
     render() {
-        let { answer, selected } = this.props;
+        let { answer, guess } = this.props;
         if (!answer) {
             this.answerElement = undefined;
         }
         return (preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["content"], lib["vertical"], Object(lib["width"])('25%')) },
             preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["flex"], Object(lib["margin"])(0), Object(lib["padding"])(0, '1em'), lib["scrollY"], { cursor: 'default' }) }, this.props.items.map(volume => preact_compat_es["createElement"]("p", null,
-                preact_compat_es["createElement"](view_VolumeView, Object.assign({ answer: answer && volume.name == answer[0] ? answer[1] : undefined, key: volume.name, library: this, selected: selected && volume.name == selected[0] ? selected[1] : undefined }, volume))))),
+                preact_compat_es["createElement"](view_VolumeView, Object.assign({ answer: answer && answer.names[0] == volume.name ? answer : undefined, guess: guess && guess.names[0] == volume.name ? guess : undefined, key: volume.name, library: this }, volume))))),
             preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["content"], Object(lib["padding"])('1em')) },
-                preact_compat_es["createElement"]("button", { disabled: !selected, onClick: this.makeGuess, type: 'button' }, answer ? "Next Excerpt" : "Make Guess"))));
+                preact_compat_es["createElement"]("button", { disabled: !guess, onClick: this.makeGuess, type: 'button' }, answer ? "Next Excerpt" : "Make Guess"))));
     }
 }
 class view_VolumeView extends preact_compat_es["Component"] {
     render() {
-        let { answer, selected } = this.props;
+        let { answer, guess } = this.props;
         return (preact_compat_es["createElement"]("div", null,
             this.props.title,
             preact_compat_es["createElement"]("ul", null, this.props.items.map(doc => preact_compat_es["createElement"]("li", null,
-                preact_compat_es["createElement"](view_DocView, Object.assign({}, doc, { answer: answer == doc.name, key: doc.name, selected: selected == doc.name, volume: this })))))));
+                preact_compat_es["createElement"](view_DocView, Object.assign({}, doc, { answer: answer && answer.names[1] == doc.name ? answer : undefined, guess: guess && guess.names[1] == doc.name ? guess : undefined, key: doc.name, volume: this })))))));
     }
 }
 function random() {
