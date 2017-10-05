@@ -24,6 +24,8 @@ export interface AppState {
 
   chapterIndex?: number;
 
+  count: number;
+
   guess?: Path;
 
   // scores: Array<{guess: Array<string>, path: Array<string>, score: number}>;
@@ -42,6 +44,7 @@ export class AppView extends Component<App, AppState> {
   constructor(props: App) {
     super(props);
     this.setState({
+      count: 0,
       // scores: [],
     });
     this.shuffle();
@@ -52,14 +55,14 @@ export class AppView extends Component<App, AppState> {
   }
 
   render() {
-    let {actual, chapter, guess, showAnswer} = this.state;
+    let {actual, chapter, count, guess, showAnswer} = this.state;
     let answer = showAnswer ? actual : undefined;
     return (
       <div className={style(fillParent, horizontal)}>
         <ExcerptView {...{chapter}}/>
         <LibraryView
           app={this}
-          {...{answer, guess}}
+          {...{answer, count, guess}}
           {...this.props.library}
         />
       </div>
@@ -93,6 +96,7 @@ export class AppView extends Component<App, AppState> {
       actual: {chapterIndex, names},
       chapter: undefined,
       chapterIndex,
+      count: this.state.count + 1,
       guess: undefined,
       showAnswer: false,
     });
@@ -114,15 +118,17 @@ export class ChapterView extends Component<
   onClick = () => {
     let {doc, index, guess} = this.props;
     let {volume} = doc.props;
-    let {app} = volume.props.library.props;
-    if (guess) {
-      // Unguess this.
-      app.guess();
-    } else {
-      // Guess it.
-      app.guess({
-        chapterIndex: index, names: [volume.props.name, doc.props.name],
-      });
+    let {answer: anyAnswer, app} = volume.props.library.props;
+    if (!anyAnswer) {
+      if (guess) {
+        // Unguess this.
+        app.guess();
+      } else {
+        // Guess it.
+        app.guess({
+          chapterIndex: index, names: [volume.props.name, doc.props.name],
+        });
+      }
     }
   }
 
@@ -133,7 +139,7 @@ export class ChapterView extends Component<
     if (answer) {
       className = style({
         color: 'green', fontSize: '150%', fontWeight: 'bold',
-        ...(guess && highlight as any)
+        ...(guess && highlight as any),
       });
     } else {
       className = style({
@@ -182,10 +188,13 @@ export class DocView extends Component<DocProps, {expanded: boolean}> {
   render() {
     let {answer, guess, title, volume} = this.props;
     let {expanded} = this.state;
+    let {answer: anyAnswer} = volume.props.library.props;
     return (
       <div>
         <div
-          className={style({$nest: {'&:hover': {fontWeight: 'bold'}}})}
+          className={style(
+            !(anyAnswer || guess) && {$nest: {'&:hover': {fontWeight: 'bold'}}},
+          )}
           onClick={this.onClick}
         >{title}</div>
         <ul>
@@ -271,6 +280,7 @@ export class LibraryView extends Component<
   Library & {
     answer?: Path,
     app: AppView,
+    count: number,
     guess?: Path,
   }, {}
 > {
@@ -294,7 +304,7 @@ export class LibraryView extends Component<
   };
 
   render() {
-    let {answer, guess} = this.props;
+    let {answer, count, guess} = this.props;
     if (!answer) {
       this.answerElement = undefined;
     }
@@ -311,7 +321,7 @@ export class LibraryView extends Component<
               guess={guess && guess.names[0] == volume.name ? guess : undefined}
               key={volume.name}
               library={this}
-              {...volume}
+              {...{count, ...volume}}
             /></p>,
           )}
         </div>
@@ -329,13 +339,14 @@ export class LibraryView extends Component<
 export class VolumeView extends Component<
   Volume & {
     answer?: Path,
+    count: number,
     guess?: Path,
     library: LibraryView,
   }, {}
 > {
 
   render() {
-    let {answer, guess} = this.props;
+    let {answer, count, guess} = this.props;
     return (
       <div>
         {this.props.title}
@@ -347,7 +358,8 @@ export class VolumeView extends Component<
                 answer && answer.names[1] == doc.name ? answer : undefined
               }
               guess={guess && guess.names[1] == doc.name ? guess : undefined}
-              key={doc.name}
+              // Force a rerender on new shuffle by appended count to key.
+              key={doc.name + count}
               volume={this}
             /></li>,
           )}

@@ -135,18 +135,20 @@ var lib_es2015 = __webpack_require__(1);
 class view_AppView extends preact_compat_es["Component"] {
     constructor(props) {
         super(props);
-        this.setState({});
+        this.setState({
+            count: 0,
+        });
         this.shuffle();
     }
     guess(guess) {
         this.setState({ guess });
     }
     render() {
-        let { actual, chapter, guess, showAnswer } = this.state;
+        let { actual, chapter, count, guess, showAnswer } = this.state;
         let answer = showAnswer ? actual : undefined;
         return (preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["fillParent"], lib["horizontal"]) },
             preact_compat_es["createElement"](view_ExcerptView, Object.assign({}, { chapter })),
-            preact_compat_es["createElement"](view_LibraryView, Object.assign({ app: this }, { answer, guess }, this.props.library))));
+            preact_compat_es["createElement"](view_LibraryView, Object.assign({ app: this }, { answer, count, guess }, this.props.library))));
     }
     showAnswer() {
         this.setState({ showAnswer: true });
@@ -166,6 +168,7 @@ class view_AppView extends preact_compat_es["Component"] {
             actual: { chapterIndex, names },
             chapter: undefined,
             chapterIndex,
+            count: this.state.count + 1,
             guess: undefined,
             showAnswer: false,
         });
@@ -183,14 +186,16 @@ class view_ChapterView extends preact_compat_es["Component"] {
         this.onClick = () => {
             let { doc, index, guess } = this.props;
             let { volume } = doc.props;
-            let { app } = volume.props.library.props;
-            if (guess) {
-                app.guess();
-            }
-            else {
-                app.guess({
-                    chapterIndex: index, names: [volume.props.name, doc.props.name],
-                });
+            let { answer: anyAnswer, app } = volume.props.library.props;
+            if (!anyAnswer) {
+                if (guess) {
+                    app.guess();
+                }
+                else {
+                    app.guess({
+                        chapterIndex: index, names: [volume.props.name, doc.props.name],
+                    });
+                }
             }
         };
     }
@@ -228,8 +233,9 @@ class view_DocView extends preact_compat_es["Component"] {
     render() {
         let { answer, guess, title, volume } = this.props;
         let { expanded } = this.state;
+        let { answer: anyAnswer } = volume.props.library.props;
         return (preact_compat_es["createElement"]("div", null,
-            preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])({ $nest: { '&:hover': { fontWeight: 'bold' } } }), onClick: this.onClick }, title),
+            preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(!(anyAnswer || guess) && { $nest: { '&:hover': { fontWeight: 'bold' } } }), onClick: this.onClick }, title),
             preact_compat_es["createElement"]("ul", null, (answer || expanded || guess) && this.props.chapterSizes.map((_, chapterIndex) => preact_compat_es["createElement"](view_ChapterView, { answer: answer && answer.chapterIndex == chapterIndex ?
                     answer : undefined, doc: this, guess: guess && guess.chapterIndex == chapterIndex ? guess : undefined, index: chapterIndex })))));
     }
@@ -285,24 +291,24 @@ class view_LibraryView extends preact_compat_es["Component"] {
         }
     }
     render() {
-        let { answer, guess } = this.props;
+        let { answer, count, guess } = this.props;
         if (!answer) {
             this.answerElement = undefined;
         }
         return (preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["content"], lib["vertical"], Object(lib["width"])('25%')) },
             preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["flex"], Object(lib["margin"])(0), Object(lib["padding"])(0, '1em'), lib["scrollY"], { cursor: 'default' }) }, this.props.items.map(volume => preact_compat_es["createElement"]("p", null,
-                preact_compat_es["createElement"](view_VolumeView, Object.assign({ answer: answer && answer.names[0] == volume.name ? answer : undefined, guess: guess && guess.names[0] == volume.name ? guess : undefined, key: volume.name, library: this }, volume))))),
+                preact_compat_es["createElement"](view_VolumeView, Object.assign({ answer: answer && answer.names[0] == volume.name ? answer : undefined, guess: guess && guess.names[0] == volume.name ? guess : undefined, key: volume.name, library: this }, Object.assign({ count }, volume)))))),
             preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["content"], Object(lib["padding"])('1em')) },
                 preact_compat_es["createElement"]("button", { disabled: !guess, onClick: this.makeGuess, type: 'button' }, answer ? "Next Excerpt" : "Make Guess"))));
     }
 }
 class view_VolumeView extends preact_compat_es["Component"] {
     render() {
-        let { answer, guess } = this.props;
+        let { answer, count, guess } = this.props;
         return (preact_compat_es["createElement"]("div", null,
             this.props.title,
             preact_compat_es["createElement"]("ul", null, this.props.items.map(doc => preact_compat_es["createElement"]("li", null,
-                preact_compat_es["createElement"](view_DocView, Object.assign({}, doc, { answer: answer && answer.names[1] == doc.name ? answer : undefined, guess: guess && guess.names[1] == doc.name ? guess : undefined, key: doc.name, volume: this })))))));
+                preact_compat_es["createElement"](view_DocView, Object.assign({}, doc, { answer: answer && answer.names[1] == doc.name ? answer : undefined, guess: guess && guess.names[1] == doc.name ? guess : undefined, key: doc.name + count, volume: this })))))));
     }
 }
 function random() {
