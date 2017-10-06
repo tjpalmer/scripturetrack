@@ -1,4 +1,4 @@
-import {Doc, Volume, usfmParse} from '../../src/usfm';
+import {Doc, Volume, usfmParse} from '../../src/';
 import {load} from 'cheerio';
 import {open, readdirSync, readFileSync, statSync, writeFileSync} from 'fs';
 import {argv} from 'process';
