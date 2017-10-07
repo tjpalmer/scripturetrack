@@ -1,6 +1,5 @@
 import {
   Chapter, Doc, IndexItemOffset, Library, Paragraph, Volume, findIndexOffset,
-  usfmParse,
 } from './';
 import {
   content, fillParent, flex, horizontal, margin, padding, scrollY, vertical,
@@ -100,11 +99,12 @@ export class AppView extends Component<App, AppState> {
       guess: undefined,
       showAnswer: false,
     });
-    // TODO Store and load individual chapters rather than whole docs.
-    fetch(['texts', ...names].join('/')).then(response => {
+    // Load the chapter that we want.
+    let base = volume.uri!.replace(/\/[^/]*$/, '');
+    let chapterUri = [base, names[1], `ch${chapterIndex}.json`].join('/');
+    fetch(chapterUri).then(response => {
       response.text().then(text => {
-        let doc = usfmParse(text, true);
-        this.setState({chapter: doc.chapters![chapterIndex], chapterIndex});
+        this.setState({chapter: JSON.parse(text), chapterIndex});
       });
     });
   }

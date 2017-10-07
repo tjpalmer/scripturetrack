@@ -60,9 +60,13 @@ if (!existsSync(outputDir)) {
   mkdirSync(outputDir);
 }
 for (let volume of summary.items) {
+  // Just keep kjv for now.
+  if (!volume.name.match(/kjv/)) {
+    continue;
+  }
   // Volume dir.
   volume.name = volume.name.replace(/_.*/, '');
-  let volumeDir = join(outputDir, volume.name);
+  let volumeDir = join(outputDir); //, volume.name);
   if (!existsSync(volumeDir)) {
     mkdirSync(volumeDir);
   }

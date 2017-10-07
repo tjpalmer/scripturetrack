@@ -51,6 +51,8 @@ export interface Volume {
 
   title: string;
 
+  uri?: string;
+
 }
 
 export interface Library {

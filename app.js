@@ -172,10 +172,11 @@ class view_AppView extends preact_compat_es["Component"] {
             guess: undefined,
             showAnswer: false,
         });
-        fetch(['texts', ...names].join('/')).then(response => {
+        let base = volume.uri.replace(/\/[^/]*$/, '');
+        let chapterUri = [base, names[1], `ch${chapterIndex}.json`].join('/');
+        fetch(chapterUri).then(response => {
             response.text().then(text => {
-                let doc = usfmParse(text, true);
-                this.setState({ chapter: doc.chapters[chapterIndex], chapterIndex });
+                this.setState({ chapter: JSON.parse(text), chapterIndex });
             });
         });
     }
@@ -340,40 +341,30 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 
 
 
-
+window.addEventListener('load', init);
 function init() {
     return __awaiter(this, void 0, void 0, function* () {
         document.getElementById('preload').remove();
         Object(lib["normalize"])();
         Object(lib["setupPage"])('#root');
-        let library = yield (yield fetch('texts/texts.json')).json();
-        let app = { library, path: [] };
+        let uri = '/kjv.st/volume.json';
+        let volume;
+        try {
+            volume = yield load(uri);
+        }
+        catch (_a) {
+            uri = 'http://localhost:52119/volume.json';
+            volume = yield load(uri);
+        }
+        volume.uri = uri;
+        let app = { library: { items: [volume] }, path: [] };
         Object(preact_compat_es["render"])(preact_compat_es["createElement"](view_AppView, Object.assign({}, app)), document.getElementById('root'));
     });
 }
-window.addEventListener('load', init);
-class main_Clock extends preact_compat_es["Component"] {
-    constructor(props) {
-        super(props);
-        this.state = { date: new Date() };
-    }
-    componentDidMount() {
-        this.timerID = window.setInterval(() => this.tick(), 1000);
-    }
-    componentWillUnmount() {
-        clearInterval(this.timerID);
-    }
-    tick() {
-        this.setState({ date: new Date() });
-    }
-    render() {
-        return (preact_compat_es["createElement"]("div", null,
-            preact_compat_es["createElement"]("h1", null, "Hello, world!"),
-            preact_compat_es["createElement"]("h2", null,
-                "It is ",
-                this.state.date.toLocaleTimeString(),
-                ".")));
-    }
+function load(uri) {
+    return __awaiter(this, void 0, void 0, function* () {
+        return yield (yield fetch(uri)).json();
+    });
 }
 
 
