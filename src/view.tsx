@@ -325,10 +325,18 @@ export class LibraryView extends Component<
             /></p>,
           )}
         </div>
-        <div className={style(content, padding('1em'))}>
-          <button disabled={!guess} onClick={this.makeGuess} type='button'>
-            {answer ? "Next Excerpt" : "Make Guess"}
-          </button>
+        <div className={style(content, horizontal, padding('1em'))}>
+          <div className={style(flex)}>
+            <button disabled={!guess} onClick={this.makeGuess} type='button'>
+              {answer ? "Next Excerpt" : "Make Guess"}
+            </button>
+            <span className={style({marginLeft: '1em'})}>
+              1 / 5
+            </span>
+          </div>
+          <div>
+            Score 0
+          </div>
         </div>
       </div>
     );
