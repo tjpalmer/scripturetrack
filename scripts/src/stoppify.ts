@@ -83,15 +83,21 @@ function similarity(a: Bag, b: Bag, ignores: Iterable<string> = []) {
   // Only count for a, presuming a is smaller, so hopefully faster even if less
   // accurate.
   // let scale = 1.1;
-  // let count = 0;
+  let count = 0;
   let ignoreSet = new Set(ignores);
+  let dot = 0;
+  let normA = 0;
+  let normB = 0;
   for (let [word, countA] of a) {
-    // if (word.match(/^(?:the|a|an|when|who|what)$/)) continue;
+    let countB = (b.get(word) || 0) + 1;
+    ++count;
+    normA += countA * countA;
+    normB += countB * countB;
+    // Ignore.
     if (ignoreSet.has(word)) {
       continue;
     }
-    // ++count;
-    let countB = (b.get(word) || 0) + 1;
+    dot += countA * countB;
     // countA *= scale;
     // countB *= scale;
     let diff = countA - countB;
@@ -99,7 +105,8 @@ function similarity(a: Bag, b: Bag, ignores: Iterable<string> = []) {
     sum += value;
   }
   // return 1 - Math.sqrt(sum / a.size);
-  return 1 - cdf(sum, a.size - 1);
+  // return cdf(sum, count - 1);
+  return dot / (Math.sqrt(normA) * Math.sqrt(normB));
 }
 
 function stoppify(bags: Bag[]) {
@@ -113,6 +120,8 @@ function stoppify(bags: Bag[]) {
   // let counts = combo.map(term => term.count);
   // let words = combo.map(term => term.word);
   combo = normalizedBag(combo);
+  console.log(combo.size);
+  return;
   // bags.map(bag => {
   //   // let map = new Map(
   //   //   bag.map(term => [term.word, term.count] as [string, number]),
@@ -132,14 +141,14 @@ function stoppify(bags: Bag[]) {
   console.log('-', similarity(bags[0], bags[1]));
   console.log('-', similarity(bags[2], bags[3]));
   console.log('-', similarity(bags[3], bags[1000]));
-  console.log(listBag(bags[0]));
-  console.log(listBag(bags[3]));
-  console.log(listBag(bags[1000]));
+  // console.log(listBag(bags[0]));
+  // console.log(listBag(bags[3]));
+  // console.log(listBag(bags[1000]));
   let stops = [] as string[];
   for (let word of words.slice(0, 100)) {
     // ignores.push(word);
-    let score = scoreWords(bags, combo, [word]) - baseScore;
-    if (score >= 0.015) {
+    let score = baseScore - scoreWords(bags, combo, [word]);
+    if (score >= 0.001) {
       console.log(word, score);
       stops.push(word);
     }
