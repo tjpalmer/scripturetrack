@@ -6,6 +6,68 @@ webpackJsonp([0],{
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
+// CONCATENATED MODULE: ./src/util.ts
+function random() {
+    let ints = new Uint8Array(8);
+    crypto.getRandomValues(ints);
+    ints[7] = 0x3f;
+    ints[6] |= 0xf0;
+    return new DataView(ints.buffer).getFloat64(0, true) - 1;
+}
+function sum(numbers) {
+    let sum = 0;
+    for (let number of numbers) {
+        sum += number;
+    }
+    return sum;
+}
+
+// CONCATENATED MODULE: ./src/text.ts
+
+function findIndexOffset(offset, items, sizer) {
+    if (!sizer) {
+        sizer = (item) => item.size;
+    }
+    let end = 0;
+    let chapterBegins = items.map(item => {
+        let prev = end;
+        end += sizer(item);
+        return prev;
+    });
+    let itemIndex = 0;
+    let itemBegin = chapterBegins.reverse().find((chapterBegin, index) => {
+        itemIndex = chapterBegins.length - index - 1;
+        return chapterBegin <= offset;
+    }) || 0;
+    let item = items[itemIndex];
+    return { index: itemIndex, item, offset: offset - itemBegin };
+}
+function findLibraryTextOffset(library, path) {
+    let offset = 0;
+    for (let volume of library.items) {
+        if (volume.name == path.names[0]) {
+            for (let doc of volume.items) {
+                if (doc.name == path.names[1]) {
+                    let { chapterSizes } = doc;
+                    if (!chapterSizes) {
+                        chapterSizes = doc.chapters.map(chapter => chapter.size);
+                    }
+                    chapterSizes = chapterSizes.slice(0, path.chapterIndex + 1);
+                    offset += sum(chapterSizes) - chapterSizes.slice(-1)[0] / 2;
+                    return offset;
+                }
+                else {
+                    offset += doc.size;
+                }
+            }
+        }
+        else {
+            offset += volume.size;
+        }
+    }
+    throw new Error('path not found');
+}
+
 // CONCATENATED MODULE: ./src/usfm.ts
 function usfmParse(text, includeText) {
     let doc = {};
@@ -94,24 +156,6 @@ function usfmParse(text, includeText) {
     }
     return doc;
 }
-function findIndexOffset(offset, items, sizer) {
-    if (!sizer) {
-        sizer = (item) => item.size;
-    }
-    let end = 0;
-    let chapterBegins = items.map(item => {
-        let prev = end;
-        end += sizer(item);
-        return prev;
-    });
-    let itemIndex = 0;
-    let itemBegin = chapterBegins.reverse().find((chapterBegin, index) => {
-        itemIndex = chapterBegins.length - index - 1;
-        return chapterBegin <= offset;
-    }) || 0;
-    let item = items[itemIndex];
-    return { index: itemIndex, item, offset: offset - itemBegin };
-}
 function stripTag(line) {
     return line.replace(/^\S+\s+/, '');
 }
@@ -137,6 +181,8 @@ class view_AppView extends preact_compat_es["Component"] {
         super(props);
         this.setState({
             count: 0,
+            outcomes: [],
+            quizLength: 5,
         });
         this.shuffle();
     }
@@ -151,10 +197,15 @@ class view_AppView extends preact_compat_es["Component"] {
             preact_compat_es["createElement"](view_LibraryView, Object.assign({ app: this }, { answer, count, guess }, this.props.library))));
     }
     showAnswer() {
-        this.setState({ showAnswer: true });
+        let { actual, guess, outcomes } = this.state;
+        let score = scoreGuess(this.props.library, actual, guess);
+        outcomes = outcomes.slice();
+        outcomes.push({ actual: actual, guess: guess, score });
+        this.setState({ outcomes, showAnswer: true });
     }
     shuffle() {
         let { library } = this.props;
+        let { outcomes, quizLength } = this.state;
         for (let volume of library.items) {
             volume.size = volume.items.reduce((size, doc) => size + doc.size, 0);
         }
@@ -170,6 +221,7 @@ class view_AppView extends preact_compat_es["Component"] {
             chapterIndex,
             count: this.state.count + 1,
             guess: undefined,
+            outcomes: outcomes.length < quizLength ? outcomes : [],
             showAnswer: false,
         });
         let base = volume.uri.replace(/\/[^/]*$/, '');
@@ -292,15 +344,34 @@ class view_LibraryView extends preact_compat_es["Component"] {
         }
     }
     render() {
-        let { answer, count, guess } = this.props;
+        let { answer, app, count, guess } = this.props;
+        let { outcomes, quizLength } = app.state;
         if (!answer) {
             this.answerElement = undefined;
         }
+        let last = outcomes.length == quizLength;
         return (preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["content"], lib["vertical"], Object(lib["width"])('25%')) },
             preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["flex"], Object(lib["margin"])(0), Object(lib["padding"])(0, '1em'), lib["scrollY"], { cursor: 'default' }) }, this.props.items.map(volume => preact_compat_es["createElement"]("p", null,
                 preact_compat_es["createElement"](view_VolumeView, Object.assign({ answer: answer && answer.names[0] == volume.name ? answer : undefined, guess: guess && guess.names[0] == volume.name ? guess : undefined, key: volume.name, library: this }, Object.assign({ count }, volume)))))),
-            preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["content"], Object(lib["padding"])('1em')) },
-                preact_compat_es["createElement"]("button", { disabled: !guess, onClick: this.makeGuess, type: 'button' }, answer ? "Next Excerpt" : "Make Guess"))));
+            preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["content"], lib["horizontal"], Object(lib["padding"])('1em')) },
+                preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["flex"]) },
+                    preact_compat_es["createElement"]("button", { disabled: !guess, onClick: this.makeGuess, type: 'button' }, answer ? (last ? 'New Game!' : 'Next Excerpt') : 'Make Guess'),
+                    preact_compat_es["createElement"]("span", { className: Object(lib_es2015["style"])({ marginLeft: '1em' }) },
+                        outcomes.length + (answer ? 0 : 1),
+                        " / ",
+                        quizLength),
+                    answer &&
+                        preact_compat_es["createElement"]("span", { className: Object(lib_es2015["style"])({ marginLeft: '1em' }) },
+                            "Points +",
+                            outcomes.slice(-1)[0].score)),
+                preact_compat_es["createElement"]("div", null,
+                    last ? 'Final ' : '',
+                    "Score ",
+                    sum(function* score() {
+                        for (let outcome of outcomes) {
+                            yield outcome.score;
+                        }
+                    }())))));
     }
 }
 class view_VolumeView extends preact_compat_es["Component"] {
@@ -312,19 +383,23 @@ class view_VolumeView extends preact_compat_es["Component"] {
                 preact_compat_es["createElement"](view_DocView, Object.assign({}, doc, { answer: answer && answer.names[1] == doc.name ? answer : undefined, guess: guess && guess.names[1] == doc.name ? guess : undefined, key: doc.name + count, volume: this })))))));
     }
 }
-function random() {
-    let ints = new Uint8Array(8);
-    crypto.getRandomValues(ints);
-    ints[7] = 0x3f;
-    ints[6] |= 0xf0;
-    return new DataView(ints.buffer).getFloat64(0, true) - 1;
-}
 let highlight = {
     background: 'silver',
     fontWeight: 'bold',
 };
+function scoreGuess(library, actual, guess) {
+    let actualOffset = findLibraryTextOffset(library, actual);
+    let guessOffset = findLibraryTextOffset(library, guess);
+    let distance = Math.abs(actualOffset - guessOffset);
+    let librarySize = sum(library.items.map(volume => volume.size));
+    let closeness = 1 - 3 * (distance / librarySize);
+    let softplus = Math.log(1 + Math.exp(10 * closeness));
+    return Math.round(500 * softplus);
+}
 
 // CONCATENATED MODULE: ./src/index.ts
+
+
 
 
 
