@@ -103,44 +103,6 @@ export function usfmParse(text: string, includeText?: boolean) {
   return doc;
 }
 
-export interface IndexItemOffset<Item> {
-  index: number;
-  item: Item;
-  offset: number;
-}
-
-// Default sizer.
-export function findIndexOffset<Item extends {size: number}>(
-  offset: number, items: Array<Item>,
-): IndexItemOffset<Item>;
-// Explicit sizer.
-export function findIndexOffset<Item>(
-  offset: number, items: Array<Item>, sizer: (item: Item) => number,
-): IndexItemOffset<Item>;
-// Implementation.
-export function findIndexOffset<Item>(
-  offset: number, items: Array<Item>, sizer?: (item: Item) => number,
-) {
-  if (!sizer) {
-    sizer = (item: Item) => (item as any).size;
-  }
-  let end = 0;
-  let chapterBegins = items.map(item => {
-    let prev = end;
-    end += sizer!(item);
-    return prev;
-  });
-  let itemIndex = 0;
-  let itemBegin = chapterBegins.reverse().find(
-    (chapterBegin, index) => {
-      itemIndex = chapterBegins.length - index - 1;
-      return chapterBegin <= offset;
-    },
-  ) || 0;
-  let item = items[itemIndex];
-  return {index: itemIndex, item, offset: offset - itemBegin};
-}
-
 function stripTag(line: string) {
   return line.replace(/^\S+\s+/, '');
 }

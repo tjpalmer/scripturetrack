@@ -1,5 +1,6 @@
 import {
-  Chapter, Doc, IndexItemOffset, Library, Paragraph, Volume, findIndexOffset,
+  Chapter, Doc, IndexItemOffset, Library, Paragraph, Path, Volume,
+  findIndexOffset, findLibraryTextOffset, random, sum,
 } from './';
 import {
   content, fillParent, flex, horizontal, margin, padding, scrollY, vertical,
@@ -25,17 +26,20 @@ export interface AppState {
 
   count: number;
 
-  guess?: Path;
+  outcomes: Outcome[];
 
-  // scores: Array<{guess: Array<string>, path: Array<string>, score: number}>;
+  quizLength: number;
+  
+  guess?: Path;
 
   showAnswer?: boolean;
 
 }
 
-export interface Path {
-  chapterIndex: number;
-  names: Array<string>;
+export interface Outcome {
+  actual: Path;
+  guess: Path;
+  score: number;
 }
 
 export class AppView extends Component<App, AppState> {
@@ -44,7 +48,8 @@ export class AppView extends Component<App, AppState> {
     super(props);
     this.setState({
       count: 0,
-      // scores: [],
+      outcomes: [],
+      quizLength: 5,
     });
     this.shuffle();
   }
@@ -69,11 +74,16 @@ export class AppView extends Component<App, AppState> {
   }
 
   showAnswer() {
-    this.setState({showAnswer: true});
+    let {actual, guess, outcomes} = this.state;
+    let score = scoreGuess(this.props.library, actual!, guess!);
+    outcomes = outcomes.slice();
+    outcomes.push({actual: actual!, guess: guess!, score});
+    this.setState({outcomes, showAnswer: true});
   }
 
   shuffle() {
     let {library} = this.props;
+    let {outcomes, quizLength} = this.state;
     // Calculate total text size, and choose a point in all the text.
     for (let volume of library.items) {
       volume.size = volume.items.reduce((size, doc) => size + doc.size, 0);
@@ -97,6 +107,7 @@ export class AppView extends Component<App, AppState> {
       chapterIndex,
       count: this.state.count + 1,
       guess: undefined,
+      outcomes: outcomes.length < quizLength ? outcomes : [],
       showAnswer: false,
     });
     // Load the chapter that we want.
@@ -304,10 +315,12 @@ export class LibraryView extends Component<
   };
 
   render() {
-    let {answer, count, guess} = this.props;
+    let {answer, app, count, guess} = this.props;
+    let {outcomes, quizLength} = app.state;
     if (!answer) {
       this.answerElement = undefined;
     }
+    let last = outcomes.length == quizLength;
     return (
       <div className={style(content, vertical, width('25%'))}>
         <div className={style(
@@ -328,14 +341,25 @@ export class LibraryView extends Component<
         <div className={style(content, horizontal, padding('1em'))}>
           <div className={style(flex)}>
             <button disabled={!guess} onClick={this.makeGuess} type='button'>
-              {answer ? "Next Excerpt" : "Make Guess"}
+              {answer ? (last ? 'New Game!' : 'Next Excerpt') : 'Make Guess'}
             </button>
             <span className={style({marginLeft: '1em'})}>
-              1 / 5
+              {outcomes.length + (answer ? 0 : 1)} / {quizLength}
             </span>
+            {
+              answer &&
+              <span className={style({marginLeft: '1em'})}>
+                Points +{outcomes.slice(-1)[0].score}
+              </span>
+            }
           </div>
           <div>
-            Score 0
+            {last ? 'Final ' : ''}
+            Score {sum(function* score() {
+              for (let outcome of outcomes) {
+                yield outcome.score;
+              }
+            }())}
           </div>
         </div>
       </div>
@@ -378,18 +402,29 @@ export class VolumeView extends Component<
 
 }
 
-export function random() {
-  // Generate 8 bytes.
-  let ints = new Uint8Array(8);
-  crypto.getRandomValues(ints);
-  // Manipulate exponent and sign.
-  ints[7] = 0x3f;
-  ints[6] |= 0xf0;
-  // Read as little-endian double, and subtract 1 for just fraction.
-  return new DataView(ints.buffer).getFloat64(0, true) - 1;
-}
-
 let highlight = {
   background: 'silver',
   fontWeight: 'bold',
 };
+
+function scoreGuess(library: Library, actual: Path, guess: Path) {
+  // Presume that the order of volumes is vaguely meaningful or at least
+  // interesting.
+  // TODO Alternative is to presume disconnect and give either 0 or reserve a
+  // TODO portion of the score for text similarity.
+  let actualOffset = findLibraryTextOffset(library, actual);
+  let guessOffset = findLibraryTextOffset(library, guess);
+  let distance = Math.abs(actualOffset - guessOffset);
+  let librarySize = sum(library.items.map(volume => volume.size!));
+  // Closeness between -2 and 1.
+  let closeness = 1 - 3 * (distance / librarySize);
+  // Go between 0 and 10 with softplus.
+  // Softplus allows a peak near the correct place and somewhat linear falloff.
+  // We'll multiply by 500 to go between 0 and 5000 after this.
+  // The 10x ends up such that closeness -0.69 still gives 1 point on the 5000
+  // scale, and closeness 1 rounds down to 5000.
+  // Closeness of 0 gives 347 points, which isn't terrible for 1/3 off in the
+  // library.
+  let softplus = Math.log(1 + Math.exp(10 * closeness));
+  return Math.round(500 * softplus);
+}
