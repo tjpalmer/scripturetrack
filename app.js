@@ -256,11 +256,14 @@ class view_ChapterView extends preact_compat_es["Component"] {
         let { answer, doc, guess, index } = this.props;
         let { library } = doc.props.volume.props;
         let className;
+        let common = {
+            padding: '0.2em',
+        };
         if (answer) {
-            className = Object(lib_es2015["style"])(Object.assign({ color: 'green', fontSize: '150%', fontWeight: 'bold' }, (guess && highlight)));
+            className = Object(lib_es2015["style"])(Object.assign({ color: 'green', fontSize: '150%', fontWeight: 'bold' }, (guess && highlight), common));
         }
         else {
-            className = Object(lib_es2015["style"])(Object.assign({}, (guess && highlight), { $nest: !library.props.answer && {
+            className = Object(lib_es2015["style"])(Object.assign({}, (guess && highlight), common, { $nest: !library.props.answer && {
                     '&:hover': highlight,
                 } }));
         }
@@ -289,7 +292,13 @@ class view_DocView extends preact_compat_es["Component"] {
         let { answer: anyAnswer } = volume.props.library.props;
         return (preact_compat_es["createElement"]("div", null,
             preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(!(anyAnswer || guess) && { $nest: { '&:hover': { fontWeight: 'bold' } } }), onClick: this.onClick }, title),
-            preact_compat_es["createElement"]("ul", null, (answer || expanded || guess) && this.props.chapterSizes.map((_, chapterIndex) => preact_compat_es["createElement"](view_ChapterView, { answer: answer && answer.chapterIndex == chapterIndex ?
+            preact_compat_es["createElement"]("ul", { className: Object(lib_es2015["style"])({
+                    display: 'flex',
+                    flexDirection: 'row',
+                    flexWrap: 'wrap',
+                    listStyle: 'none',
+                    padding: 0,
+                }) }, (answer || expanded || guess) && this.props.chapterSizes.map((_, chapterIndex) => preact_compat_es["createElement"](view_ChapterView, { answer: answer && answer.chapterIndex == chapterIndex ?
                     answer : undefined, doc: this, guess: guess && guess.chapterIndex == chapterIndex ? guess : undefined, index: chapterIndex })))));
     }
 }
@@ -306,10 +315,12 @@ class view_ExcerptView extends preact_compat_es["PureComponent"] {
         let { chapter } = this.props;
         return (preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["flex"], {
                 fontFamily: 'Excerpt',
-                fontSize: '200%',
+                fontSize: '250%',
+                letterSpacing: '-0.05em',
+                wordSpacing: '0.1em',
             }, Object(lib["padding"])(0, '1em'), lib["scrollY"]), ref: element => this.container = element }, chapter && chapter.paragraphs.map((paragraph, paragraphIndex) => preact_compat_es["createElement"]("p", { className: Object(lib_es2015["style"])({
                 margin: '0.3em auto',
-                maxWidth: '30em',
+                maxWidth: '25em',
                 textIndent: '1.5em',
                 $nest: {
                     '&:first-child': {
@@ -350,7 +361,7 @@ class view_LibraryView extends preact_compat_es["Component"] {
             this.answerElement = undefined;
         }
         let last = outcomes.length == quizLength;
-        return (preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["content"], lib["vertical"], Object(lib["width"])('25%')) },
+        return (preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])({ fontSize: '150%' }, lib["content"], lib["vertical"], Object(lib["width"])('25%')) },
             preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["flex"], Object(lib["margin"])(0), Object(lib["padding"])(0, '1em'), lib["scrollY"], { cursor: 'default' }) }, this.props.items.map(volume => preact_compat_es["createElement"]("p", null,
                 preact_compat_es["createElement"](view_VolumeView, Object.assign({ answer: answer && answer.names[0] == volume.name ? answer : undefined, guess: guess && guess.names[0] == volume.name ? guess : undefined, key: volume.name, library: this }, Object.assign({ count }, volume)))))),
             preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["content"], lib["horizontal"], Object(lib["padding"])('1em')) },
@@ -378,8 +389,15 @@ class view_VolumeView extends preact_compat_es["Component"] {
     render() {
         let { answer, count, guess } = this.props;
         return (preact_compat_es["createElement"]("div", null,
-            this.props.title,
-            preact_compat_es["createElement"]("ul", null, this.props.items.map(doc => preact_compat_es["createElement"]("li", null,
+            preact_compat_es["createElement"]("h2", { className: Object(lib_es2015["style"])({
+                    fontSize: '110%',
+                    marginBottom: '0.2em',
+                }) }, this.props.title),
+            preact_compat_es["createElement"]("ul", { className: Object(lib_es2015["style"])({
+                    listStyle: 'none',
+                    marginTop: 0,
+                    padding: 0,
+                }) }, this.props.items.map(doc => preact_compat_es["createElement"]("li", null,
                 preact_compat_es["createElement"](view_DocView, Object.assign({}, doc, { answer: answer && answer.names[1] == doc.name ? answer : undefined, guess: guess && guess.names[1] == doc.name ? guess : undefined, key: doc.name + count, volume: this })))))));
     }
 }

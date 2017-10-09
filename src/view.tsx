@@ -147,14 +147,19 @@ export class ChapterView extends Component<
     let {answer, doc, guess, index} = this.props;
     let {library} = doc.props.volume.props;
     let className: string;
+    let common = {
+      padding: '0.2em',
+    };
     if (answer) {
       className = style({
         color: 'green', fontSize: '150%', fontWeight: 'bold',
         ...(guess && highlight as any),
+        ...common,
       });
     } else {
       className = style({
         ...(guess && highlight as any),
+        ...common,
         $nest: !library.props.answer && {
           '&:hover': highlight as any,
         },
@@ -208,7 +213,13 @@ export class DocView extends Component<DocProps, {expanded: boolean}> {
           )}
           onClick={this.onClick}
         >{title}</div>
-        <ul>
+        <ul className={style({
+          display: 'flex',
+          flexDirection: 'row',
+          flexWrap: 'wrap',
+          listStyle: 'none',
+          padding: 0,
+        })}>
           {(answer || expanded || guess) && this.props.chapterSizes!.map(
             (_, chapterIndex) => <ChapterView
               answer={
@@ -253,7 +264,9 @@ export class ExcerptView extends PureComponent<{chapter?: Chapter}, {}> {
             // When I had 'sans-serif' as a fallback, Chrome used it, despite
             // the custom font being available.
             fontFamily: 'Excerpt',
-            fontSize: '200%',
+            fontSize: '250%',
+            letterSpacing: '-0.05em',
+            wordSpacing: '0.1em',
           },
           padding(0, '1em'),
           scrollY,
@@ -265,7 +278,7 @@ export class ExcerptView extends PureComponent<{chapter?: Chapter}, {}> {
             className={style({
               // Narrow betweens, with indent for contrast.
               margin: '0.3em auto',
-              maxWidth: '30em',
+              maxWidth: '25em',
               textIndent: '1.5em',
               // Full margin at ends.
               $nest: {
@@ -322,7 +335,9 @@ export class LibraryView extends Component<
     }
     let last = outcomes.length == quizLength;
     return (
-      <div className={style(content, vertical, width('25%'))}>
+      <div className={style(
+        {fontSize: '150%'}, content, vertical, width('25%')
+      )}>
         <div className={style(
           flex, margin(0), padding(0, '1em'), scrollY, {cursor: 'default'},
         )}>
@@ -381,8 +396,15 @@ export class VolumeView extends Component<
     let {answer, count, guess} = this.props;
     return (
       <div>
-        {this.props.title}
-        <ul>
+        <h2 className={style({
+          fontSize: '110%',
+          marginBottom: '0.2em',
+        })}>{this.props.title}</h2>
+        <ul className={style({
+          listStyle: 'none',
+          marginTop: 0,
+          padding: 0,
+        })}>
           {this.props.items.map(doc =>
             <li><DocView
               {...doc}
