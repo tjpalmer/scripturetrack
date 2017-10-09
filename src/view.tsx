@@ -148,7 +148,10 @@ export class ChapterView extends Component<
     let {library} = doc.props.volume.props;
     let className: string;
     let common = {
+      letterSpacing: '-0.05em',
+      minWidth: '1.3em',
       padding: '0.2em',
+      textAlign: 'center',
     };
     if (answer) {
       className = style({
@@ -334,6 +337,7 @@ export class LibraryView extends Component<
       this.answerElement = undefined;
     }
     let last = outcomes.length == quizLength;
+    let score = outcomes.length ? outcomes.slice(-1)[0].score : 0;
     return (
       <div className={style(
         {fontSize: '150%'}, content, vertical, width('25%')
@@ -353,20 +357,24 @@ export class LibraryView extends Component<
             /></p>,
           )}
         </div>
-        <div className={style(content, horizontal, padding('1em'))}>
+        <div className={style(content, horizontal, {padding: '1em 1em 0'})}>
           <div className={style(flex)}>
             <button disabled={!guess} onClick={this.makeGuess} type='button'>
               {answer ? (last ? 'New Game!' : 'Next Excerpt') : 'Make Guess'}
             </button>
-            <span className={style({marginLeft: '1em'})}>
-              {outcomes.length + (answer ? 0 : 1)} / {quizLength}
-            </span>
+          </div>
+          <div>
             {
               answer &&
-              <span className={style({marginLeft: '1em'})}>
-                Points +{outcomes.slice(-1)[0].score}
+              <span>
+                + {outcomes.slice(-1)[0].score}
               </span>
             }
+          </div>
+        </div>
+        <div className={style(content, horizontal, {padding: '0.5em 1em 1em'})}>
+          <div className={style(flex)}>
+            Round {outcomes.length + (answer ? 0 : 1)} / {quizLength}
           </div>
           <div>
             {last ? 'Final ' : ''}

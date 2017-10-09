@@ -257,7 +257,10 @@ class view_ChapterView extends preact_compat_es["Component"] {
         let { library } = doc.props.volume.props;
         let className;
         let common = {
+            letterSpacing: '-0.05em',
+            minWidth: '1.3em',
             padding: '0.2em',
+            textAlign: 'center',
         };
         if (answer) {
             className = Object(lib_es2015["style"])(Object.assign({ color: 'green', fontSize: '150%', fontWeight: 'bold' }, (guess && highlight), common));
@@ -361,20 +364,23 @@ class view_LibraryView extends preact_compat_es["Component"] {
             this.answerElement = undefined;
         }
         let last = outcomes.length == quizLength;
+        let score = outcomes.length ? outcomes.slice(-1)[0].score : 0;
         return (preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])({ fontSize: '150%' }, lib["content"], lib["vertical"], Object(lib["width"])('25%')) },
             preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["flex"], Object(lib["margin"])(0), Object(lib["padding"])(0, '1em'), lib["scrollY"], { cursor: 'default' }) }, this.props.items.map(volume => preact_compat_es["createElement"]("p", null,
                 preact_compat_es["createElement"](view_VolumeView, Object.assign({ answer: answer && answer.names[0] == volume.name ? answer : undefined, guess: guess && guess.names[0] == volume.name ? guess : undefined, key: volume.name, library: this }, Object.assign({ count }, volume)))))),
-            preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["content"], lib["horizontal"], Object(lib["padding"])('1em')) },
+            preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["content"], lib["horizontal"], { padding: '1em 1em 0' }) },
                 preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["flex"]) },
-                    preact_compat_es["createElement"]("button", { disabled: !guess, onClick: this.makeGuess, type: 'button' }, answer ? (last ? 'New Game!' : 'Next Excerpt') : 'Make Guess'),
-                    preact_compat_es["createElement"]("span", { className: Object(lib_es2015["style"])({ marginLeft: '1em' }) },
-                        outcomes.length + (answer ? 0 : 1),
-                        " / ",
-                        quizLength),
-                    answer &&
-                        preact_compat_es["createElement"]("span", { className: Object(lib_es2015["style"])({ marginLeft: '1em' }) },
-                            "Points +",
-                            outcomes.slice(-1)[0].score)),
+                    preact_compat_es["createElement"]("button", { disabled: !guess, onClick: this.makeGuess, type: 'button' }, answer ? (last ? 'New Game!' : 'Next Excerpt') : 'Make Guess')),
+                preact_compat_es["createElement"]("div", null, answer &&
+                    preact_compat_es["createElement"]("span", null,
+                        "+ ",
+                        outcomes.slice(-1)[0].score))),
+            preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["content"], lib["horizontal"], { padding: '0.5em 1em 1em' }) },
+                preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["flex"]) },
+                    "Round ",
+                    outcomes.length + (answer ? 0 : 1),
+                    " / ",
+                    quizLength),
                 preact_compat_es["createElement"]("div", null,
                     last ? 'Final ' : '',
                     "Score ",
