@@ -357,11 +357,17 @@ export class LibraryView extends Component<
             /></p>,
           )}
         </div>
-        <div className={style(content, horizontal, {padding: '1em 1em 0'})}>
+        <div className={style(
+          content,
+          horizontal,
+          {
+            borderTop: '1px solid black',
+            margin: '1em 0.5em 0',
+            padding: '1em 0.5em 0',
+          }
+        )}>
           <div className={style(flex)}>
-            <button disabled={!guess} onClick={this.makeGuess} type='button'>
-              {answer ? (last ? 'New Game!' : 'Next Excerpt') : 'Make Guess'}
-            </button>
+            Round {outcomes.length + (answer ? 0 : 1)} / {quizLength}
           </div>
           <div>
             {
@@ -372,9 +378,11 @@ export class LibraryView extends Component<
             }
           </div>
         </div>
-        <div className={style(content, horizontal, {padding: '0.5em 1em 1em'})}>
+        <div className={style(content, horizontal, {padding: '1em'})}>
           <div className={style(flex)}>
-            Round {outcomes.length + (answer ? 0 : 1)} / {quizLength}
+            <button disabled={!guess} onClick={this.makeGuess} type='button'>
+              {answer ? (last ? 'New Game!' : 'Next Excerpt') : 'Make Guess'}
+            </button>
           </div>
           <div>
             {last ? 'Final ' : ''}
