@@ -8,7 +8,7 @@ import {
 } from 'csstips';
 import * as React from 'react';
 import {Component, PureComponent} from 'react';
-import {style} from 'typestyle';
+import {style, types as styletypes} from 'typestyle';
 
 export interface App {
 
@@ -35,6 +35,8 @@ export interface AppState {
   showAnswer?: boolean;
 
 }
+
+export type CSSProperties = styletypes.CSSProperties;
 
 export interface Outcome {
   actual: Path;
@@ -191,15 +193,13 @@ export class DocView extends Component<DocProps, {expanded: boolean}> {
 
   constructor(props: DocProps) {
     super(props);
-    // TODO This resets on answer change, I guess since the props change.
-    // TODO Really, though, I want all collapsed on fresh. How to do that?
     this.setState({expanded: !!props.answer});
   }
 
   onClick = () => {
-    let {name, volume} = this.props;
+    let {guess, name, volume} = this.props;
     let {library} = volume.props;
-    if (!library.props.answer) {
+    if (!(guess || library.props.answer)) {
       this.setState({expanded: !this.state.expanded})
     }
   }
@@ -351,7 +351,7 @@ export class LibraryView extends Component<
                 answer && answer.names[0] == volume.name ? answer : undefined
               }
               guess={guess && guess.names[0] == volume.name ? guess : undefined}
-              key={volume.name}
+              key={volume.name + count}
               library={this}
               {...{count, ...volume}}
             />,
@@ -399,30 +399,52 @@ export class LibraryView extends Component<
 
 }
 
-export class VolumeView extends Component<
-  Volume & {
-    answer?: Path,
-    count: number,
-    guess?: Path,
-    library: LibraryView,
-  }, {}
-> {
+export interface VolumeProps extends Volume {
+  answer?: Path,
+  count: number,
+  guess?: Path,
+  library: LibraryView,
+}
+
+export class VolumeView extends Component<VolumeProps, {expanded: boolean}> {
+
+  constructor(props: VolumeProps) {
+    super(props);
+    this.setState({expanded: !!props.answer});
+  }
+
+  onClick = () => {
+    let {guess, library, name} = this.props;
+    if (!(guess || library.props.answer)) {
+      this.setState({expanded: !this.state.expanded})
+    }
+  }
 
   render() {
-    let {answer, count, guess} = this.props;
+    let {answer, count, guess, library} = this.props;
+    let {answer: anyAnswer} = library.props;
+    let {expanded} = this.state;
+    let extraStyle: CSSProperties =
+      !(anyAnswer || guess) ? {$nest: {'&:hover': {fontSize: '120%'}}} : {};
+    let expandStyle: CSSProperties =
+      answer || expanded || guess ? {} : {display: 'none'};
     return (
       <div>
-        <h2 className={style({
-          fontSize: '110%',
-          marginBottom: '0.2em',
-        })}>{this.props.title}</h2>
+        <h2
+          className={style({
+            fontSize: '110%',
+            marginBottom: '0.2em',
+            ...extraStyle,
+          })}
+          onClick={this.onClick}
+        >{this.props.title}</h2>
         <ul className={style({
           listStyle: 'none',
           marginTop: 0,
           padding: 0,
         })}>
           {this.props.items.map(doc =>
-            <li><DocView
+            <li className={style(expandStyle)}><DocView
               {...doc}
               answer={
                 answer && answer.names[1] == doc.name ? answer : undefined
@@ -440,7 +462,7 @@ export class VolumeView extends Component<
 
 }
 
-let highlight = {
+let highlight: CSSProperties = {
   background: 'silver',
   fontWeight: 'bold',
 };
@@ -463,20 +485,12 @@ function scoreGuess(library: Library, actual: Path, guess: Path) {
   let distance = Math.abs(actualOffset - guessOffset);
   // Go in units of half pages, so we can explain more easily.
   let wordsPerPage = 2000;
-  let halfPages = Math.round(2 * (distance / wordsPerPage));
-  let distancePages = halfPages / 2;
   let librarySize = sum(library.items.map(volume => volume.size!));
-  let libraryPages = Math.round(librarySize / wordsPerPage);
   // Closeness between -(x - 1) and 1.
-  console.log(distancePages, libraryPages);
-  let closeness = 1 - 5 * (distancePages / libraryPages);
+  console.log(distance / wordsPerPage, librarySize / wordsPerPage);
+  let closeness = 1 - 5 * (distance / librarySize);
   // Go between 0 and 10 with softplus.
   // Softplus allows a peak near the correct place and somewhat linear falloff.
-  // We'll multiply by 500 to go between 0 and 5000 after this.
-  // The 10x ends up such that closeness -0.69 still gives 1 point on the 5000
-  // scale, and closeness 1 rounds down to 5000.
-  // Closeness of 0 gives 347 points, which isn't terrible for 1/3 off in the
-  // library.
   let softplus = Math.log(1 + Math.exp(10 * closeness));
   return Math.round(50 * softplus);
 }

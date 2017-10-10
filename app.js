@@ -281,9 +281,9 @@ class view_DocView extends preact_compat_es["Component"] {
     constructor(props) {
         super(props);
         this.onClick = () => {
-            let { name, volume } = this.props;
+            let { guess, name, volume } = this.props;
             let { library } = volume.props;
-            if (!library.props.answer) {
+            if (!(guess || library.props.answer)) {
                 this.setState({ expanded: !this.state.expanded });
             }
         };
@@ -366,7 +366,7 @@ class view_LibraryView extends preact_compat_es["Component"] {
         let last = outcomes.length == quizLength;
         let score = outcomes.length ? outcomes.slice(-1)[0].score : 0;
         return (preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])({ fontSize: '150%' }, lib["content"], lib["vertical"], Object(lib["width"])('25%')) },
-            preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["flex"], Object(lib["margin"])(0), Object(lib["padding"])(0, '1em'), lib["scrollY"], { cursor: 'default' }) }, this.props.items.map(volume => preact_compat_es["createElement"](view_VolumeView, Object.assign({ answer: answer && answer.names[0] == volume.name ? answer : undefined, guess: guess && guess.names[0] == volume.name ? guess : undefined, key: volume.name, library: this }, Object.assign({ count }, volume))))),
+            preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["flex"], Object(lib["margin"])(0), Object(lib["padding"])(0, '1em'), lib["scrollY"], { cursor: 'default' }) }, this.props.items.map(volume => preact_compat_es["createElement"](view_VolumeView, Object.assign({ answer: answer && answer.names[0] == volume.name ? answer : undefined, guess: guess && guess.names[0] == volume.name ? guess : undefined, key: volume.name + count, library: this }, Object.assign({ count }, volume))))),
             preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["content"], lib["horizontal"], {
                     borderTop: '1px solid black',
                     margin: '0 0.5em',
@@ -395,18 +395,29 @@ class view_LibraryView extends preact_compat_es["Component"] {
     }
 }
 class view_VolumeView extends preact_compat_es["Component"] {
+    constructor(props) {
+        super(props);
+        this.onClick = () => {
+            let { guess, library, name } = this.props;
+            if (!(guess || library.props.answer)) {
+                this.setState({ expanded: !this.state.expanded });
+            }
+        };
+        this.setState({ expanded: !!props.answer });
+    }
     render() {
-        let { answer, count, guess } = this.props;
+        let { answer, count, guess, library } = this.props;
+        let { answer: anyAnswer } = library.props;
+        let { expanded } = this.state;
+        let extraStyle = !(anyAnswer || guess) ? { $nest: { '&:hover': { fontSize: '120%' } } } : {};
+        let expandStyle = answer || expanded || guess ? {} : { display: 'none' };
         return (preact_compat_es["createElement"]("div", null,
-            preact_compat_es["createElement"]("h2", { className: Object(lib_es2015["style"])({
-                    fontSize: '110%',
-                    marginBottom: '0.2em',
-                }) }, this.props.title),
+            preact_compat_es["createElement"]("h2", { className: Object(lib_es2015["style"])(Object.assign({ fontSize: '110%', marginBottom: '0.2em' }, extraStyle)), onClick: this.onClick }, this.props.title),
             preact_compat_es["createElement"]("ul", { className: Object(lib_es2015["style"])({
                     listStyle: 'none',
                     marginTop: 0,
                     padding: 0,
-                }) }, this.props.items.map(doc => preact_compat_es["createElement"]("li", null,
+                }) }, this.props.items.map(doc => preact_compat_es["createElement"]("li", { className: Object(lib_es2015["style"])(expandStyle) },
                 preact_compat_es["createElement"](view_DocView, Object.assign({}, doc, { answer: answer && answer.names[1] == doc.name ? answer : undefined, guess: guess && guess.names[1] == doc.name ? guess : undefined, key: doc.name + count, volume: this })))))));
     }
 }
@@ -424,12 +435,9 @@ function scoreGuess(library, actual, guess) {
     let guessOffset = findLibraryTextOffset(library, guess);
     let distance = Math.abs(actualOffset - guessOffset);
     let wordsPerPage = 2000;
-    let halfPages = Math.round(2 * (distance / wordsPerPage));
-    let distancePages = halfPages / 2;
     let librarySize = sum(library.items.map(volume => volume.size));
-    let libraryPages = Math.round(librarySize / wordsPerPage);
-    console.log(distancePages, libraryPages);
-    let closeness = 1 - 5 * (distancePages / libraryPages);
+    console.log(distance / wordsPerPage, librarySize / wordsPerPage);
+    let closeness = 1 - 5 * (distance / librarySize);
     let softplus = Math.log(1 + Math.exp(10 * closeness));
     return Math.round(50 * softplus);
 }
