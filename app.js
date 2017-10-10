@@ -366,11 +366,10 @@ class view_LibraryView extends preact_compat_es["Component"] {
         let last = outcomes.length == quizLength;
         let score = outcomes.length ? outcomes.slice(-1)[0].score : 0;
         return (preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])({ fontSize: '150%' }, lib["content"], lib["vertical"], Object(lib["width"])('25%')) },
-            preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["flex"], Object(lib["margin"])(0), Object(lib["padding"])(0, '1em'), lib["scrollY"], { cursor: 'default' }) }, this.props.items.map(volume => preact_compat_es["createElement"]("p", null,
-                preact_compat_es["createElement"](view_VolumeView, Object.assign({ answer: answer && answer.names[0] == volume.name ? answer : undefined, guess: guess && guess.names[0] == volume.name ? guess : undefined, key: volume.name, library: this }, Object.assign({ count }, volume)))))),
+            preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["flex"], Object(lib["margin"])(0), Object(lib["padding"])(0, '1em'), lib["scrollY"], { cursor: 'default' }) }, this.props.items.map(volume => preact_compat_es["createElement"](view_VolumeView, Object.assign({ answer: answer && answer.names[0] == volume.name ? answer : undefined, guess: guess && guess.names[0] == volume.name ? guess : undefined, key: volume.name, library: this }, Object.assign({ count }, volume))))),
             preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["content"], lib["horizontal"], {
                     borderTop: '1px solid black',
-                    margin: '1em 0.5em 0',
+                    margin: '0 0.5em',
                     padding: '1em 0.5em 0',
                 }) },
                 preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["flex"]) },
@@ -450,18 +449,19 @@ function init() {
         document.getElementById('preload').remove();
         Object(lib["normalize"])();
         Object(lib["setupPage"])('#root');
-        let uri = '/kjv.st/volume.json';
-        let volume;
+        let uri = '/kjv.st/volumes.json';
+        let volumes;
         try {
-            volume = yield load(uri);
+            volumes = yield load(uri);
         }
         catch (_a) {
-            uri = 'http://localhost:52119/volume.json';
-            volume = yield load(uri);
+            uri = 'http://localhost:52119/volumes.json';
+            volumes = yield load(uri);
         }
-        volume.uri = uri;
-        let app = { library: { items: [volume] }, path: [] };
-        Object(preact_compat_es["render"])(preact_compat_es["createElement"](view_AppView, Object.assign({}, app)), document.getElementById('root'));
+        for (let volume of volumes.items) {
+            volume.uri = uri;
+        }
+        Object(preact_compat_es["render"])(preact_compat_es["createElement"](view_AppView, { library: volumes }), document.getElementById('root'));
     });
 }
 function load(uri) {

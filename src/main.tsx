@@ -1,4 +1,4 @@
-import {App, AppView, Volume} from './';
+import {App, AppView, Library} from './';
 import {normalize, setupPage} from 'csstips';
 import * as React from 'react';
 import {Component} from 'react';
@@ -12,21 +12,22 @@ async function init() {
   normalize();
   setupPage('#root');
   // Figure out where our default volume is.
-  let uri = '/kjv.st/volume.json';
-  let volume: Volume;
+  let uri = '/kjv.st/volumes.json';
+  let volumes: Library;
   try {
-    volume = await load(uri);
+    volumes = await load(uri);
   } catch {
     // Dev workaround.
-    uri = 'http://localhost:52119/volume.json';
-    volume = await load(uri);
+    uri = 'http://localhost:52119/volumes.json';
+    volumes = await load(uri);
   }
-  volume.uri = uri;
+  for (let volume of volumes.items) {
+    volume.uri = uri;
+  }
   // Now do our work.
-  let app = {library: {items: [volume]}, path: []};
-  render(<AppView {...app}/>, document.getElementById('root'));
+  render(<AppView library={volumes}/>, document.getElementById('root'));
 }
 
 async function load(uri: string) {
-  return await (await fetch(uri)).json() as Volume;
+  return await (await fetch(uri)).json() as Library;
 }

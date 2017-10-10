@@ -1,4 +1,4 @@
-import {Doc, Volume} from '../../src/text';
+import {Doc, Library, Volume} from '../../src/text';
 import {usfmParse} from '../../src/usfm';
 import {load} from 'cheerio';
 import {
@@ -45,6 +45,17 @@ let deuterocanonIds = [
   'TOB', 'JDT', 'ESG', 'WIS', 'SIR', 'BAR', '1MA', '2MA', '1ES', 'MAN', 'PS2',
   '3MA', '2ES', '4MA', 'DAG',
 ];
+let oldTestamentIds = new Set([
+  'GEN', 'EXO', 'LEV', 'NUM', 'DEU', 'JOS', 'JDG', 'RUT', '1SA', '2SA', '1KI',
+  '2KI', '1CH', '2CH', 'EZR', 'NEH', 'EST', 'JOB', 'PSA', 'PRO', 'ECC', 'SNG',
+  'ISA', 'JER', 'LAM', 'EZK', 'DAN', 'HOS', 'JOL', 'AMO', 'OBA', 'JON', 'MIC',
+  'NAM', 'HAB', 'ZEP', 'HAG', 'ZEC', 'MAL',
+]);
+let newTestamentIds = new Set([
+  'MAT', 'MRK', 'LUK', 'JHN', 'ACT', 'ROM', '1CO', '2CO', 'GAL', 'EPH', 'PHP',
+  'COL', '1TH', '2TH', '1TI', '2TI', 'TIT', 'PHM', 'HEB', 'JAS', '1PE', '2PE',
+  '1JN', '2JN', '3JN', 'JUD', 'REV',
+]);
 
 let inputDir = argv[2];
 let outputDir = argv[3];
@@ -66,11 +77,11 @@ for (let volume of summary.items) {
   }
   // Volume dir.
   volume.name = volume.name.replace(/_.*/, '');
-  let volumeDir = join(outputDir); //, volume.name);
-  if (!existsSync(volumeDir)) {
-    mkdirSync(volumeDir);
+  let volumesDir = join(outputDir); //, volume.name);
+  if (!existsSync(volumesDir)) {
+    mkdirSync(volumesDir);
   }
-  console.log(volumeDir);
+  console.log(volumesDir);
   // Retitle.
   switch (volume.name) {
     case 'eng-kjv': {
@@ -85,6 +96,17 @@ for (let volume of summary.items) {
       throw Error(`unrecognized name: ${volume.name}`);
     }
   }
+  // Split volumes.
+  let oldTestament: Volume = {
+    items: [],
+    name: 'kjv-ot',
+    title: 'Old Testament (KJV)',
+  };
+  let newTestament: Volume = {
+    items: [],
+    name: 'kjv-nt',
+    title: 'New Testament (KJV)',
+  };
   // Documents.
   // Skip extras for now.
   volume.items = volume.items.filter(doc =>
@@ -94,7 +116,7 @@ for (let volume of summary.items) {
   for (let doc of volume.items) {
     // Doc dir.
     doc.name = doc.name.replace(/\..*/, '');
-    let docDir = join(volumeDir, doc.name);
+    let docDir = join(volumesDir, doc.name);
     if (!existsSync(docDir)) {
       mkdirSync(docDir);
     }
@@ -109,8 +131,19 @@ for (let volume of summary.items) {
     // Change to summary for later saving.
     doc.chapterSizes = doc.chapters!.map(chapter => chapter.size);
     delete doc.chapters;
+    // Put in right volume.
+    let splitVolume =
+      oldTestamentIds.has(doc.id) ? oldTestament :
+      newTestamentIds.has(doc.id) ? newTestament :
+      undefined;
+    if (!splitVolume) {
+      // Not keeping for now.
+      continue;
+    }
+    splitVolume.items.push(doc);
   }
+  let volumes: Library = {items: [oldTestament, newTestament]};
   // Save volume summary.
-  let volumePath = join(volumeDir, 'volume.json');
-  writeFileSync(volumePath, JSON.stringify(volume));
+  let volumesPath = join(volumesDir, 'volumes.json');
+  writeFileSync(volumesPath, JSON.stringify(volumes));
 }
