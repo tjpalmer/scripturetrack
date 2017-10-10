@@ -450,12 +450,26 @@ function scoreGuess(library: Library, actual: Path, guess: Path) {
   // interesting.
   // TODO Alternative is to presume disconnect and give either 0 or reserve a
   // TODO portion of the score for text similarity.
+  if (actual.names[0] != guess.names[0]) {
+    // No points for wrong volume at this point.
+    return 0;
+  }
+  // Narrow down to just the correct volume.
+  let volume = library.items.find(volume => volume.name == actual.names[0])!;
+  library = {items: [volume]};
+  // Now see how close we are.
   let actualOffset = findLibraryTextOffset(library, actual);
   let guessOffset = findLibraryTextOffset(library, guess);
   let distance = Math.abs(actualOffset - guessOffset);
+  // Go in units of half pages, so we can explain more easily.
+  let wordsPerPage = 2000;
+  let halfPages = Math.round(2 * (distance / wordsPerPage));
+  let distancePages = halfPages / 2;
   let librarySize = sum(library.items.map(volume => volume.size!));
-  // Closeness between -2 and 1.
-  let closeness = 1 - 3 * (distance / librarySize);
+  let libraryPages = Math.round(librarySize / wordsPerPage);
+  // Closeness between -(x - 1) and 1.
+  console.log(distancePages, libraryPages);
+  let closeness = 1 - 5 * (distancePages / libraryPages);
   // Go between 0 and 10 with softplus.
   // Softplus allows a peak near the correct place and somewhat linear falloff.
   // We'll multiply by 500 to go between 0 and 5000 after this.
@@ -464,5 +478,5 @@ function scoreGuess(library: Library, actual: Path, guess: Path) {
   // Closeness of 0 gives 347 points, which isn't terrible for 1/3 off in the
   // library.
   let softplus = Math.log(1 + Math.exp(10 * closeness));
-  return Math.round(500 * softplus);
+  return Math.round(50 * softplus);
 }
