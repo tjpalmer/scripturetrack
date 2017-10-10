@@ -88,12 +88,12 @@ export class AppView extends Component<App, AppState> {
     for (let volume of library.items) {
       volume.size = volume.items.reduce((size, doc) => size + doc.size, 0);
     }
-    let end = library.items.reduce((size, volume) => size + volume.size!, 0);
-    let charIndex = random() * end;
+    // Uniform volume selection.
+    // TODO Multinomial weighted once that option's in place.
+    let volumeIndex = Math.floor(random() * library.items.length);
+    let volume = library.items[volumeIndex];
     // Figure out what document and chapter we're in.
-    let {item: volume, offset: volumeOffset} =
-      findIndexOffset(charIndex, library.items as any) as
-      IndexItemOffset<Volume>;
+    let volumeOffset = random() * volume.size!;
     let {index: docIndex, item: doc, offset} =
       findIndexOffset(volumeOffset, volume.items);
     let names = [volume.name, volume.items[docIndex].name];
