@@ -209,9 +209,9 @@ class view_AppView extends preact_compat_es["Component"] {
         for (let volume of library.items) {
             volume.size = volume.items.reduce((size, doc) => size + doc.size, 0);
         }
-        let end = library.items.reduce((size, volume) => size + volume.size, 0);
-        let charIndex = random() * end;
-        let { item: volume, offset: volumeOffset } = findIndexOffset(charIndex, library.items);
+        let volumeIndex = Math.floor(random() * library.items.length);
+        let volume = library.items[volumeIndex];
+        let volumeOffset = random() * volume.size;
         let { index: docIndex, item: doc, offset } = findIndexOffset(volumeOffset, volume.items);
         let names = [volume.name, volume.items[docIndex].name];
         let { index: chapterIndex } = findIndexOffset(offset, doc.chapterSizes, size => size);
@@ -415,13 +415,23 @@ let highlight = {
     fontWeight: 'bold',
 };
 function scoreGuess(library, actual, guess) {
+    if (actual.names[0] != guess.names[0]) {
+        return 0;
+    }
+    let volume = library.items.find(volume => volume.name == actual.names[0]);
+    library = { items: [volume] };
     let actualOffset = findLibraryTextOffset(library, actual);
     let guessOffset = findLibraryTextOffset(library, guess);
     let distance = Math.abs(actualOffset - guessOffset);
+    let wordsPerPage = 2000;
+    let halfPages = Math.round(2 * (distance / wordsPerPage));
+    let distancePages = halfPages / 2;
     let librarySize = sum(library.items.map(volume => volume.size));
-    let closeness = 1 - 3 * (distance / librarySize);
+    let libraryPages = Math.round(librarySize / wordsPerPage);
+    console.log(distancePages, libraryPages);
+    let closeness = 1 - 5 * (distancePages / libraryPages);
     let softplus = Math.log(1 + Math.exp(10 * closeness));
-    return Math.round(500 * softplus);
+    return Math.round(50 * softplus);
 }
 
 // CONCATENATED MODULE: ./src/index.ts
