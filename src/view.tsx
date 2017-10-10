@@ -346,7 +346,7 @@ export class LibraryView extends Component<
           flex, margin(0), padding(0, '1em'), scrollY, {cursor: 'default'},
         )}>
           {this.props.items.map(volume =>
-            <p><VolumeView
+            <VolumeView
               answer={
                 answer && answer.names[0] == volume.name ? answer : undefined
               }
@@ -354,7 +354,7 @@ export class LibraryView extends Component<
               key={volume.name}
               library={this}
               {...{count, ...volume}}
-            /></p>,
+            />,
           )}
         </div>
         <div className={style(
@@ -362,7 +362,7 @@ export class LibraryView extends Component<
           horizontal,
           {
             borderTop: '1px solid black',
-            margin: '1em 0.5em 0',
+            margin: '0 0.5em',
             padding: '1em 0.5em 0',
           }
         )}>
