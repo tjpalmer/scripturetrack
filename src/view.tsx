@@ -1,10 +1,10 @@
 import {
-  Chapter, Doc, IndexItemOffset, Library, Paragraph, Path, Volume,
-  findIndexOffset, findLibraryTextOffset, random, sum,
+  Chapter, Doc, IndexItemOffset, Indexed, Library, Paragraph, Path, Volume,
+  arrayify, findIndexOffset, findLibraryTextOffset, random, sum,
 } from './';
 import {
-  content, fillParent, flex, horizontal, margin, padding, scrollY, vertical,
-  width,
+  content, fillParent, flex, horizontal, margin, padding, scrollY,
+  someChildWillScroll, vertical, width,
 } from 'csstips';
 import * as React from 'react';
 import {Component, PureComponent} from 'react';
@@ -64,7 +64,7 @@ export class AppView extends Component<App, AppState> {
     let {actual, chapter, count, guess, showAnswer} = this.state;
     let answer = showAnswer ? actual : undefined;
     return (
-      <div className={style(fillParent, horizontal)}>
+      <div className={style(fillParent, horizontal, someChildWillScroll)}>
         <ExcerptView {...{chapter}}/>
         <LibraryView
           app={this}
@@ -253,6 +253,7 @@ export class ExcerptView extends PureComponent<{chapter?: Chapter}, {}> {
       let extraHeight = container.scrollHeight - container.offsetHeight;
       let offset = extraHeight * random();
       container.scrollTop = offset;
+      setTimeout(() => calculateLineSplits(container!), 100);
     }
   }
 
@@ -269,6 +270,7 @@ export class ExcerptView extends PureComponent<{chapter?: Chapter}, {}> {
             fontFamily: 'Excerpt',
             fontSize: '250%',
             letterSpacing: '-0.05em',
+            position: 'relative',
             wordSpacing: '0.1em',
           },
           padding(0, '1em'),
@@ -279,6 +281,7 @@ export class ExcerptView extends PureComponent<{chapter?: Chapter}, {}> {
         chapter && chapter.paragraphs!.map((paragraph, paragraphIndex) =>
           <p
             className={style({
+              lineHeight: 1.5,
               // Narrow betweens, with indent for contrast.
               margin: '0.3em auto',
               maxWidth: '25em',
@@ -462,10 +465,92 @@ export class VolumeView extends Component<VolumeProps, {expanded: boolean}> {
 
 }
 
+function calculateLineSplits(box: HTMLElement) {
+  if (!document.contains(box)) {
+    return;
+  }
+  // setTimeout(() => calculateLineSplits(box), 5000);
+  let offset = box.scrollTop;
+  console.log(box.scrollTop);
+  for (let split of arrayify(box.querySelectorAll('.split'))) {
+    split.remove();
+  }
+  let x: number;
+  let width: number;
+  let addSplit = (y: number, color: string) => {
+    let split = document.createElement('div');
+    split.setAttribute('class', 'split');
+    split.setAttribute('style', `
+      background: ${color};
+      height: 1px;
+      left: ${x}px;
+      position: absolute;
+      top: ${y + offset}px;
+      width: ${width}px;
+    `);
+    box.appendChild(split);
+  }
+  for (let para of arrayify(box.children as any as Indexed<HTMLElement>)) {
+    console.log(para);
+    let paraRect = para.getBoundingClientRect();
+    // console.log(paraRect);
+    x = paraRect.left;
+    width = paraRect.width;
+    // addSplit(paraRect.top, 'black');
+    // addSplit(paraRect.bottom, 'red');
+    // We expect repeats in all browsers and get way bunches in Chrome.
+    let topSet = new Set<number>();
+    let bottomSet = new Set<number>();
+    let total = 0;
+    for (let span of arrayify(para.children as any as Indexed<HTMLElement>)) {
+      for (let rect of arrayify(span.getClientRects())) {
+        topSet.add(rect.top);
+        bottomSet.add(rect.bottom);
+        ++total;
+      }
+    }
+    let tops = [...topSet].sort((a, b) => a - b);
+    let bottoms = [...bottomSet].sort((a, b) => a - b);
+    tops = pruneNears(tops, 3, false);
+    bottoms = pruneNears(bottoms, 3, true);
+    // console.log(tops.size, bottoms.size, total);
+    let minTop = tops[0];
+    let maxBottom = bottoms.slice(-1)[0];
+    for (let top of topSet) {
+      addSplit(top, top == minTop ? 'black' : 'green');
+    }
+    for (let bottom of bottomSet) {
+      addSplit(bottom, bottom == maxBottom ? 'red' : 'blue');
+    }
+  }
+}
+
 let highlight: CSSProperties = {
   background: 'silver',
   fontWeight: 'bold',
 };
+
+function pruneNears(values: number[], near: number, keepLast: boolean) {
+  if (!values.length) {
+    return values.slice();
+  }
+  let {abs} = Math;
+  let kept = values[0];
+  let result = [];
+  for (let value of values) {
+    if (abs(value - kept) <= near) {
+      console.log(`pruned ${value}`);
+      if (keepLast) {
+        kept = value;
+      }
+    } else {
+      result.push(kept);
+      kept = value;
+    }
+  }
+  result.push(kept);
+  return result;
+}
 
 function scoreGuess(library: Library, actual: Path, guess: Path) {
   // Presume that the order of volumes is vaguely meaningful or at least

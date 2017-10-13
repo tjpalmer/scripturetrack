@@ -1,3 +1,16 @@
+export class Indexed<Item> {
+  [index: number]: Item;
+  length: number;
+}
+
+export function arrayify<Item>(indexed: Indexed<Item>) {
+  let result = new Array<Item>(indexed.length);
+  for (let i = 0; i < indexed.length; ++i) {
+    result[i] = indexed[i];
+  }
+  return result;
+}
+
 export function random() {
   // Generate 8 bytes.
   let ints = new Uint8Array(8);
