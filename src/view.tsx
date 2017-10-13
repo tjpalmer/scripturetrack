@@ -490,12 +490,35 @@ function calculateLineSplits(box: HTMLElement) {
     `);
     box.appendChild(split);
   };
+  let needTop = true;
+  let lastTop = 0;
+  let skippedBottom = 0;
+  let skippedTop = 0;
   for (let edge of edges) {
-    addSplit(
-      edge.y,
-      edge.chunk ? (edge.top ? 'black': 'red') : (edge.top ? 'blue' : 'green')
-    );
+    if (needTop) {
+      if (edge.top) {
+        addSplit(edge.y, 'black');
+        lastTop = edge.y;
+        needTop = false;
+      }
+    } else {
+      // Need bottom.
+      if (edge.top) {
+        skippedTop = edge.y;
+      } else {
+        let distance = edge.y - lastTop;
+        if (distance > maxHeight) {
+          // TODO Orphan control.
+          addSplit(skippedBottom, 'red');
+          lastTop = skippedTop;
+          addSplit(lastTop, 'black');
+        } else {
+          skippedBottom = edge.y;
+        }
+      }
+    }
   }
+  addSplit(skippedBottom, 'red');
 }
 
 interface Edge {
