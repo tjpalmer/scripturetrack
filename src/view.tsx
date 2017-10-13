@@ -466,17 +466,17 @@ export class VolumeView extends Component<VolumeProps, {expanded: boolean}> {
 }
 
 function calculateLineSplits(box: HTMLElement) {
-  if (!document.contains(box)) {
-    return;
-  }
-  // setTimeout(() => calculateLineSplits(box), 5000);
-  let offset = box.scrollTop;
-  console.log(box.scrollTop);
+  let total = window.innerHeight;
+  let minHeight = total * 3 / 8;
+  let maxHeight = total * 5 / 8;
+  let edges = findEdges(box);
+  // console.log(box.scrollTop);
   for (let split of arrayify(box.querySelectorAll('.split'))) {
     split.remove();
   }
-  let x: number;
-  let width: number;
+  let rect = box.querySelector('p')!.getBoundingClientRect();
+  let x = rect.left;
+  let width = rect.width;
   let addSplit = (y: number, color: string) => {
     let split = document.createElement('div');
     split.setAttribute('class', 'split');
@@ -485,44 +485,56 @@ function calculateLineSplits(box: HTMLElement) {
       height: 1px;
       left: ${x}px;
       position: absolute;
-      top: ${y + offset}px;
+      top: ${y}px;
       width: ${width}px;
     `);
     box.appendChild(split);
+  };
+  for (let edge of edges) {
+    addSplit(
+      edge.y,
+      edge.chunk ? (edge.top ? 'black': 'red') : (edge.top ? 'blue' : 'green')
+    );
   }
+}
+
+interface Edge {
+  // This doesn't explicitly pair tops with bottoms, say in case there are extra
+  // tops or extra bottoms.
+  // Maybe not impossible, depending on the browser and situation, though I've
+  // always seen pairs so far in my testing in Chrome, Firefox, and Edge.
+  chunk: boolean;
+  top: boolean;
+  y: number;
+}
+
+function findEdges(box: HTMLElement): Edge[] {
+  let edges: Edge[] = [];
+  let offset = box.scrollTop;
   for (let para of arrayify(box.children as any as Indexed<HTMLElement>)) {
-    console.log(para);
-    let paraRect = para.getBoundingClientRect();
-    // console.log(paraRect);
-    x = paraRect.left;
-    width = paraRect.width;
-    // addSplit(paraRect.top, 'black');
-    // addSplit(paraRect.bottom, 'red');
     // We expect repeats in all browsers and get way bunches in Chrome.
     let topSet = new Set<number>();
     let bottomSet = new Set<number>();
     let total = 0;
     for (let span of arrayify(para.children as any as Indexed<HTMLElement>)) {
       for (let rect of arrayify(span.getClientRects())) {
-        topSet.add(rect.top);
-        bottomSet.add(rect.bottom);
+        topSet.add(rect.top + offset);
+        bottomSet.add(rect.bottom + offset);
         ++total;
       }
     }
-    let tops = [...topSet].sort((a, b) => a - b);
-    let bottoms = [...bottomSet].sort((a, b) => a - b);
-    tops = pruneNears(tops, 3, false);
-    bottoms = pruneNears(bottoms, 3, true);
-    // console.log(tops.size, bottoms.size, total);
-    let minTop = tops[0];
-    let maxBottom = bottoms.slice(-1)[0];
-    for (let top of topSet) {
-      addSplit(top, top == minTop ? 'black' : 'green');
-    }
-    for (let bottom of bottomSet) {
-      addSplit(bottom, bottom == maxBottom ? 'red' : 'blue');
-    }
+    // Annotate values.
+    let chunkEdges = [...topSet].map(y => ({chunk: false, top: true, y}));
+    let bottomEdges = [...bottomSet].map(y => ({chunk: false, top: false, y}));
+    // Combine, sort, and finish marking.
+    chunkEdges.push(...bottomEdges);
+    chunkEdges.sort((a, b) => a.y - b.y);
+    chunkEdges[0].chunk = true;
+    chunkEdges.slice(-1)[0].chunk = true;
+    // Add to the total.
+    edges.push(...chunkEdges);
   }
+  return edges;
 }
 
 let highlight: CSSProperties = {
@@ -530,27 +542,27 @@ let highlight: CSSProperties = {
   fontWeight: 'bold',
 };
 
-function pruneNears(values: number[], near: number, keepLast: boolean) {
-  if (!values.length) {
-    return values.slice();
-  }
-  let {abs} = Math;
-  let kept = values[0];
-  let result = [];
-  for (let value of values) {
-    if (abs(value - kept) <= near) {
-      console.log(`pruned ${value}`);
-      if (keepLast) {
-        kept = value;
-      }
-    } else {
-      result.push(kept);
-      kept = value;
-    }
-  }
-  result.push(kept);
-  return result;
-}
+// function pruneNears(values: number[], near: number, keepLast: boolean) {
+//   if (!values.length) {
+//     return values.slice();
+//   }
+//   let {abs} = Math;
+//   let kept = values[0];
+//   let result = [];
+//   for (let value of values) {
+//     if (abs(value - kept) <= near) {
+//       console.log(`pruned ${value}`);
+//       if (keepLast) {
+//         kept = value;
+//       }
+//     } else {
+//       result.push(kept);
+//       kept = value;
+//     }
+//   }
+//   result.push(kept);
+//   return result;
+// }
 
 function scoreGuess(library: Library, actual: Path, guess: Path) {
   // Presume that the order of volumes is vaguely meaningful or at least
