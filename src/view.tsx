@@ -44,7 +44,7 @@ export interface Outcome {
   score: number;
 }
 
-export class AppView extends Component<App, AppState> implements Scrolling {
+export class AppView extends Component<App, AppState> {
 
   constructor(props: App) {
     super(props);
@@ -65,11 +65,7 @@ export class AppView extends Component<App, AppState> implements Scrolling {
     let answer = showAnswer ? actual : undefined;
     return (
       <div className={style(fillParent, horizontal, someChildWillScroll)}>
-        <div className={style(flex, vertical)}>
-          <ScrollButton target={this} dir='up'/>
-          <ExcerptView {...{chapter}}/>
-          <ScrollButton target={this} dir='down'/>
-        </div>
+        <ExcerptScroller {...{chapter}}/>
         <LibraryView
           app={this}
           {...{answer, count, guess}}
@@ -77,10 +73,6 @@ export class AppView extends Component<App, AppState> implements Scrolling {
         />
       </div>
     );
-  }
-
-  scroll(dir: 'up' | 'down') {
-    // TODO Scroll.
   }
 
   showAnswer() {
@@ -251,8 +243,39 @@ export class DocView extends Component<DocProps, {expanded: boolean}> {
 
 }
 
+export class ExcerptScroller
+  extends PureComponent<
+    {chapter?: Chapter},
+    {bottom: boolean, ready: boolean, top: boolean}
+  >
+  implements Scroller
+{
+
+  markEnd(top: boolean, bottom: boolean): void {
+    console.log(top, bottom);
+    this.setState({bottom, ready: true, top});
+  }
+
+  render() {
+    let {chapter} = this.props;
+    let {bottom, ready, top} = this.state;
+    return (
+      <div className={style(flex, vertical)}>
+        <ScrollButton scroller={this} dir='up' end={top || !ready}/>
+        <ExcerptView scroller={this} {...{chapter}}/>
+        <ScrollButton scroller={this} dir='down' end={bottom || !ready}/>
+      </div>
+    );
+  }
+
+  scroll(dir: "up" | "down"): void {
+    console.log(dir);
+  }
+
+}
+
 export class ExcerptView extends PureComponent<
-  {chapter?: Chapter}, {ready?: boolean}
+  {chapter?: Chapter, scroller: Scroller}, {ready?: boolean}
 > {
   // This is a PureComponent, because chapter object identity should stay
   // constant for a single shuffle, so it avoids needless rerender.
@@ -265,10 +288,16 @@ export class ExcerptView extends PureComponent<
         let listener = () => {
           if (!(this.container && document.contains(this.container))) {
             // Just as a failsafe.
+            this.maxHeight = window.innerHeight * 5 / 8;
             window.removeEventListener('resize', listener);
             this.watchingResize = false;
           }
-          this.split();
+          // TODO Remember where are in text rather than random jumping.
+          this.setState({ready: false});
+          window.setTimeout(() => {
+            this.splits = [];
+            this.split();
+          }, 100);
         };
         window.addEventListener('resize', listener);
         this.watchingResize = true;
@@ -278,7 +307,7 @@ export class ExcerptView extends PureComponent<
 
   container?: HTMLElement;
 
-  height = window.innerHeight * 5 / 8;
+  maxHeight = window.innerHeight * 5 / 8;
 
   render() {
     let {chapter} = this.props;
@@ -290,7 +319,7 @@ export class ExcerptView extends PureComponent<
             // the custom font being available.
             fontFamily: 'Excerpt',
             fontSize: '250%',
-            height: `${this.height}px`,
+            height: `${this.maxHeight}px`,
             letterSpacing: '-0.05em',
             overflow: 'hidden',
             position: 'relative',
@@ -330,23 +359,39 @@ export class ExcerptView extends PureComponent<
   split() {
     // Actually, watch repeatedly until things stop changing.
     setTimeout(() => {
-      let {container, splits} = this;
-      // TODO Check for changed splits rather than any splits.
-      if (container && !splits.length) {
+      let {container, maxHeight, splits} = this;
+      // TODO Check for changed splits rather than any splits or chapter change.
+      if (container && !(
+        splits.length && this.splitChapter == this.props.chapter
+      )) {
+        this.splitChapter = this.props.chapter;
         // Find splits.
         let splits = this.splits = calculateLineSplits(container);
         // Pick one.
         let splitIndex = Math.floor(splits.length * random());
         let split = splits[splitIndex];
         // Go to it.
-        this.height = split.height;
-        container.style.height = `${this.height}px`;
+        let height = split.height;
+        container.style.height = `${height}px`;
+        let extra = maxHeight - height;
+        if (extra >= 0) {
+          // TODO Why do we go too far sometimes? On single-paragraph chapters?
+          let extraTop = Math.floor(extra / 2);
+          let extraBottom = extra - extraTop;
+          container.style.marginTop = `${extraTop}px`;
+          container.style.marginBottom = `${extraBottom}px`;
+        }
         container.scrollTop = split.top;
+        this.props.scroller.markEnd(
+          splitIndex == 0, splitIndex == splits.length - 1,
+        );
         // Show ourselves.
-        this.setState({ready: true})
+        this.setState({ready: true});
       }
     }, 100);
   }
+
+  splitChapter?: Chapter;
 
   splits: Split[] = [];
 
@@ -451,28 +496,45 @@ export class LibraryView extends Component<
 }
 
 export class ScrollButton extends Component<
-  {dir: 'up' | 'down', target: Scrolling}, {}
+  {dir: 'up' | 'down', end: boolean, scroller: Scroller}, {}
 > {
 
   render() {
-    let {dir, target} = this.props;
+    let {dir, end, scroller} = this.props;
     return (
       <div
         className={style(
           flex,
-          {fontSize: '4em'}
+          vertical,
+          {
+            color: end ? '#bbb' : 'black',
+            fontSize: '4em',
+            textAlign: 'center',
+          }
         )}
-        onClick={() => target.scroll(dir)}
       >
-        {{down: 'v', up: '^'}[dir]}
+        <div className={style(flex)}></div>
+        <div className={style(flex)}>
+          <span
+            className={style({cursor: 'default', padding: '1em'})}
+            onClick={() => scroller.scroll(dir)}
+          >
+            {{down: 'v', up: '^'}[dir]}
+          </span>
+        </div>
+        <div className={style(flex)}></div>
       </div>
     );
   }
 
 }
 
-export interface Scrolling {
+export interface Scroller {
+
+  markEnd(top: boolean, bottom: boolean): void;
+
   scroll(dir: 'up' | 'down'): void;
+
 }
 
 export interface VolumeProps extends Volume {
