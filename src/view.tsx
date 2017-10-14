@@ -469,7 +469,7 @@ function calculateLineSplits(box: HTMLElement) {
   let total = window.innerHeight;
   let minHeight = total * 3 / 8;
   let maxHeight = total * 5 / 8;
-  let edges = findEdges(box);
+  let lines = findLines(box);
   // console.log(box.scrollTop);
   for (let split of arrayify(box.querySelectorAll('.split'))) {
     split.remove();
@@ -490,74 +490,76 @@ function calculateLineSplits(box: HTMLElement) {
     `);
     box.appendChild(split);
   };
-  let needTop = true;
-  let lastTop = 0;
-  let skippedBottom = 0;
-  let skippedTop = 0;
-  for (let edge of edges) {
-    if (needTop) {
-      if (edge.top) {
-        addSplit(edge.y, 'black');
-        lastTop = edge.y;
-        needTop = false;
-      }
-    } else {
-      // Need bottom.
-      if (edge.top) {
-        skippedTop = edge.y;
-      } else {
-        let distance = edge.y - lastTop;
-        if (distance > maxHeight) {
-          // TODO Orphan control.
-          addSplit(skippedBottom, 'red');
-          lastTop = skippedTop;
-          addSplit(lastTop, 'black');
-        } else {
-          skippedBottom = edge.y;
-        }
-      }
+  let lastLine = lines[0];
+  let lastTop = lastLine.top;
+  addSplit(lastTop, 'black');
+  for (let line of lines) {
+    // addSplit(line.top, 'blue');
+    // addSplit(line.bottom, 'green');
+    let distance = line.bottom - lastTop;
+    if (distance > maxHeight) {
+      // TODO Orphan control.
+      addSplit(lastLine.bottom, 'red');
+      lastTop = line.top;
+      addSplit(lastTop, 'black');
     }
+    lastLine = line;
   }
-  addSplit(skippedBottom, 'red');
+  addSplit(lastLine.bottom, 'red');
 }
 
-interface Edge {
-  // This doesn't explicitly pair tops with bottoms, say in case there are extra
-  // tops or extra bottoms.
-  // Maybe not impossible, depending on the browser and situation, though I've
-  // always seen pairs so far in my testing in Chrome, Firefox, and Edge.
-  chunk: boolean;
-  top: boolean;
-  y: number;
-}
+interface Line {
+  bottom: number;
+  chunkBegin: boolean;
+  chunkEnd: boolean;
+  top: number;
+};
 
-function findEdges(box: HTMLElement): Edge[] {
-  let edges: Edge[] = [];
+function findLines(box: HTMLElement) {
+  type Edge = {top: boolean, y: number};
+  let {max, min} = Math;
+  let lines: Line[] = [];
   let offset = box.scrollTop;
   for (let para of arrayify(box.children as any as Indexed<HTMLElement>)) {
-    // We expect repeats in all browsers and get way bunches in Chrome.
-    let topSet = new Set<number>();
-    let bottomSet = new Set<number>();
+    // Gather up top and bottom edges.
+    let edges: Edge[] = [];
     let total = 0;
     for (let span of arrayify(para.children as any as Indexed<HTMLElement>)) {
       for (let rect of arrayify(span.getClientRects())) {
-        topSet.add(rect.top + offset);
-        bottomSet.add(rect.bottom + offset);
+        edges.push({top: true, y: rect.top + offset});
+        edges.push({top: false, y: rect.bottom + offset});
         ++total;
       }
     }
-    // Annotate values.
-    let chunkEdges = [...topSet].map(y => ({chunk: false, top: true, y}));
-    let bottomEdges = [...bottomSet].map(y => ({chunk: false, top: false, y}));
-    // Combine, sort, and finish marking.
-    chunkEdges.push(...bottomEdges);
-    chunkEdges.sort((a, b) => a.y - b.y);
-    chunkEdges[0].chunk = true;
-    chunkEdges.slice(-1)[0].chunk = true;
-    // Add to the total.
-    edges.push(...chunkEdges);
+    // Sort them by y.
+    edges.sort((a, b) => a.y - b.y);
+    // We expect repeats in all browsers and get way bunches in Chrome, so
+    // remove consecutive tops and bottoms.
+    // All this should work if bottoms don't overlap later tops.
+    // Also presumes we have at least one line.
+    let makeLine = (): Line => ({
+      bottom: -Infinity, chunkBegin: false, chunkEnd: false, top: Infinity,
+    });
+    let line = makeLine();
+    line.chunkBegin = true;
+    for (let edge of edges) {
+      // Top.
+      if (edge.top) {
+        if (isFinite(line.bottom)) {
+          lines.push(line);
+          line = makeLine();
+        }
+        line.top = min(line.top, edge.y);
+      } else {
+        // Bottom.
+        line.bottom = max(line.bottom, edge.y);
+      }
+    }
+    line.chunkEnd = true;
+    lines.push(line);
   }
-  return edges;
+  // All done.
+  return lines;
 }
 
 let highlight: CSSProperties = {
