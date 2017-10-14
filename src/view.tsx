@@ -25,12 +25,12 @@ export interface AppState {
   chapterIndex?: number;
 
   count: number;
+  
+  guess?: Path;
 
   outcomes: Outcome[];
 
   quizLength: number;
-  
-  guess?: Path;
 
   showAnswer?: boolean;
 
@@ -44,7 +44,7 @@ export interface Outcome {
   score: number;
 }
 
-export class AppView extends Component<App, AppState> {
+export class AppView extends Component<App, AppState> implements Scrolling {
 
   constructor(props: App) {
     super(props);
@@ -65,7 +65,11 @@ export class AppView extends Component<App, AppState> {
     let answer = showAnswer ? actual : undefined;
     return (
       <div className={style(fillParent, horizontal, someChildWillScroll)}>
-        <ExcerptView {...{chapter}}/>
+        <div className={style(flex, vertical)}>
+          <ScrollButton target={this} dir='up'/>
+          <ExcerptView {...{chapter}}/>
+          <ScrollButton target={this} dir='down'/>
+        </div>
         <LibraryView
           app={this}
           {...{answer, count, guess}}
@@ -73,6 +77,10 @@ export class AppView extends Component<App, AppState> {
         />
       </div>
     );
+  }
+
+  scroll(dir: 'up' | 'down') {
+    // TODO Scroll.
   }
 
   showAnswer() {
@@ -243,38 +251,53 @@ export class DocView extends Component<DocProps, {expanded: boolean}> {
 
 }
 
-export class ExcerptView extends PureComponent<{chapter?: Chapter}, {}> {
+export class ExcerptView extends PureComponent<
+  {chapter?: Chapter}, {ready?: boolean}
+> {
   // This is a PureComponent, because chapter object identity should stay
   // constant for a single shuffle, so it avoids needless rerender.
 
   componentDidUpdate() {
     let {container} = this;
     if (container) {
-      let extraHeight = container.scrollHeight - container.offsetHeight;
-      let offset = extraHeight * random();
-      container.scrollTop = offset;
-      setTimeout(() => calculateLineSplits(container!), 100);
-    }
+      this.split();
+      if (!this.watchingResize) {
+        let listener = () => {
+          if (!(this.container && document.contains(this.container))) {
+            // Just as a failsafe.
+            window.removeEventListener('resize', listener);
+            this.watchingResize = false;
+          }
+          this.split();
+        };
+        window.addEventListener('resize', listener);
+        this.watchingResize = true;
+      }
+     }
   }
 
   container?: HTMLElement;
+
+  height = window.innerHeight * 5 / 8;
 
   render() {
     let {chapter} = this.props;
     return (
       <div
         className={style(
-          flex, {
+          {
             // When I had 'sans-serif' as a fallback, Chrome used it, despite
             // the custom font being available.
             fontFamily: 'Excerpt',
             fontSize: '250%',
+            height: `${this.height}px`,
             letterSpacing: '-0.05em',
+            overflow: 'hidden',
             position: 'relative',
+            visibility: this.state.ready ? 'visible' : 'hidden',
             wordSpacing: '0.1em',
           },
           padding(0, '1em'),
-          scrollY,
         )}
         ref={element => this.container = element!}
       >{
@@ -303,6 +326,31 @@ export class ExcerptView extends PureComponent<{chapter?: Chapter}, {}> {
       }</div>
     );
   }
+
+  split() {
+    // Actually, watch repeatedly until things stop changing.
+    setTimeout(() => {
+      let {container, splits} = this;
+      // TODO Check for changed splits rather than any splits.
+      if (container && !splits.length) {
+        // Find splits.
+        let splits = this.splits = calculateLineSplits(container);
+        // Pick one.
+        let splitIndex = Math.floor(splits.length * random());
+        let split = splits[splitIndex];
+        // Go to it.
+        this.height = split.height;
+        container.style.height = `${this.height}px`;
+        container.scrollTop = split.top;
+        // Show ourselves.
+        this.setState({ready: true})
+      }
+    }, 100);
+  }
+
+  splits: Split[] = [];
+
+  watchingResize = false;
 
 }
 
@@ -402,6 +450,31 @@ export class LibraryView extends Component<
 
 }
 
+export class ScrollButton extends Component<
+  {dir: 'up' | 'down', target: Scrolling}, {}
+> {
+
+  render() {
+    let {dir, target} = this.props;
+    return (
+      <div
+        className={style(
+          flex,
+          {fontSize: '4em'}
+        )}
+        onClick={() => target.scroll(dir)}
+      >
+        {{down: 'v', up: '^'}[dir]}
+      </div>
+    );
+  }
+
+}
+
+export interface Scrolling {
+  scroll(dir: 'up' | 'down'): void;
+}
+
 export interface VolumeProps extends Volume {
   answer?: Path,
   count: number,
@@ -466,46 +539,61 @@ export class VolumeView extends Component<VolumeProps, {expanded: boolean}> {
 }
 
 function calculateLineSplits(box: HTMLElement) {
+  // Set limits.
   let total = window.innerHeight;
-  let minHeight = total * 3 / 8;
+  // TODO For orphan control.
+  // TODO let minHeight = total * 3 / 8;
   let maxHeight = total * 5 / 8;
+  // Calculate splits.
+  let splits: Split[] = [];
+  // Get lines, then iterate on them.
   let lines = findLines(box);
-  // console.log(box.scrollTop);
-  for (let split of arrayify(box.querySelectorAll('.split'))) {
-    split.remove();
-  }
-  let rect = box.querySelector('p')!.getBoundingClientRect();
-  let x = rect.left;
-  let width = rect.width;
-  let addSplit = (y: number, color: string) => {
-    let split = document.createElement('div');
-    split.setAttribute('class', 'split');
-    split.setAttribute('style', `
-      background: ${color};
-      height: 1px;
-      left: ${x}px;
-      position: absolute;
-      top: ${y}px;
-      width: ${width}px;
-    `);
-    box.appendChild(split);
-  };
   let lastLine = lines[0];
   let lastTop = lastLine.top;
-  addSplit(lastTop, 'black');
+  let split = {height: 0, top: lastTop};
+  let pushSplit = () => {
+    split.height = lastLine.bottom - split.top;
+    splits.push(split);
+    split = {height: 0, top: lastTop};
+  };
   for (let line of lines) {
-    // addSplit(line.top, 'blue');
-    // addSplit(line.bottom, 'green');
     let distance = line.bottom - lastTop;
     if (distance > maxHeight) {
       // TODO Orphan control.
-      addSplit(lastLine.bottom, 'red');
       lastTop = line.top;
-      addSplit(lastTop, 'black');
+      pushSplit();
     }
     lastLine = line;
   }
-  addSplit(lastLine.bottom, 'red');
+  pushSplit();
+  // Option debug visuals.
+  if (false) {
+    for (let split of arrayify(box.querySelectorAll('.split'))) {
+      split.remove();
+    }
+    let rect = box.querySelector('p')!.getBoundingClientRect();
+    let x = rect.left;
+    let width = rect.width;
+    let addSplit = (y: number, color: string) => {
+      let split = document.createElement('div');
+      split.setAttribute('class', 'split');
+      split.setAttribute('style', `
+        background: ${color};
+        height: 1px;
+        left: ${x}px;
+        position: absolute;
+        top: ${y}px;
+        width: ${width}px;
+      `);
+      box.appendChild(split);
+    };
+    for (let split of splits) {
+      addSplit(split.top, 'black');
+      addSplit(split.top + split.height, 'red');
+    }
+  }
+  // All done.
+  return splits;
 }
 
 interface Line {
@@ -515,11 +603,16 @@ interface Line {
   top: number;
 };
 
+interface Split {
+  height: number;
+  top: number;
+}
+
 function findLines(box: HTMLElement) {
   type Edge = {top: boolean, y: number};
   let {max, min} = Math;
   let lines: Line[] = [];
-  let offset = box.scrollTop;
+  let offset = box.scrollTop - box.offsetTop;
   for (let para of arrayify(box.children as any as Indexed<HTMLElement>)) {
     // Gather up top and bottom edges.
     let edges: Edge[] = [];
