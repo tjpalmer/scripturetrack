@@ -246,36 +246,42 @@ export class DocView extends Component<DocProps, {expanded: boolean}> {
 export class ExcerptScroller
   extends PureComponent<
     {chapter?: Chapter},
-    {bottom: boolean, ready: boolean, top: boolean}
+    {bottom: boolean, ready: boolean, page?: number, top: boolean}
   >
   implements Scroller
 {
 
   markEnd(top: boolean, bottom: boolean): void {
-    console.log(top, bottom);
     this.setState({bottom, ready: true, top});
   }
 
   render() {
     let {chapter} = this.props;
-    let {bottom, ready, top} = this.state;
+    let {bottom, page, ready, top} = this.state;
     return (
       <div className={style(flex, vertical)}>
         <ScrollButton scroller={this} dir='up' end={top || !ready}/>
-        <ExcerptView scroller={this} {...{chapter}}/>
+        <ExcerptView page={page} scroller={this} {...{chapter}}/>
         <ScrollButton scroller={this} dir='down' end={bottom || !ready}/>
       </div>
     );
   }
 
-  scroll(dir: "up" | "down"): void {
-    console.log(dir);
+  scroll(dir: 'up' | 'down'): void {
+    if (this.state.page != undefined) {
+      let offset = dir == 'up' ? -1 : 1;
+      this.setState({page: this.state.page! + offset});
+    }
+  }
+
+  setPage(page: number) {
+    this.setState({page});
   }
 
 }
 
 export class ExcerptView extends PureComponent<
-  {chapter?: Chapter, scroller: Scroller}, {ready?: boolean}
+  {chapter?: Chapter, page?: number, scroller: Scroller}, {ready?: boolean}
 > {
   // This is a PureComponent, because chapter object identity should stay
   // constant for a single shuffle, so it avoids needless rerender.
@@ -302,7 +308,7 @@ export class ExcerptView extends PureComponent<
         window.addEventListener('resize', listener);
         this.watchingResize = true;
       }
-     }
+    }
   }
 
   container?: HTMLElement;
@@ -359,18 +365,24 @@ export class ExcerptView extends PureComponent<
   split() {
     // Actually, watch repeatedly until things stop changing.
     setTimeout(() => {
-      let {container, maxHeight, splits} = this;
+      let {container, maxHeight, props, splits} = this;
       // TODO Check for changed splits rather than any splits or chapter change.
+      let splitIndex: number | undefined = this.props.page;
       if (container && !(
         splits.length && this.splitChapter == this.props.chapter
       )) {
         this.splitChapter = this.props.chapter;
         // Find splits.
-        let splits = this.splits = calculateLineSplits(container);
+        splits = this.splits = calculateLineSplits(container);
         // Pick one.
-        let splitIndex = Math.floor(splits.length * random());
-        let split = splits[splitIndex];
+        splitIndex = Math.floor(splits.length * random());
         // Go to it.
+        this.props.scroller.setPage(splitIndex!);
+        // Show ourselves.
+        this.setState({ready: true});
+      }
+      if (container && splitIndex != undefined) {
+        let split = splits[splitIndex];
         let height = split.height;
         container.style.height = `${height}px`;
         let extra = maxHeight - height;
@@ -382,11 +394,10 @@ export class ExcerptView extends PureComponent<
           container.style.marginBottom = `${extraBottom}px`;
         }
         container.scrollTop = split.top;
+        // Update limits.
         this.props.scroller.markEnd(
           splitIndex == 0, splitIndex == splits.length - 1,
         );
-        // Show ourselves.
-        this.setState({ready: true});
       }
     }, 100);
   }
@@ -517,7 +528,7 @@ export class ScrollButton extends Component<
         <div className={style(flex)}>
           <span
             className={style({cursor: 'default', padding: '1em'})}
-            onClick={() => scroller.scroll(dir)}
+            onClick={() => !end && scroller.scroll(dir)}
           >
             {{down: 'v', up: '^'}[dir]}
           </span>
@@ -534,6 +545,8 @@ export interface Scroller {
   markEnd(top: boolean, bottom: boolean): void;
 
   scroll(dir: 'up' | 'down'): void;
+
+  setPage(page: number): void;
 
 }
 
