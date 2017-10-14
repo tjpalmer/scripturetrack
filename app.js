@@ -7,6 +7,15 @@ webpackJsonp([0],{
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 // CONCATENATED MODULE: ./src/util.ts
+class Indexed {
+}
+function util_arrayify(indexed) {
+    let result = new Array(indexed.length);
+    for (let i = 0; i < indexed.length; ++i) {
+        result[i] = indexed[i];
+    }
+    return result;
+}
 function random() {
     let ints = new Uint8Array(8);
     crypto.getRandomValues(ints);
@@ -192,8 +201,8 @@ class view_AppView extends preact_compat_es["Component"] {
     render() {
         let { actual, chapter, count, guess, showAnswer } = this.state;
         let answer = showAnswer ? actual : undefined;
-        return (preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["fillParent"], lib["horizontal"]) },
-            preact_compat_es["createElement"](view_ExcerptView, Object.assign({}, { chapter })),
+        return (preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["fillParent"], lib["horizontal"], lib["someChildWillScroll"]) },
+            preact_compat_es["createElement"](view_ExcerptScroller, Object.assign({}, { chapter })),
             preact_compat_es["createElement"](view_LibraryView, Object.assign({ app: this }, { answer, count, guess }, this.props.library))));
     }
     showAnswer() {
@@ -305,23 +314,70 @@ class view_DocView extends preact_compat_es["Component"] {
                     answer : undefined, doc: this, guess: guess && guess.chapterIndex == chapterIndex ? guess : undefined, index: chapterIndex })))));
     }
 }
+class view_ExcerptScroller extends preact_compat_es["PureComponent"] {
+    markEnd(top, bottom) {
+        this.setState({ bottom, ready: true, top });
+    }
+    render() {
+        let { chapter } = this.props;
+        let { bottom, page, ready, top } = this.state;
+        return (preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["flex"], lib["vertical"]) },
+            preact_compat_es["createElement"](view_ScrollButton, { scroller: this, dir: 'up', end: top || !ready }),
+            preact_compat_es["createElement"](view_ExcerptView, Object.assign({ page: page, scroller: this }, { chapter })),
+            preact_compat_es["createElement"](view_ScrollButton, { scroller: this, dir: 'down', end: bottom || !ready })));
+    }
+    scroll(dir) {
+        if (this.state.page != undefined) {
+            let offset = dir == 'up' ? -1 : 1;
+            this.setState({ page: this.state.page + offset });
+        }
+    }
+    setPage(page) {
+        this.setState({ page });
+    }
+}
 class view_ExcerptView extends preact_compat_es["PureComponent"] {
+    constructor() {
+        super(...arguments);
+        this.maxHeight = window.innerHeight * 5 / 8;
+        this.splits = [];
+        this.watchingResize = false;
+    }
     componentDidUpdate() {
         let { container } = this;
         if (container) {
-            let extraHeight = container.scrollHeight - container.offsetHeight;
-            let offset = extraHeight * random();
-            container.scrollTop = offset;
+            this.split();
+            if (!this.watchingResize) {
+                let listener = () => {
+                    if (!(this.container && document.contains(this.container))) {
+                        this.maxHeight = window.innerHeight * 5 / 8;
+                        window.removeEventListener('resize', listener);
+                        this.watchingResize = false;
+                    }
+                    this.setState({ ready: false });
+                    window.setTimeout(() => {
+                        this.splits = [];
+                        this.split();
+                    }, 100);
+                };
+                window.addEventListener('resize', listener);
+                this.watchingResize = true;
+            }
         }
     }
     render() {
         let { chapter } = this.props;
-        return (preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["flex"], {
+        return (preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])({
                 fontFamily: 'Excerpt',
                 fontSize: '250%',
+                height: `${this.maxHeight}px`,
                 letterSpacing: '-0.05em',
+                overflow: 'hidden',
+                position: 'relative',
+                visibility: this.state.ready ? 'visible' : 'hidden',
                 wordSpacing: '0.1em',
-            }, Object(lib["padding"])(0, '1em'), lib["scrollY"]), ref: element => this.container = element }, chapter && chapter.paragraphs.map((paragraph, paragraphIndex) => preact_compat_es["createElement"]("p", { className: Object(lib_es2015["style"])({
+            }, Object(lib["padding"])(0, '1em')), ref: element => this.container = element }, chapter && chapter.paragraphs.map((paragraph, paragraphIndex) => preact_compat_es["createElement"]("p", { className: Object(lib_es2015["style"])({
+                lineHeight: 1.5,
                 margin: '0.3em auto',
                 maxWidth: '25em',
                 textIndent: '1.5em',
@@ -336,6 +392,33 @@ class view_ExcerptView extends preact_compat_es["PureComponent"] {
             }) }, paragraph.verses.map(verse => preact_compat_es["createElement"]("span", null,
             verse.text,
             " "))))));
+    }
+    split() {
+        setTimeout(() => {
+            let { container, maxHeight, props, splits } = this;
+            let splitIndex = this.props.page;
+            if (container && !(splits.length && this.splitChapter == this.props.chapter)) {
+                this.splitChapter = this.props.chapter;
+                splits = this.splits = calculateLineSplits(container);
+                splitIndex = Math.floor(splits.length * random());
+                this.props.scroller.setPage(splitIndex);
+                this.setState({ ready: true });
+            }
+            if (container && splitIndex != undefined) {
+                let split = splits[splitIndex];
+                let height = split.height;
+                container.style.height = `${height}px`;
+                let extra = maxHeight - height;
+                if (extra >= 0) {
+                    let extraTop = Math.floor(extra / 2);
+                    let extraBottom = extra - extraTop;
+                    container.style.marginTop = `${extraTop}px`;
+                    container.style.marginBottom = `${extraBottom}px`;
+                }
+                container.scrollTop = split.top;
+                this.props.scroller.markEnd(splitIndex == 0, splitIndex == splits.length - 1);
+            }
+        }, 100);
     }
 }
 class view_LibraryView extends preact_compat_es["Component"] {
@@ -394,6 +477,20 @@ class view_LibraryView extends preact_compat_es["Component"] {
                     }())))));
     }
 }
+class view_ScrollButton extends preact_compat_es["Component"] {
+    render() {
+        let { dir, end, scroller } = this.props;
+        return (preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["flex"], lib["vertical"], {
+                color: end ? '#bbb' : 'black',
+                fontSize: '4em',
+                textAlign: 'center',
+            }) },
+            preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["flex"]) }),
+            preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["flex"]) },
+                preact_compat_es["createElement"]("span", { className: Object(lib_es2015["style"])({ cursor: 'default', padding: '1em' }), onClick: () => !end && scroller.scroll(dir) }, { down: 'v', up: '^' }[dir])),
+            preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["flex"]) })));
+    }
+}
 class view_VolumeView extends preact_compat_es["Component"] {
     constructor(props) {
         super(props);
@@ -420,6 +517,93 @@ class view_VolumeView extends preact_compat_es["Component"] {
                 }) }, this.props.items.map(doc => preact_compat_es["createElement"]("li", { className: Object(lib_es2015["style"])(expandStyle) },
                 preact_compat_es["createElement"](view_DocView, Object.assign({}, doc, { answer: answer && answer.names[1] == doc.name ? answer : undefined, guess: guess && guess.names[1] == doc.name ? guess : undefined, key: doc.name + count, volume: this })))))));
     }
+}
+function calculateLineSplits(box) {
+    let total = window.innerHeight;
+    let maxHeight = total * 5 / 8;
+    let splits = [];
+    let lines = findLines(box);
+    let lastLine = lines[0];
+    let lastTop = lastLine.top;
+    let split = { height: 0, top: lastTop };
+    let pushSplit = () => {
+        split.height = lastLine.bottom - split.top;
+        splits.push(split);
+        split = { height: 0, top: lastTop };
+    };
+    for (let line of lines) {
+        let distance = line.bottom - lastTop;
+        if (distance > maxHeight) {
+            lastTop = line.top;
+            pushSplit();
+        }
+        lastLine = line;
+    }
+    pushSplit();
+    if (false) {
+        for (let split of arrayify(box.querySelectorAll('.split'))) {
+            split.remove();
+        }
+        let rect = box.querySelector('p').getBoundingClientRect();
+        let x = rect.left;
+        let width = rect.width;
+        let addSplit = (y, color) => {
+            let split = document.createElement('div');
+            split.setAttribute('class', 'split');
+            split.setAttribute('style', `
+        background: ${color};
+        height: 1px;
+        left: ${x}px;
+        position: absolute;
+        top: ${y}px;
+        width: ${width}px;
+      `);
+            box.appendChild(split);
+        };
+        for (let split of splits) {
+            addSplit(split.top, 'black');
+            addSplit(split.top + split.height, 'red');
+        }
+    }
+    return splits;
+}
+;
+function findLines(box) {
+    let { max, min } = Math;
+    let lines = [];
+    let offset = box.scrollTop - box.offsetTop;
+    for (let para of util_arrayify(box.children)) {
+        let edges = [];
+        let total = 0;
+        for (let span of util_arrayify(para.children)) {
+            for (let rect of util_arrayify(span.getClientRects())) {
+                edges.push({ top: true, y: rect.top + offset });
+                edges.push({ top: false, y: rect.bottom + offset });
+                ++total;
+            }
+        }
+        edges.sort((a, b) => a.y - b.y);
+        let makeLine = () => ({
+            bottom: -Infinity, chunkBegin: false, chunkEnd: false, top: Infinity,
+        });
+        let line = makeLine();
+        line.chunkBegin = true;
+        for (let edge of edges) {
+            if (edge.top) {
+                if (isFinite(line.bottom)) {
+                    lines.push(line);
+                    line = makeLine();
+                }
+                line.top = min(line.top, edge.y);
+            }
+            else {
+                line.bottom = max(line.bottom, edge.y);
+            }
+        }
+        line.chunkEnd = true;
+        lines.push(line);
+    }
+    return lines;
 }
 let highlight = {
     background: 'silver',
