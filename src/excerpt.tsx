@@ -2,6 +2,7 @@ import {Chapter, Indexed, arrayify, random} from './';
 import {flex, padding, vertical} from 'csstips';
 import * as React from 'react';
 import {Component, PureComponent} from 'react';
+import {ChevronUp, ChevronDown} from 'react-feather';
 import {style} from 'typestyle';
 
 export class ExcerptScroller
@@ -177,6 +178,7 @@ class ScrollButton extends Component<
 
   render() {
     let {dir, end, scroller} = this.props;
+    let size = window.innerHeight / 16;
     return (
       <div
         className={style(
@@ -194,9 +196,11 @@ class ScrollButton extends Component<
           <span
             className={style({cursor: 'default', padding: '1em'})}
             onClick={() => !end && scroller.scroll(dir)}
-          >
-            {{down: 'v', up: '^'}[dir]}
-          </span>
+          >{
+            dir == 'up' ?
+              <ChevronUp size={size}/> :
+              <ChevronDown size={size}/>
+          }</span>
         </div>
         <div className={style(flex)}></div>
       </div>

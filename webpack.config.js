@@ -13,6 +13,7 @@ module.exports = {
       'csstips',
       'preact',
       'preact-compat',
+      'react-feather',
       'typestyle',
     ],
   },
