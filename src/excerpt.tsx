@@ -2,7 +2,8 @@ import {Chapter, Indexed, arrayify, random} from './';
 import {flex, padding, vertical} from 'csstips';
 import * as React from 'react';
 import {Component, PureComponent} from 'react';
-import {ChevronUp, ChevronDown} from 'react-feather';
+import ChevronDown from 'react-feather/dist/icons/chevron-down';
+import ChevronUp from 'react-feather/dist/icons/chevron-up';
 import {style} from 'typestyle';
 
 export class ExcerptScroller

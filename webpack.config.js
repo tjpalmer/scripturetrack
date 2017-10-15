@@ -13,7 +13,9 @@ module.exports = {
       'csstips',
       'preact',
       'preact-compat',
-      'react-feather',
+      // The full thing is huge, and piecemeal listing is trouble, so just let
+      // icons go with app.
+      // 'react-feather',
       'typestyle',
     ],
   },

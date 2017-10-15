@@ -147,625 +147,11 @@
 /******/ 	__webpack_require__.oe = function(err) { console.error(err); throw err; };
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 24);
+/******/ 	return __webpack_require__(__webpack_require__.s = 26);
 /******/ })
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ (function(module, exports) {
-
-// shim for using process in browser
-var process = module.exports = {};
-
-// cached from whatever global is present so that test runners that stub it
-// don't break things.  But we need to wrap it in a try catch in case it is
-// wrapped in strict mode code which doesn't define any globals.  It's inside a
-// function because try/catches deoptimize in certain engines.
-
-var cachedSetTimeout;
-var cachedClearTimeout;
-
-function defaultSetTimout() {
-    throw new Error('setTimeout has not been defined');
-}
-function defaultClearTimeout () {
-    throw new Error('clearTimeout has not been defined');
-}
-(function () {
-    try {
-        if (typeof setTimeout === 'function') {
-            cachedSetTimeout = setTimeout;
-        } else {
-            cachedSetTimeout = defaultSetTimout;
-        }
-    } catch (e) {
-        cachedSetTimeout = defaultSetTimout;
-    }
-    try {
-        if (typeof clearTimeout === 'function') {
-            cachedClearTimeout = clearTimeout;
-        } else {
-            cachedClearTimeout = defaultClearTimeout;
-        }
-    } catch (e) {
-        cachedClearTimeout = defaultClearTimeout;
-    }
-} ())
-function runTimeout(fun) {
-    if (cachedSetTimeout === setTimeout) {
-        //normal enviroments in sane situations
-        return setTimeout(fun, 0);
-    }
-    // if setTimeout wasn't available but was latter defined
-    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
-        cachedSetTimeout = setTimeout;
-        return setTimeout(fun, 0);
-    }
-    try {
-        // when when somebody has screwed with setTimeout but no I.E. maddness
-        return cachedSetTimeout(fun, 0);
-    } catch(e){
-        try {
-            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
-            return cachedSetTimeout.call(null, fun, 0);
-        } catch(e){
-            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
-            return cachedSetTimeout.call(this, fun, 0);
-        }
-    }
-
-
-}
-function runClearTimeout(marker) {
-    if (cachedClearTimeout === clearTimeout) {
-        //normal enviroments in sane situations
-        return clearTimeout(marker);
-    }
-    // if clearTimeout wasn't available but was latter defined
-    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
-        cachedClearTimeout = clearTimeout;
-        return clearTimeout(marker);
-    }
-    try {
-        // when when somebody has screwed with setTimeout but no I.E. maddness
-        return cachedClearTimeout(marker);
-    } catch (e){
-        try {
-            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
-            return cachedClearTimeout.call(null, marker);
-        } catch (e){
-            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
-            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
-            return cachedClearTimeout.call(this, marker);
-        }
-    }
-
-
-
-}
-var queue = [];
-var draining = false;
-var currentQueue;
-var queueIndex = -1;
-
-function cleanUpNextTick() {
-    if (!draining || !currentQueue) {
-        return;
-    }
-    draining = false;
-    if (currentQueue.length) {
-        queue = currentQueue.concat(queue);
-    } else {
-        queueIndex = -1;
-    }
-    if (queue.length) {
-        drainQueue();
-    }
-}
-
-function drainQueue() {
-    if (draining) {
-        return;
-    }
-    var timeout = runTimeout(cleanUpNextTick);
-    draining = true;
-
-    var len = queue.length;
-    while(len) {
-        currentQueue = queue;
-        queue = [];
-        while (++queueIndex < len) {
-            if (currentQueue) {
-                currentQueue[queueIndex].run();
-            }
-        }
-        queueIndex = -1;
-        len = queue.length;
-    }
-    currentQueue = null;
-    draining = false;
-    runClearTimeout(timeout);
-}
-
-process.nextTick = function (fun) {
-    var args = new Array(arguments.length - 1);
-    if (arguments.length > 1) {
-        for (var i = 1; i < arguments.length; i++) {
-            args[i - 1] = arguments[i];
-        }
-    }
-    queue.push(new Item(fun, args));
-    if (queue.length === 1 && !draining) {
-        runTimeout(drainQueue);
-    }
-};
-
-// v8 likes predictible objects
-function Item(fun, array) {
-    this.fun = fun;
-    this.array = array;
-}
-Item.prototype.run = function () {
-    this.fun.apply(null, this.array);
-};
-process.title = 'browser';
-process.browser = true;
-process.env = {};
-process.argv = [];
-process.version = ''; // empty string to avoid regexp issues
-process.versions = {};
-
-function noop() {}
-
-process.on = noop;
-process.addListener = noop;
-process.once = noop;
-process.off = noop;
-process.removeListener = noop;
-process.removeAllListeners = noop;
-process.emit = noop;
-process.prependListener = noop;
-process.prependOnceListener = noop;
-
-process.listeners = function (name) { return [] }
-
-process.binding = function (name) {
-    throw new Error('process.binding is not supported');
-};
-
-process.cwd = function () { return '/' };
-process.chdir = function (dir) {
-    throw new Error('process.chdir is not supported');
-};
-process.umask = function() { return 0; };
-
-
-/***/ }),
-/* 1 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-
-// EXTERNAL MODULE: ./node_modules/free-style/dist/free-style.js
-var free_style = __webpack_require__(7);
-var free_style_default = /*#__PURE__*/__webpack_require__.n(free_style);
-
-// CONCATENATED MODULE: ./node_modules/typestyle/lib.es2015/internal/formatting.js
-
-/**
- * We need to do the following to *our* objects before passing to freestyle:
- * - For any `$nest` directive move up to FreeStyle style nesting
- * - For any `$unique` directive map to FreeStyle Unique
- * - For any `$debugName` directive return the debug name
- */
-function ensureStringObj(object) {
-    /** The final result we will return */
-    var result = {};
-    var debugName = '';
-    for (var key in object) {
-        /** Grab the value upfront */
-        var val = object[key];
-        /** TypeStyle configuration options */
-        if (key === '$unique') {
-            result[free_style["IS_UNIQUE"]] = val;
-        }
-        else if (key === '$nest') {
-            var nested = val;
-            for (var selector in nested) {
-                var subproperties = nested[selector];
-                result[selector] = ensureStringObj(subproperties).result;
-            }
-        }
-        else if (key === '$debugName') {
-            debugName = val;
-        }
-        else {
-            result[key] = val;
-        }
-    }
-    return { result: result, debugName: debugName };
-}
-// todo: better name here
-function explodeKeyframes(frames) {
-    var result = { $debugName: undefined, keyframes: {} };
-    for (var offset in frames) {
-        var val = frames[offset];
-        if (offset === '$debugName') {
-            result.$debugName = val;
-        }
-        else {
-            result.keyframes[offset] = val;
-        }
-    }
-    return result;
-}
-
-// CONCATENATED MODULE: ./node_modules/typestyle/lib.es2015/internal/utilities.js
-/** Raf for node + browser */
-var raf = typeof requestAnimationFrame === 'undefined' ? setTimeout : requestAnimationFrame.bind(window);
-/**
- * Utility to join classes conditionally
- */
-function classes() {
-    var classes = [];
-    for (var _i = 0; _i < arguments.length; _i++) {
-        classes[_i] = arguments[_i];
-    }
-    return classes.filter(function (c) { return !!c; }).join(' ');
-}
-/**
- * Merges various styles into a single style object.
- * Note: if two objects have the same property the last one wins
- */
-function extend() {
-    var objects = [];
-    for (var _i = 0; _i < arguments.length; _i++) {
-        objects[_i] = arguments[_i];
-    }
-    /** The final result we will return */
-    var result = {};
-    for (var _a = 0, objects_1 = objects; _a < objects_1.length; _a++) {
-        var object = objects_1[_a];
-        if (object == null || object === false) {
-            continue;
-        }
-        for (var key in object) {
-            /** Falsy values except a explicit 0 is ignored */
-            var val = object[key];
-            if (!val && val !== 0) {
-                continue;
-            }
-            /** if nested media or pseudo selector */
-            if (key === '$nest' && val) {
-                result[key] = result['$nest'] ? extend(result['$nest'], val) : val;
-            }
-            else if ((key.indexOf('&') !== -1 || key.indexOf('@media') === 0)) {
-                result[key] = result[key] ? extend(result[key], val) : val;
-            }
-            else {
-                result[key] = val;
-            }
-        }
-    }
-    return result;
-}
-/**
- * Utility to help customize styles with media queries. e.g.
- * ```
- * style(
- *  media({maxWidth:500}, {color:'red'})
- * )
- * ```
- */
-var media = function (mediaQuery) {
-    var objects = [];
-    for (var _i = 1; _i < arguments.length; _i++) {
-        objects[_i - 1] = arguments[_i];
-    }
-    var mediaQuerySections = [];
-    if (mediaQuery.type)
-        mediaQuerySections.push(mediaQuery.type);
-    if (mediaQuery.orientation)
-        mediaQuerySections.push(mediaQuery.orientation);
-    if (mediaQuery.minWidth)
-        mediaQuerySections.push("(min-width: " + mediaLength(mediaQuery.minWidth) + ")");
-    if (mediaQuery.maxWidth)
-        mediaQuerySections.push("(max-width: " + mediaLength(mediaQuery.maxWidth) + ")");
-    if (mediaQuery.minHeight)
-        mediaQuerySections.push("(min-height: " + mediaLength(mediaQuery.minHeight) + ")");
-    if (mediaQuery.maxHeight)
-        mediaQuerySections.push("(max-height: " + mediaLength(mediaQuery.maxHeight) + ")");
-    var stringMediaQuery = "@media " + mediaQuerySections.join(' and ');
-    var object = {
-        $nest: (_a = {},
-            _a[stringMediaQuery] = extend.apply(void 0, objects),
-            _a)
-    };
-    return object;
-    var _a;
-};
-var mediaLength = function (value) {
-    return typeof value === 'string' ? value : value + "px";
-};
-
-// CONCATENATED MODULE: ./node_modules/typestyle/lib.es2015/internal/typestyle.js
-
-
-
-/**
- * Creates an instance of free style with our options
- */
-var createFreeStyle = function () { return free_style["create"](
-/** Use the default hash function */
-undefined, 
-/** Preserve $debugName values */
-true); };
-/**
- * Maintains a single stylesheet and keeps it in sync with requested styles
- */
-var typestyle_TypeStyle = (function () {
-    function TypeStyle(_a) {
-        var autoGenerateTag = _a.autoGenerateTag;
-        var _this = this;
-        /**
-         * Insert `raw` CSS as a string. This is useful for e.g.
-         * - third party CSS that you are customizing with template strings
-         * - generating raw CSS in JavaScript
-         * - reset libraries like normalize.css that you can use without loaders
-         */
-        this.cssRaw = function (mustBeValidCSS) {
-            if (!mustBeValidCSS) {
-                return;
-            }
-            _this._raw += mustBeValidCSS || '';
-            _this._pendingRawChange = true;
-            _this._styleUpdated();
-        };
-        /**
-         * Takes CSSProperties and registers it to a global selector (body, html, etc.)
-         */
-        this.cssRule = function (selector) {
-            var objects = [];
-            for (var _i = 1; _i < arguments.length; _i++) {
-                objects[_i - 1] = arguments[_i];
-            }
-            var object = ensureStringObj(extend.apply(void 0, objects)).result;
-            _this._freeStyle.registerRule(selector, object);
-            _this._styleUpdated();
-            return;
-        };
-        /**
-         * Renders styles to the singleton tag imediately
-         * NOTE: You should only call it on initial render to prevent any non CSS flash.
-         * After that it is kept sync using `requestAnimationFrame` and we haven't noticed any bad flashes.
-         **/
-        this.forceRenderStyles = function () {
-            var target = _this._getTag();
-            if (!target) {
-                return;
-            }
-            target.textContent = _this.getStyles();
-        };
-        /**
-         * Utility function to register an @font-face
-         */
-        this.fontFace = function () {
-            var fontFace = [];
-            for (var _i = 0; _i < arguments.length; _i++) {
-                fontFace[_i] = arguments[_i];
-            }
-            var freeStyle = _this._freeStyle;
-            for (var _a = 0, _b = fontFace; _a < _b.length; _a++) {
-                var face = _b[_a];
-                freeStyle.registerRule('@font-face', face);
-            }
-            _this._styleUpdated();
-            return;
-        };
-        /**
-         * Allows use to use the stylesheet in a node.js environment
-         */
-        this.getStyles = function () {
-            return (_this._raw || '') + _this._freeStyle.getStyles();
-        };
-        /**
-         * Takes keyframes and returns a generated animationName
-         */
-        this.keyframes = function (frames) {
-            var _a = explodeKeyframes(frames), keyframes = _a.keyframes, $debugName = _a.$debugName;
-            // TODO: replace $debugName with display name
-            var animationName = _this._freeStyle.registerKeyframes(keyframes, $debugName);
-            _this._styleUpdated();
-            return animationName;
-        };
-        /**
-         * Helps with testing. Reinitializes FreeStyle + raw
-         */
-        this.reinit = function () {
-            /** reinit freestyle */
-            var freeStyle = createFreeStyle();
-            _this._freeStyle = freeStyle;
-            _this._lastFreeStyleChangeId = freeStyle.changeId;
-            /** reinit raw */
-            _this._raw = '';
-            _this._pendingRawChange = false;
-            /** Clear any styles that were flushed */
-            var target = _this._getTag();
-            if (target) {
-                target.textContent = '';
-            }
-        };
-        /** Sets the target tag where we write the css on style updates */
-        this.setStylesTarget = function (tag) {
-            /** Clear any data in any previous tag */
-            if (_this._tag) {
-                _this._tag.textContent = '';
-            }
-            _this._tag = tag;
-            /** This special time buffer immediately */
-            _this.forceRenderStyles();
-        };
-        /**
-         * Takes CSSProperties and return a generated className you can use on your component
-         */
-        this.style = function () {
-            var objects = [];
-            for (var _i = 0; _i < arguments.length; _i++) {
-                objects[_i] = arguments[_i];
-            }
-            var freeStyle = _this._freeStyle;
-            var _a = ensureStringObj(extend.apply(void 0, objects)), result = _a.result, debugName = _a.debugName;
-            var className = debugName ? freeStyle.registerStyle(result, debugName) : freeStyle.registerStyle(result);
-            _this._styleUpdated();
-            return className;
-        };
-        var freeStyle = createFreeStyle();
-        this._autoGenerateTag = autoGenerateTag;
-        this._freeStyle = freeStyle;
-        this._lastFreeStyleChangeId = freeStyle.changeId;
-        this._pending = 0;
-        this._pendingRawChange = false;
-        this._raw = '';
-        this._tag = undefined;
-    }
-    /**
-     * Only calls cb all sync operations settle
-     */
-    TypeStyle.prototype._afterAllSync = function (cb) {
-        var _this = this;
-        this._pending++;
-        var pending = this._pending;
-        raf(function () {
-            if (pending !== _this._pending) {
-                return;
-            }
-            cb();
-        });
-    };
-    TypeStyle.prototype._getTag = function () {
-        if (this._tag) {
-            return this._tag;
-        }
-        if (this._autoGenerateTag) {
-            var tag = typeof window === 'undefined'
-                ? { textContent: '' }
-                : document.createElement('style');
-            if (typeof document !== 'undefined') {
-                document.head.appendChild(tag);
-            }
-            this._tag = tag;
-            return tag;
-        }
-        return undefined;
-    };
-    /** Checks if the style tag needs updating and if so queues up the change */
-    TypeStyle.prototype._styleUpdated = function () {
-        var _this = this;
-        var changeId = this._freeStyle.changeId;
-        var lastChangeId = this._lastFreeStyleChangeId;
-        if (!this._pendingRawChange && changeId === lastChangeId) {
-            return;
-        }
-        this._lastFreeStyleChangeId = changeId;
-        this._pendingRawChange = false;
-        this._afterAllSync(function () { return _this.forceRenderStyles(); });
-    };
-    return TypeStyle;
-}());
-
-
-// EXTERNAL MODULE: ./node_modules/typestyle/lib.es2015/types.js
-var types = __webpack_require__(14);
-var types_default = /*#__PURE__*/__webpack_require__.n(types);
-
-// CONCATENATED MODULE: ./node_modules/typestyle/lib.es2015/index.js
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "setStylesTarget", function() { return setStylesTarget; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "cssRaw", function() { return cssRaw; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "cssRule", function() { return cssRule; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "forceRenderStyles", function() { return forceRenderStyles; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "fontFace", function() { return fontFace; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getStyles", function() { return getStyles; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "keyframes", function() { return lib_es2015_keyframes; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "reinit", function() { return reinit; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "style", function() { return style; });
-/* harmony export (immutable) */ __webpack_exports__["createTypeStyle"] = createTypeStyle;
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, "TypeStyle", function() { return typestyle_TypeStyle; });
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, "types", function() { return types; });
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, "extend", function() { return extend; });
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, "classes", function() { return classes; });
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, "media", function() { return media; });
-
-
-/**
- * All the CSS types in the 'types' namespace
- */
-
-
-/**
- * Export certain utilities
- */
-
-/** Zero configuration, default instance of TypeStyle */
-var ts = new typestyle_TypeStyle({ autoGenerateTag: true });
-/** Sets the target tag where we write the css on style updates */
-var setStylesTarget = ts.setStylesTarget;
-/**
- * Insert `raw` CSS as a string. This is useful for e.g.
- * - third party CSS that you are customizing with template strings
- * - generating raw CSS in JavaScript
- * - reset libraries like normalize.css that you can use without loaders
- */
-var cssRaw = ts.cssRaw;
-/**
- * Takes CSSProperties and registers it to a global selector (body, html, etc.)
- */
-var cssRule = ts.cssRule;
-/**
- * Renders styles to the singleton tag imediately
- * NOTE: You should only call it on initial render to prevent any non CSS flash.
- * After that it is kept sync using `requestAnimationFrame` and we haven't noticed any bad flashes.
- **/
-var forceRenderStyles = ts.forceRenderStyles;
-/**
- * Utility function to register an @font-face
- */
-var fontFace = ts.fontFace;
-/**
- * Allows use to use the stylesheet in a node.js environment
- */
-var getStyles = ts.getStyles;
-/**
- * Takes keyframes and returns a generated animationName
- */
-var lib_es2015_keyframes = ts.keyframes;
-/**
- * Helps with testing. Reinitializes FreeStyle + raw
- */
-var reinit = ts.reinit;
-/**
- * Takes CSSProperties and return a generated className you can use on your component
- */
-var style = ts.style;
-/**
- * Creates a new instance of TypeStyle separate from the default instance.
- *
- * - Use this for creating a different typestyle instance for a shadow dom component.
- * - Use this if you don't want an auto tag generated and you just want to collect the CSS.
- *
- * NOTE: styles aren't shared between different instances.
- */
-function createTypeStyle(target) {
-    var instance = new typestyle_TypeStyle({ autoGenerateTag: false });
-    if (target) {
-        instance.setStylesTarget(target);
-    }
-    return instance;
-}
-
-
-/***/ }),
-/* 2 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -785,9 +171,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "PureComponent", function() { return PureComponent; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "unstable_renderSubtreeIntoContainer", function() { return renderSubtreeIntoContainer; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "__spread", function() { return extend; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_prop_types__ = __webpack_require__(20);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_prop_types__ = __webpack_require__(4);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_prop_types___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_prop_types__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_preact__ = __webpack_require__(10);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_preact__ = __webpack_require__(11);
 /* harmony reexport (default from non-hamory) */ __webpack_require__.d(__webpack_exports__, "PropTypes", function() { return __WEBPACK_IMPORTED_MODULE_0_prop_types___default.a; });
 
 
@@ -1420,7 +806,621 @@ var index = {
 /* harmony default export */ __webpack_exports__["default"] = (index);
 //# sourceMappingURL=preact-compat.es.js.map
 
-/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(0)))
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(2)))
+
+/***/ }),
+/* 1 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+
+// EXTERNAL MODULE: ./node_modules/free-style/dist/free-style.js
+var free_style = __webpack_require__(8);
+var free_style_default = /*#__PURE__*/__webpack_require__.n(free_style);
+
+// CONCATENATED MODULE: ./node_modules/typestyle/lib.es2015/internal/formatting.js
+
+/**
+ * We need to do the following to *our* objects before passing to freestyle:
+ * - For any `$nest` directive move up to FreeStyle style nesting
+ * - For any `$unique` directive map to FreeStyle Unique
+ * - For any `$debugName` directive return the debug name
+ */
+function ensureStringObj(object) {
+    /** The final result we will return */
+    var result = {};
+    var debugName = '';
+    for (var key in object) {
+        /** Grab the value upfront */
+        var val = object[key];
+        /** TypeStyle configuration options */
+        if (key === '$unique') {
+            result[free_style["IS_UNIQUE"]] = val;
+        }
+        else if (key === '$nest') {
+            var nested = val;
+            for (var selector in nested) {
+                var subproperties = nested[selector];
+                result[selector] = ensureStringObj(subproperties).result;
+            }
+        }
+        else if (key === '$debugName') {
+            debugName = val;
+        }
+        else {
+            result[key] = val;
+        }
+    }
+    return { result: result, debugName: debugName };
+}
+// todo: better name here
+function explodeKeyframes(frames) {
+    var result = { $debugName: undefined, keyframes: {} };
+    for (var offset in frames) {
+        var val = frames[offset];
+        if (offset === '$debugName') {
+            result.$debugName = val;
+        }
+        else {
+            result.keyframes[offset] = val;
+        }
+    }
+    return result;
+}
+
+// CONCATENATED MODULE: ./node_modules/typestyle/lib.es2015/internal/utilities.js
+/** Raf for node + browser */
+var raf = typeof requestAnimationFrame === 'undefined' ? setTimeout : requestAnimationFrame.bind(window);
+/**
+ * Utility to join classes conditionally
+ */
+function classes() {
+    var classes = [];
+    for (var _i = 0; _i < arguments.length; _i++) {
+        classes[_i] = arguments[_i];
+    }
+    return classes.filter(function (c) { return !!c; }).join(' ');
+}
+/**
+ * Merges various styles into a single style object.
+ * Note: if two objects have the same property the last one wins
+ */
+function extend() {
+    var objects = [];
+    for (var _i = 0; _i < arguments.length; _i++) {
+        objects[_i] = arguments[_i];
+    }
+    /** The final result we will return */
+    var result = {};
+    for (var _a = 0, objects_1 = objects; _a < objects_1.length; _a++) {
+        var object = objects_1[_a];
+        if (object == null || object === false) {
+            continue;
+        }
+        for (var key in object) {
+            /** Falsy values except a explicit 0 is ignored */
+            var val = object[key];
+            if (!val && val !== 0) {
+                continue;
+            }
+            /** if nested media or pseudo selector */
+            if (key === '$nest' && val) {
+                result[key] = result['$nest'] ? extend(result['$nest'], val) : val;
+            }
+            else if ((key.indexOf('&') !== -1 || key.indexOf('@media') === 0)) {
+                result[key] = result[key] ? extend(result[key], val) : val;
+            }
+            else {
+                result[key] = val;
+            }
+        }
+    }
+    return result;
+}
+/**
+ * Utility to help customize styles with media queries. e.g.
+ * ```
+ * style(
+ *  media({maxWidth:500}, {color:'red'})
+ * )
+ * ```
+ */
+var media = function (mediaQuery) {
+    var objects = [];
+    for (var _i = 1; _i < arguments.length; _i++) {
+        objects[_i - 1] = arguments[_i];
+    }
+    var mediaQuerySections = [];
+    if (mediaQuery.type)
+        mediaQuerySections.push(mediaQuery.type);
+    if (mediaQuery.orientation)
+        mediaQuerySections.push(mediaQuery.orientation);
+    if (mediaQuery.minWidth)
+        mediaQuerySections.push("(min-width: " + mediaLength(mediaQuery.minWidth) + ")");
+    if (mediaQuery.maxWidth)
+        mediaQuerySections.push("(max-width: " + mediaLength(mediaQuery.maxWidth) + ")");
+    if (mediaQuery.minHeight)
+        mediaQuerySections.push("(min-height: " + mediaLength(mediaQuery.minHeight) + ")");
+    if (mediaQuery.maxHeight)
+        mediaQuerySections.push("(max-height: " + mediaLength(mediaQuery.maxHeight) + ")");
+    var stringMediaQuery = "@media " + mediaQuerySections.join(' and ');
+    var object = {
+        $nest: (_a = {},
+            _a[stringMediaQuery] = extend.apply(void 0, objects),
+            _a)
+    };
+    return object;
+    var _a;
+};
+var mediaLength = function (value) {
+    return typeof value === 'string' ? value : value + "px";
+};
+
+// CONCATENATED MODULE: ./node_modules/typestyle/lib.es2015/internal/typestyle.js
+
+
+
+/**
+ * Creates an instance of free style with our options
+ */
+var createFreeStyle = function () { return free_style["create"](
+/** Use the default hash function */
+undefined, 
+/** Preserve $debugName values */
+true); };
+/**
+ * Maintains a single stylesheet and keeps it in sync with requested styles
+ */
+var typestyle_TypeStyle = (function () {
+    function TypeStyle(_a) {
+        var autoGenerateTag = _a.autoGenerateTag;
+        var _this = this;
+        /**
+         * Insert `raw` CSS as a string. This is useful for e.g.
+         * - third party CSS that you are customizing with template strings
+         * - generating raw CSS in JavaScript
+         * - reset libraries like normalize.css that you can use without loaders
+         */
+        this.cssRaw = function (mustBeValidCSS) {
+            if (!mustBeValidCSS) {
+                return;
+            }
+            _this._raw += mustBeValidCSS || '';
+            _this._pendingRawChange = true;
+            _this._styleUpdated();
+        };
+        /**
+         * Takes CSSProperties and registers it to a global selector (body, html, etc.)
+         */
+        this.cssRule = function (selector) {
+            var objects = [];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                objects[_i - 1] = arguments[_i];
+            }
+            var object = ensureStringObj(extend.apply(void 0, objects)).result;
+            _this._freeStyle.registerRule(selector, object);
+            _this._styleUpdated();
+            return;
+        };
+        /**
+         * Renders styles to the singleton tag imediately
+         * NOTE: You should only call it on initial render to prevent any non CSS flash.
+         * After that it is kept sync using `requestAnimationFrame` and we haven't noticed any bad flashes.
+         **/
+        this.forceRenderStyles = function () {
+            var target = _this._getTag();
+            if (!target) {
+                return;
+            }
+            target.textContent = _this.getStyles();
+        };
+        /**
+         * Utility function to register an @font-face
+         */
+        this.fontFace = function () {
+            var fontFace = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                fontFace[_i] = arguments[_i];
+            }
+            var freeStyle = _this._freeStyle;
+            for (var _a = 0, _b = fontFace; _a < _b.length; _a++) {
+                var face = _b[_a];
+                freeStyle.registerRule('@font-face', face);
+            }
+            _this._styleUpdated();
+            return;
+        };
+        /**
+         * Allows use to use the stylesheet in a node.js environment
+         */
+        this.getStyles = function () {
+            return (_this._raw || '') + _this._freeStyle.getStyles();
+        };
+        /**
+         * Takes keyframes and returns a generated animationName
+         */
+        this.keyframes = function (frames) {
+            var _a = explodeKeyframes(frames), keyframes = _a.keyframes, $debugName = _a.$debugName;
+            // TODO: replace $debugName with display name
+            var animationName = _this._freeStyle.registerKeyframes(keyframes, $debugName);
+            _this._styleUpdated();
+            return animationName;
+        };
+        /**
+         * Helps with testing. Reinitializes FreeStyle + raw
+         */
+        this.reinit = function () {
+            /** reinit freestyle */
+            var freeStyle = createFreeStyle();
+            _this._freeStyle = freeStyle;
+            _this._lastFreeStyleChangeId = freeStyle.changeId;
+            /** reinit raw */
+            _this._raw = '';
+            _this._pendingRawChange = false;
+            /** Clear any styles that were flushed */
+            var target = _this._getTag();
+            if (target) {
+                target.textContent = '';
+            }
+        };
+        /** Sets the target tag where we write the css on style updates */
+        this.setStylesTarget = function (tag) {
+            /** Clear any data in any previous tag */
+            if (_this._tag) {
+                _this._tag.textContent = '';
+            }
+            _this._tag = tag;
+            /** This special time buffer immediately */
+            _this.forceRenderStyles();
+        };
+        /**
+         * Takes CSSProperties and return a generated className you can use on your component
+         */
+        this.style = function () {
+            var objects = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                objects[_i] = arguments[_i];
+            }
+            var freeStyle = _this._freeStyle;
+            var _a = ensureStringObj(extend.apply(void 0, objects)), result = _a.result, debugName = _a.debugName;
+            var className = debugName ? freeStyle.registerStyle(result, debugName) : freeStyle.registerStyle(result);
+            _this._styleUpdated();
+            return className;
+        };
+        var freeStyle = createFreeStyle();
+        this._autoGenerateTag = autoGenerateTag;
+        this._freeStyle = freeStyle;
+        this._lastFreeStyleChangeId = freeStyle.changeId;
+        this._pending = 0;
+        this._pendingRawChange = false;
+        this._raw = '';
+        this._tag = undefined;
+    }
+    /**
+     * Only calls cb all sync operations settle
+     */
+    TypeStyle.prototype._afterAllSync = function (cb) {
+        var _this = this;
+        this._pending++;
+        var pending = this._pending;
+        raf(function () {
+            if (pending !== _this._pending) {
+                return;
+            }
+            cb();
+        });
+    };
+    TypeStyle.prototype._getTag = function () {
+        if (this._tag) {
+            return this._tag;
+        }
+        if (this._autoGenerateTag) {
+            var tag = typeof window === 'undefined'
+                ? { textContent: '' }
+                : document.createElement('style');
+            if (typeof document !== 'undefined') {
+                document.head.appendChild(tag);
+            }
+            this._tag = tag;
+            return tag;
+        }
+        return undefined;
+    };
+    /** Checks if the style tag needs updating and if so queues up the change */
+    TypeStyle.prototype._styleUpdated = function () {
+        var _this = this;
+        var changeId = this._freeStyle.changeId;
+        var lastChangeId = this._lastFreeStyleChangeId;
+        if (!this._pendingRawChange && changeId === lastChangeId) {
+            return;
+        }
+        this._lastFreeStyleChangeId = changeId;
+        this._pendingRawChange = false;
+        this._afterAllSync(function () { return _this.forceRenderStyles(); });
+    };
+    return TypeStyle;
+}());
+
+
+// EXTERNAL MODULE: ./node_modules/typestyle/lib.es2015/types.js
+var types = __webpack_require__(15);
+var types_default = /*#__PURE__*/__webpack_require__.n(types);
+
+// CONCATENATED MODULE: ./node_modules/typestyle/lib.es2015/index.js
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "setStylesTarget", function() { return setStylesTarget; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "cssRaw", function() { return cssRaw; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "cssRule", function() { return cssRule; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "forceRenderStyles", function() { return forceRenderStyles; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "fontFace", function() { return fontFace; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getStyles", function() { return getStyles; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "keyframes", function() { return lib_es2015_keyframes; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "reinit", function() { return reinit; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "style", function() { return style; });
+/* harmony export (immutable) */ __webpack_exports__["createTypeStyle"] = createTypeStyle;
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, "TypeStyle", function() { return typestyle_TypeStyle; });
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, "types", function() { return types; });
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, "extend", function() { return extend; });
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, "classes", function() { return classes; });
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, "media", function() { return media; });
+
+
+/**
+ * All the CSS types in the 'types' namespace
+ */
+
+
+/**
+ * Export certain utilities
+ */
+
+/** Zero configuration, default instance of TypeStyle */
+var ts = new typestyle_TypeStyle({ autoGenerateTag: true });
+/** Sets the target tag where we write the css on style updates */
+var setStylesTarget = ts.setStylesTarget;
+/**
+ * Insert `raw` CSS as a string. This is useful for e.g.
+ * - third party CSS that you are customizing with template strings
+ * - generating raw CSS in JavaScript
+ * - reset libraries like normalize.css that you can use without loaders
+ */
+var cssRaw = ts.cssRaw;
+/**
+ * Takes CSSProperties and registers it to a global selector (body, html, etc.)
+ */
+var cssRule = ts.cssRule;
+/**
+ * Renders styles to the singleton tag imediately
+ * NOTE: You should only call it on initial render to prevent any non CSS flash.
+ * After that it is kept sync using `requestAnimationFrame` and we haven't noticed any bad flashes.
+ **/
+var forceRenderStyles = ts.forceRenderStyles;
+/**
+ * Utility function to register an @font-face
+ */
+var fontFace = ts.fontFace;
+/**
+ * Allows use to use the stylesheet in a node.js environment
+ */
+var getStyles = ts.getStyles;
+/**
+ * Takes keyframes and returns a generated animationName
+ */
+var lib_es2015_keyframes = ts.keyframes;
+/**
+ * Helps with testing. Reinitializes FreeStyle + raw
+ */
+var reinit = ts.reinit;
+/**
+ * Takes CSSProperties and return a generated className you can use on your component
+ */
+var style = ts.style;
+/**
+ * Creates a new instance of TypeStyle separate from the default instance.
+ *
+ * - Use this for creating a different typestyle instance for a shadow dom component.
+ * - Use this if you don't want an auto tag generated and you just want to collect the CSS.
+ *
+ * NOTE: styles aren't shared between different instances.
+ */
+function createTypeStyle(target) {
+    var instance = new typestyle_TypeStyle({ autoGenerateTag: false });
+    if (target) {
+        instance.setStylesTarget(target);
+    }
+    return instance;
+}
+
+
+/***/ }),
+/* 2 */
+/***/ (function(module, exports) {
+
+// shim for using process in browser
+var process = module.exports = {};
+
+// cached from whatever global is present so that test runners that stub it
+// don't break things.  But we need to wrap it in a try catch in case it is
+// wrapped in strict mode code which doesn't define any globals.  It's inside a
+// function because try/catches deoptimize in certain engines.
+
+var cachedSetTimeout;
+var cachedClearTimeout;
+
+function defaultSetTimout() {
+    throw new Error('setTimeout has not been defined');
+}
+function defaultClearTimeout () {
+    throw new Error('clearTimeout has not been defined');
+}
+(function () {
+    try {
+        if (typeof setTimeout === 'function') {
+            cachedSetTimeout = setTimeout;
+        } else {
+            cachedSetTimeout = defaultSetTimout;
+        }
+    } catch (e) {
+        cachedSetTimeout = defaultSetTimout;
+    }
+    try {
+        if (typeof clearTimeout === 'function') {
+            cachedClearTimeout = clearTimeout;
+        } else {
+            cachedClearTimeout = defaultClearTimeout;
+        }
+    } catch (e) {
+        cachedClearTimeout = defaultClearTimeout;
+    }
+} ())
+function runTimeout(fun) {
+    if (cachedSetTimeout === setTimeout) {
+        //normal enviroments in sane situations
+        return setTimeout(fun, 0);
+    }
+    // if setTimeout wasn't available but was latter defined
+    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
+        cachedSetTimeout = setTimeout;
+        return setTimeout(fun, 0);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedSetTimeout(fun, 0);
+    } catch(e){
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
+            return cachedSetTimeout.call(null, fun, 0);
+        } catch(e){
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
+            return cachedSetTimeout.call(this, fun, 0);
+        }
+    }
+
+
+}
+function runClearTimeout(marker) {
+    if (cachedClearTimeout === clearTimeout) {
+        //normal enviroments in sane situations
+        return clearTimeout(marker);
+    }
+    // if clearTimeout wasn't available but was latter defined
+    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
+        cachedClearTimeout = clearTimeout;
+        return clearTimeout(marker);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedClearTimeout(marker);
+    } catch (e){
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
+            return cachedClearTimeout.call(null, marker);
+        } catch (e){
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
+            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
+            return cachedClearTimeout.call(this, marker);
+        }
+    }
+
+
+
+}
+var queue = [];
+var draining = false;
+var currentQueue;
+var queueIndex = -1;
+
+function cleanUpNextTick() {
+    if (!draining || !currentQueue) {
+        return;
+    }
+    draining = false;
+    if (currentQueue.length) {
+        queue = currentQueue.concat(queue);
+    } else {
+        queueIndex = -1;
+    }
+    if (queue.length) {
+        drainQueue();
+    }
+}
+
+function drainQueue() {
+    if (draining) {
+        return;
+    }
+    var timeout = runTimeout(cleanUpNextTick);
+    draining = true;
+
+    var len = queue.length;
+    while(len) {
+        currentQueue = queue;
+        queue = [];
+        while (++queueIndex < len) {
+            if (currentQueue) {
+                currentQueue[queueIndex].run();
+            }
+        }
+        queueIndex = -1;
+        len = queue.length;
+    }
+    currentQueue = null;
+    draining = false;
+    runClearTimeout(timeout);
+}
+
+process.nextTick = function (fun) {
+    var args = new Array(arguments.length - 1);
+    if (arguments.length > 1) {
+        for (var i = 1; i < arguments.length; i++) {
+            args[i - 1] = arguments[i];
+        }
+    }
+    queue.push(new Item(fun, args));
+    if (queue.length === 1 && !draining) {
+        runTimeout(drainQueue);
+    }
+};
+
+// v8 likes predictible objects
+function Item(fun, array) {
+    this.fun = fun;
+    this.array = array;
+}
+Item.prototype.run = function () {
+    this.fun.apply(null, this.array);
+};
+process.title = 'browser';
+process.browser = true;
+process.env = {};
+process.argv = [];
+process.version = ''; // empty string to avoid regexp issues
+process.versions = {};
+
+function noop() {}
+
+process.on = noop;
+process.addListener = noop;
+process.once = noop;
+process.off = noop;
+process.removeListener = noop;
+process.removeAllListeners = noop;
+process.emit = noop;
+process.prependListener = noop;
+process.prependOnceListener = noop;
+
+process.listeners = function (name) { return [] }
+
+process.binding = function (name) {
+    throw new Error('process.binding is not supported');
+};
+
+process.cwd = function () { return '/' };
+process.chdir = function (dir) {
+    throw new Error('process.chdir is not supported');
+};
+process.umask = function() { return 0; };
+
 
 /***/ }),
 /* 3 */
@@ -1435,18 +1435,55 @@ exports.__esModule = true;
 /**
  * TODO: move out to csstips
  */
-__export(__webpack_require__(12));
 __export(__webpack_require__(13));
-__export(__webpack_require__(15));
-__export(__webpack_require__(8));
+__export(__webpack_require__(14));
 __export(__webpack_require__(16));
+__export(__webpack_require__(9));
 __export(__webpack_require__(17));
 __export(__webpack_require__(18));
 __export(__webpack_require__(19));
+__export(__webpack_require__(20));
 
 
 /***/ }),
 /* 4 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/* WEBPACK VAR INJECTION */(function(process) {/**
+ * Copyright 2013-present, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree. An additional grant
+ * of patent rights can be found in the PATENTS file in the same directory.
+ */
+
+if (process.env.NODE_ENV !== 'production') {
+  var REACT_ELEMENT_TYPE = (typeof Symbol === 'function' &&
+    Symbol.for &&
+    Symbol.for('react.element')) ||
+    0xeac7;
+
+  var isValidElement = function(object) {
+    return typeof object === 'object' &&
+      object !== null &&
+      object.$$typeof === REACT_ELEMENT_TYPE;
+  };
+
+  // By explicitly using `prop-types` you are opting into new development behavior.
+  // http://fb.me/prop-types-in-prod
+  var throwOnDirectAccess = true;
+  module.exports = __webpack_require__(21)(isValidElement, throwOnDirectAccess);
+} else {
+  // By explicitly using `prop-types` you are opting into new production behavior.
+  // http://fb.me/prop-types-in-prod
+  module.exports = __webpack_require__(23)();
+}
+
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)))
+
+/***/ }),
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1490,7 +1527,7 @@ emptyFunction.thatReturnsArgument = function (arg) {
 module.exports = emptyFunction;
 
 /***/ }),
-/* 5 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1549,10 +1586,10 @@ function invariant(condition, format, a, b, c, d, e, f) {
 }
 
 module.exports = invariant;
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)))
 
 /***/ }),
-/* 6 */
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1573,7 +1610,7 @@ module.exports = ReactPropTypesSecret;
 
 
 /***/ }),
-/* 7 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2039,10 +2076,10 @@ function create(hash, debug, changes) {
 }
 exports.create = create;
 //# sourceMappingURL=free-style.js.map
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)))
 
 /***/ }),
-/* 8 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2174,7 +2211,7 @@ exports.width = function (value) {
 
 
 /***/ }),
-/* 9 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2190,7 +2227,7 @@ exports.width = function (value) {
 
 
 
-var emptyFunction = __webpack_require__(4);
+var emptyFunction = __webpack_require__(5);
 
 /**
  * Similar to invariant but only logs a warning if the condition is not met.
@@ -2242,10 +2279,10 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 module.exports = warning;
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)))
 
 /***/ }),
-/* 10 */
+/* 11 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -3224,8 +3261,8 @@ var preact = {
 
 
 /***/ }),
-/* 11 */,
-/* 12 */
+/* 12 */,
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3237,7 +3274,7 @@ exports.fontWeightBold = { fontWeight: 'bold' };
 
 
 /***/ }),
-/* 13 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3447,13 +3484,13 @@ exports.selfStretch = {
 
 
 /***/ }),
-/* 14 */
+/* 15 */
 /***/ (function(module, exports) {
 
 
 
 /***/ }),
-/* 15 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3535,7 +3572,7 @@ exports.pageLeft = typestyle_1.extend(fixed, {
 
 
 /***/ }),
-/* 16 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3563,7 +3600,7 @@ exports.someChildWillScroll = {
 
 
 /***/ }),
-/* 17 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3584,7 +3621,7 @@ exports.invisible = {
 
 
 /***/ }),
-/* 18 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3614,14 +3651,14 @@ exports.normalize = normalize;
 
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 exports.__esModule = true;
 var typestyle_1 = __webpack_require__(1);
-var box_1 = __webpack_require__(8);
+var box_1 = __webpack_require__(9);
 /**
  * Recommended Page setup
  * - Sets up the body to be full size
@@ -3651,43 +3688,6 @@ exports.setupPage = setupPage;
 
 
 /***/ }),
-/* 20 */
-/***/ (function(module, exports, __webpack_require__) {
-
-/* WEBPACK VAR INJECTION */(function(process) {/**
- * Copyright 2013-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
-
-if (process.env.NODE_ENV !== 'production') {
-  var REACT_ELEMENT_TYPE = (typeof Symbol === 'function' &&
-    Symbol.for &&
-    Symbol.for('react.element')) ||
-    0xeac7;
-
-  var isValidElement = function(object) {
-    return typeof object === 'object' &&
-      object !== null &&
-      object.$$typeof === REACT_ELEMENT_TYPE;
-  };
-
-  // By explicitly using `prop-types` you are opting into new development behavior.
-  // http://fb.me/prop-types-in-prod
-  var throwOnDirectAccess = true;
-  module.exports = __webpack_require__(21)(isValidElement, throwOnDirectAccess);
-} else {
-  // By explicitly using `prop-types` you are opting into new production behavior.
-  // http://fb.me/prop-types-in-prod
-  module.exports = __webpack_require__(23)();
-}
-
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
-
-/***/ }),
 /* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -3703,11 +3703,11 @@ if (process.env.NODE_ENV !== 'production') {
 
 
 
-var emptyFunction = __webpack_require__(4);
-var invariant = __webpack_require__(5);
-var warning = __webpack_require__(9);
+var emptyFunction = __webpack_require__(5);
+var invariant = __webpack_require__(6);
+var warning = __webpack_require__(10);
 
-var ReactPropTypesSecret = __webpack_require__(6);
+var ReactPropTypesSecret = __webpack_require__(7);
 var checkPropTypes = __webpack_require__(22);
 
 module.exports = function(isValidElement, throwOnDirectAccess) {
@@ -4205,7 +4205,7 @@ module.exports = function(isValidElement, throwOnDirectAccess) {
   return ReactPropTypes;
 };
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)))
 
 /***/ }),
 /* 22 */
@@ -4224,9 +4224,9 @@ module.exports = function(isValidElement, throwOnDirectAccess) {
 
 
 if (process.env.NODE_ENV !== 'production') {
-  var invariant = __webpack_require__(5);
-  var warning = __webpack_require__(9);
-  var ReactPropTypesSecret = __webpack_require__(6);
+  var invariant = __webpack_require__(6);
+  var warning = __webpack_require__(10);
+  var ReactPropTypesSecret = __webpack_require__(7);
   var loggedTypeFailures = {};
 }
 
@@ -4274,7 +4274,7 @@ function checkPropTypes(typeSpecs, values, location, componentName, getStack) {
 
 module.exports = checkPropTypes;
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)))
 
 /***/ }),
 /* 23 */
@@ -4292,9 +4292,9 @@ module.exports = checkPropTypes;
 
 
 
-var emptyFunction = __webpack_require__(4);
-var invariant = __webpack_require__(5);
-var ReactPropTypesSecret = __webpack_require__(6);
+var emptyFunction = __webpack_require__(5);
+var invariant = __webpack_require__(6);
+var ReactPropTypesSecret = __webpack_require__(7);
 
 module.exports = function() {
   function shim(props, propName, componentName, location, propFullName, secret) {
@@ -4343,12 +4343,14 @@ module.exports = function() {
 
 
 /***/ }),
-/* 24 */
+/* 24 */,
+/* 25 */,
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 __webpack_require__(3);
-__webpack_require__(10);
-__webpack_require__(2);
+__webpack_require__(11);
+__webpack_require__(0);
 module.exports = __webpack_require__(1);
 
 
