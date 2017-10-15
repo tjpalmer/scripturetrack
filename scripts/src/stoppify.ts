@@ -120,8 +120,10 @@ function stoppify(bags: Bag[]) {
   // let counts = combo.map(term => term.count);
   // let words = combo.map(term => term.word);
   combo = normalizedBag(combo);
-  console.log(combo.size);
-  return;
+  // TODO I had the next two lines in. Not sure of the debug purpose.
+  // TODO I commented them out so I'd stop getting compiler errors.
+  // console.log(combo.size);
+  // return;
   // bags.map(bag => {
   //   // let map = new Map(
   //   //   bag.map(term => [term.word, term.count] as [string, number]),

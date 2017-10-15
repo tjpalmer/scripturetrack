@@ -642,33 +642,35 @@ function calculateLineSplits(box: HTMLElement) {
   }
   pushSplit();
   // Option debug visuals.
-  if (false) {
-    for (let split of arrayify(box.querySelectorAll('.split'))) {
-      split.remove();
-    }
-    let rect = box.querySelector('p')!.getBoundingClientRect();
-    let x = rect.left;
-    let width = rect.width;
-    let addSplit = (y: number, color: string) => {
-      let split = document.createElement('div');
-      split.setAttribute('class', 'split');
-      split.setAttribute('style', `
-        background: ${color};
-        height: 1px;
-        left: ${x}px;
-        position: absolute;
-        top: ${y}px;
-        width: ${width}px;
-      `);
-      box.appendChild(split);
-    };
-    for (let split of splits) {
-      addSplit(split.top, 'black');
-      addSplit(split.top + split.height, 'red');
-    }
-  }
+  // drawSplits();
   // All done.
   return splits;
+}
+
+function drawSplits(box: HTMLElement, splits: Split[]) {
+  for (let split of arrayify(box.querySelectorAll('.split'))) {
+    split.remove();
+  }
+  let rect = box.querySelector('p')!.getBoundingClientRect();
+  let x = rect.left;
+  let width = rect.width;
+  let addSplit = (y: number, color: string) => {
+    let split = document.createElement('div');
+    split.setAttribute('class', 'split');
+    split.setAttribute('style', `
+      background: ${color};
+      height: 1px;
+      left: ${x}px;
+      position: absolute;
+      top: ${y}px;
+      width: ${width}px;
+    `);
+    box.appendChild(split);
+  };
+  for (let split of splits) {
+    addSplit(split.top, 'black');
+    addSplit(split.top + split.height, 'red');
+  }
 }
 
 interface Line {
