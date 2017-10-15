@@ -45,12 +45,12 @@ export class AppView extends Component<App, AppState> {
 
   constructor(props: App) {
     super(props);
-    this.setState({
+    this.state = {
       count: 0,
       outcomes: [],
       quizLength: 5,
-    });
-    this.shuffle();
+    };
+    this.shuffle(true);
   }
 
   guess(guess?: Path) {
@@ -80,7 +80,7 @@ export class AppView extends Component<App, AppState> {
     this.setState({outcomes, showAnswer: true});
   }
 
-  shuffle() {
+  shuffle(first?: boolean) {
     let {library} = this.props;
     let {outcomes, quizLength} = this.state;
     // Calculate total text size, and choose a point in all the text.
@@ -100,7 +100,7 @@ export class AppView extends Component<App, AppState> {
       findIndexOffset(offset, doc.chapterSizes!, size => size);
     // Set text to undefined before we try loading, so we don't flash to random
     // spot of current text.
-    this.setState({
+    let newState = {
       actual: {chapterIndex, names},
       chapter: undefined,
       chapterIndex,
@@ -108,7 +108,12 @@ export class AppView extends Component<App, AppState> {
       guess: undefined,
       outcomes: outcomes.length < quizLength ? outcomes : [],
       showAnswer: false,
-    });
+    };
+    if (first) {
+      Object.assign(this.state, newState);
+    } else {
+      this.setState(newState);
+    }
     // Load the chapter that we want.
     let base = volume.uri!.replace(/\/[^/]*$/, '');
     let chapterUri = [base, names[1], `ch${chapterIndex}.json`].join('/');

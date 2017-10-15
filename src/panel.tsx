@@ -77,7 +77,7 @@ class DocView extends Component<DocProps, {expanded: boolean}> {
 
   constructor(props: DocProps) {
     super(props);
-    this.setState({expanded: !!props.answer});
+    this.state = {expanded: !!props.answer};
   }
 
   onClick = () => {
@@ -234,7 +234,7 @@ class VolumeView extends Component<VolumeProps, {expanded: boolean}> {
 
   constructor(props: VolumeProps) {
     super(props);
-    this.setState({expanded: !!props.answer});
+    this.state = {expanded: !!props.answer};
   }
 
   onClick = () => {

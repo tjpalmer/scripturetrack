@@ -20,7 +20,7 @@ export class ExcerptScroller
 
   render() {
     let {chapter} = this.props;
-    let {bottom, page, ready, top} = this.state;
+    let {bottom, page, ready, top} = this.state || {} as any;
     return (
       <div className={style(flex, vertical)}>
         <ScrollButton scroller={this} dir='up' end={top || !ready}/>
@@ -80,6 +80,7 @@ class ExcerptView extends PureComponent<
 
   render() {
     let {chapter} = this.props;
+    let {ready} = this.state || {} as any;
     return (
       <div
         className={style(
@@ -92,7 +93,7 @@ class ExcerptView extends PureComponent<
             letterSpacing: '-0.05em',
             overflow: 'hidden',
             position: 'relative',
-            visibility: this.state.ready ? 'visible' : 'hidden',
+            visibility: ready ? 'visible' : 'hidden',
             wordSpacing: '0.1em',
           },
           padding(0, '1em'),

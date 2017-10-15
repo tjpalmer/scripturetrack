@@ -1,6 +1,49 @@
-webpackJsonp([0],{
+webpackJsonp([0],[
+/* 0 */,
+/* 1 */,
+/* 2 */,
+/* 3 */,
+/* 4 */,
+/* 5 */,
+/* 6 */
+/***/ (function(module, exports, __webpack_require__) {
 
-/***/ 12:
+/**
+ * Copyright 2013-present, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree. An additional grant
+ * of patent rights can be found in the PATENTS file in the same directory.
+ */
+
+if (false) {
+  var REACT_ELEMENT_TYPE = (typeof Symbol === 'function' &&
+    Symbol.for &&
+    Symbol.for('react.element')) ||
+    0xeac7;
+
+  var isValidElement = function(object) {
+    return typeof object === 'object' &&
+      object !== null &&
+      object.$$typeof === REACT_ELEMENT_TYPE;
+  };
+
+  // By explicitly using `prop-types` you are opting into new development behavior.
+  // http://fb.me/prop-types-in-prod
+  var throwOnDirectAccess = true;
+  module.exports = require('./factoryWithTypeCheckers')(isValidElement, throwOnDirectAccess);
+} else {
+  // By explicitly using `prop-types` you are opting into new production behavior.
+  // http://fb.me/prop-types-in-prod
+  module.exports = __webpack_require__(24)();
+}
+
+
+/***/ }),
+/* 7 */,
+/* 8 */,
+/* 9 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -78,18 +121,19 @@ function findLibraryTextOffset(library, path) {
 }
 
 // EXTERNAL MODULE: ./node_modules/csstips/lib/index.js
-var lib = __webpack_require__(3);
+var lib = __webpack_require__(2);
 var lib_default = /*#__PURE__*/__webpack_require__.n(lib);
 
-// EXTERNAL MODULE: ./node_modules/preact-compat/dist/preact-compat.es.js
-var preact_compat_es = __webpack_require__(0);
+// EXTERNAL MODULE: ./node_modules/react/index.js
+var react = __webpack_require__(0);
+var react_default = /*#__PURE__*/__webpack_require__.n(react);
 
 // EXTERNAL MODULE: ./node_modules/react-feather/dist/icons/chevron-down.js
-var chevron_down = __webpack_require__(24);
+var chevron_down = __webpack_require__(23);
 var chevron_down_default = /*#__PURE__*/__webpack_require__.n(chevron_down);
 
 // EXTERNAL MODULE: ./node_modules/react-feather/dist/icons/chevron-up.js
-var chevron_up = __webpack_require__(25);
+var chevron_up = __webpack_require__(28);
 var chevron_up_default = /*#__PURE__*/__webpack_require__.n(chevron_up);
 
 // EXTERNAL MODULE: ./node_modules/typestyle/lib.es2015/index.js + 3 modules
@@ -103,17 +147,17 @@ var lib_es2015 = __webpack_require__(1);
 
 
 
-class excerpt_ExcerptScroller extends preact_compat_es["PureComponent"] {
+class excerpt_ExcerptScroller extends react["PureComponent"] {
     markEnd(top, bottom) {
         this.setState({ bottom, ready: true, top });
     }
     render() {
         let { chapter } = this.props;
-        let { bottom, page, ready, top } = this.state;
-        return (preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["flex"], lib["vertical"]) },
-            preact_compat_es["createElement"](excerpt_ScrollButton, { scroller: this, dir: 'up', end: top || !ready }),
-            preact_compat_es["createElement"](excerpt_ExcerptView, Object.assign({ page: page, scroller: this }, { chapter })),
-            preact_compat_es["createElement"](excerpt_ScrollButton, { scroller: this, dir: 'down', end: bottom || !ready })));
+        let { bottom, page, ready, top } = this.state || {};
+        return (react["createElement"]("div", { className: Object(lib_es2015["style"])(lib["flex"], lib["vertical"]) },
+            react["createElement"](excerpt_ScrollButton, { scroller: this, dir: 'up', end: top || !ready }),
+            react["createElement"](excerpt_ExcerptView, Object.assign({ page: page, scroller: this }, { chapter })),
+            react["createElement"](excerpt_ScrollButton, { scroller: this, dir: 'down', end: bottom || !ready })));
     }
     scroll(dir) {
         if (this.state.page != undefined) {
@@ -125,7 +169,7 @@ class excerpt_ExcerptScroller extends preact_compat_es["PureComponent"] {
         this.setState({ page });
     }
 }
-class excerpt_ExcerptView extends preact_compat_es["PureComponent"] {
+class excerpt_ExcerptView extends react["PureComponent"] {
     constructor() {
         super(...arguments);
         this.maxHeight = window.innerHeight * 5 / 8;
@@ -156,16 +200,17 @@ class excerpt_ExcerptView extends preact_compat_es["PureComponent"] {
     }
     render() {
         let { chapter } = this.props;
-        return (preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])({
+        let { ready } = this.state || {};
+        return (react["createElement"]("div", { className: Object(lib_es2015["style"])({
                 fontFamily: 'Excerpt',
                 fontSize: '250%',
                 height: `${this.maxHeight}px`,
                 letterSpacing: '-0.05em',
                 overflow: 'hidden',
                 position: 'relative',
-                visibility: this.state.ready ? 'visible' : 'hidden',
+                visibility: ready ? 'visible' : 'hidden',
                 wordSpacing: '0.1em',
-            }, Object(lib["padding"])(0, '1em')), ref: element => this.container = element }, chapter && chapter.paragraphs.map((paragraph, paragraphIndex) => preact_compat_es["createElement"]("p", { className: Object(lib_es2015["style"])({
+            }, Object(lib["padding"])(0, '1em')), ref: element => this.container = element }, chapter && chapter.paragraphs.map((paragraph, paragraphIndex) => react["createElement"]("p", { className: Object(lib_es2015["style"])({
                 lineHeight: 1.5,
                 margin: '0.3em auto',
                 maxWidth: '25em',
@@ -178,7 +223,7 @@ class excerpt_ExcerptView extends preact_compat_es["PureComponent"] {
                         marginBottom: '1em',
                     },
                 },
-            }) }, paragraph.verses.map(verse => preact_compat_es["createElement"]("span", null,
+            }) }, paragraph.verses.map(verse => react["createElement"]("span", null,
             verse.text,
             " "))))));
     }
@@ -210,21 +255,21 @@ class excerpt_ExcerptView extends preact_compat_es["PureComponent"] {
         }, 100);
     }
 }
-class excerpt_ScrollButton extends preact_compat_es["Component"] {
+class excerpt_ScrollButton extends react["Component"] {
     render() {
         let { dir, end, scroller } = this.props;
         let size = window.innerHeight / 16;
-        return (preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["flex"], lib["vertical"], {
+        return (react["createElement"]("div", { className: Object(lib_es2015["style"])(lib["flex"], lib["vertical"], {
                 color: end ? '#bbb' : 'black',
                 fontSize: '4em',
                 textAlign: 'center',
             }) },
-            preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["flex"]) }),
-            preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["flex"]) },
-                preact_compat_es["createElement"]("span", { className: Object(lib_es2015["style"])({ cursor: 'default', padding: '1em' }), onClick: () => !end && scroller.scroll(dir) }, dir == 'up' ?
-                    preact_compat_es["createElement"](chevron_up_default.a, { size: size }) :
-                    preact_compat_es["createElement"](chevron_down_default.a, { size: size }))),
-            preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["flex"]) })));
+            react["createElement"]("div", { className: Object(lib_es2015["style"])(lib["flex"]) }),
+            react["createElement"]("div", { className: Object(lib_es2015["style"])(lib["flex"]) },
+                react["createElement"]("span", { className: Object(lib_es2015["style"])({ cursor: 'default', padding: '1em' }), onClick: () => !end && scroller.scroll(dir) }, dir == 'up' ?
+                    react["createElement"](chevron_up_default.a, { size: size }) :
+                    react["createElement"](chevron_down_default.a, { size: size }))),
+            react["createElement"]("div", { className: Object(lib_es2015["style"])(lib["flex"]) })));
     }
 }
 function calculateLineSplits(box) {
@@ -321,7 +366,7 @@ function findLines(box) {
 
 
 
-class panel_ChapterView extends preact_compat_es["Component"] {
+class panel_ChapterView extends react["Component"] {
     constructor() {
         super(...arguments);
         this.onClick = () => {
@@ -358,14 +403,14 @@ class panel_ChapterView extends preact_compat_es["Component"] {
                     '&:hover': highlight,
                 } }));
         }
-        return preact_compat_es["createElement"]("li", Object.assign({}, { className }, { ref: element => {
+        return react["createElement"]("li", Object.assign({}, { className }, { ref: element => {
                 if (answer) {
                     library.answerElement = element;
                 }
             }, onClick: this.onClick }), index + 1);
     }
 }
-class panel_DocView extends preact_compat_es["Component"] {
+class panel_DocView extends react["Component"] {
     constructor(props) {
         super(props);
         this.onClick = () => {
@@ -375,25 +420,25 @@ class panel_DocView extends preact_compat_es["Component"] {
                 this.setState({ expanded: !this.state.expanded });
             }
         };
-        this.setState({ expanded: !!props.answer });
+        this.state = { expanded: !!props.answer };
     }
     render() {
         let { answer, guess, title, volume } = this.props;
         let { expanded } = this.state;
         let { answer: anyAnswer } = volume.props.library.props;
-        return (preact_compat_es["createElement"]("div", null,
-            preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(!(anyAnswer || guess) && { $nest: { '&:hover': { fontWeight: 'bold' } } }), onClick: this.onClick }, title),
-            preact_compat_es["createElement"]("ul", { className: Object(lib_es2015["style"])({
+        return (react["createElement"]("div", null,
+            react["createElement"]("div", { className: Object(lib_es2015["style"])(!(anyAnswer || guess) && { $nest: { '&:hover': { fontWeight: 'bold' } } }), onClick: this.onClick }, title),
+            react["createElement"]("ul", { className: Object(lib_es2015["style"])({
                     display: 'flex',
                     flexDirection: 'row',
                     flexWrap: 'wrap',
                     listStyle: 'none',
                     padding: 0,
-                }) }, (answer || expanded || guess) && this.props.chapterSizes.map((_, chapterIndex) => preact_compat_es["createElement"](panel_ChapterView, { answer: answer && answer.chapterIndex == chapterIndex ?
+                }) }, (answer || expanded || guess) && this.props.chapterSizes.map((_, chapterIndex) => react["createElement"](panel_ChapterView, { answer: answer && answer.chapterIndex == chapterIndex ?
                     answer : undefined, doc: this, guess: guess && guess.chapterIndex == chapterIndex ? guess : undefined, index: chapterIndex })))));
     }
 }
-class panel_LibraryView extends preact_compat_es["Component"] {
+class panel_LibraryView extends react["Component"] {
     constructor() {
         super(...arguments);
         this.makeGuess = () => {
@@ -420,26 +465,26 @@ class panel_LibraryView extends preact_compat_es["Component"] {
         }
         let last = outcomes.length == quizLength;
         let score = outcomes.length ? outcomes.slice(-1)[0].score : 0;
-        return (preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])({ fontSize: '150%' }, lib["content"], lib["vertical"], Object(lib["width"])('25%')) },
-            preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["flex"], Object(lib["margin"])(0), Object(lib["padding"])(0, '1em'), lib["scrollY"], { cursor: 'default' }) }, this.props.items.map(volume => preact_compat_es["createElement"](panel_VolumeView, Object.assign({ answer: answer && answer.names[0] == volume.name ? answer : undefined, guess: guess && guess.names[0] == volume.name ? guess : undefined, key: volume.name + count, library: this }, Object.assign({ count }, volume))))),
-            preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["content"], lib["horizontal"], {
+        return (react["createElement"]("div", { className: Object(lib_es2015["style"])({ fontSize: '150%' }, lib["content"], lib["vertical"], Object(lib["width"])('25%')) },
+            react["createElement"]("div", { className: Object(lib_es2015["style"])(lib["flex"], Object(lib["margin"])(0), Object(lib["padding"])(0, '1em'), lib["scrollY"], { cursor: 'default' }) }, this.props.items.map(volume => react["createElement"](panel_VolumeView, Object.assign({ answer: answer && answer.names[0] == volume.name ? answer : undefined, guess: guess && guess.names[0] == volume.name ? guess : undefined, key: volume.name + count, library: this }, Object.assign({ count }, volume))))),
+            react["createElement"]("div", { className: Object(lib_es2015["style"])(lib["content"], lib["horizontal"], {
                     borderTop: '1px solid black',
                     margin: '0 0.5em',
                     padding: '1em 0.5em 0',
                 }) },
-                preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["flex"]) },
+                react["createElement"]("div", { className: Object(lib_es2015["style"])(lib["flex"]) },
                     "Round ",
                     outcomes.length + (answer ? 0 : 1),
                     " / ",
                     quizLength),
-                preact_compat_es["createElement"]("div", null, answer &&
-                    preact_compat_es["createElement"]("span", null,
+                react["createElement"]("div", null, answer &&
+                    react["createElement"]("span", null,
                         "+ ",
                         outcomes.slice(-1)[0].score))),
-            preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["content"], lib["horizontal"], { padding: '1em' }) },
-                preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["flex"]) },
-                    preact_compat_es["createElement"]("button", { disabled: !guess, onClick: this.makeGuess, type: 'button' }, answer ? (last ? 'New Game!' : 'Next Excerpt') : 'Make Guess')),
-                preact_compat_es["createElement"]("div", null,
+            react["createElement"]("div", { className: Object(lib_es2015["style"])(lib["content"], lib["horizontal"], { padding: '1em' }) },
+                react["createElement"]("div", { className: Object(lib_es2015["style"])(lib["flex"]) },
+                    react["createElement"]("button", { disabled: !guess, onClick: this.makeGuess, type: 'button' }, answer ? (last ? 'New Game!' : 'Next Excerpt') : 'Make Guess')),
+                react["createElement"]("div", null,
                     last ? 'Final ' : '',
                     "Score ",
                     sum(function* score() {
@@ -449,7 +494,7 @@ class panel_LibraryView extends preact_compat_es["Component"] {
                     }())))));
     }
 }
-class panel_VolumeView extends preact_compat_es["Component"] {
+class panel_VolumeView extends react["Component"] {
     constructor(props) {
         super(props);
         this.onClick = () => {
@@ -458,7 +503,7 @@ class panel_VolumeView extends preact_compat_es["Component"] {
                 this.setState({ expanded: !this.state.expanded });
             }
         };
-        this.setState({ expanded: !!props.answer });
+        this.state = { expanded: !!props.answer };
     }
     render() {
         let { answer, count, guess, library } = this.props;
@@ -466,14 +511,14 @@ class panel_VolumeView extends preact_compat_es["Component"] {
         let { expanded } = this.state;
         let extraStyle = !(anyAnswer || guess) ? { $nest: { '&:hover': { fontSize: '120%' } } } : {};
         let expandStyle = answer || expanded || guess ? {} : { display: 'none' };
-        return (preact_compat_es["createElement"]("div", null,
-            preact_compat_es["createElement"]("h2", { className: Object(lib_es2015["style"])(Object.assign({ fontSize: '110%', marginBottom: '0.2em' }, extraStyle)), onClick: this.onClick }, this.props.title),
-            preact_compat_es["createElement"]("ul", { className: Object(lib_es2015["style"])({
+        return (react["createElement"]("div", null,
+            react["createElement"]("h2", { className: Object(lib_es2015["style"])(Object.assign({ fontSize: '110%', marginBottom: '0.2em' }, extraStyle)), onClick: this.onClick }, this.props.title),
+            react["createElement"]("ul", { className: Object(lib_es2015["style"])({
                     listStyle: 'none',
                     marginTop: 0,
                     padding: 0,
-                }) }, this.props.items.map(doc => preact_compat_es["createElement"]("li", { className: Object(lib_es2015["style"])(expandStyle) },
-                preact_compat_es["createElement"](panel_DocView, Object.assign({}, doc, { answer: answer && answer.names[1] == doc.name ? answer : undefined, guess: guess && guess.names[1] == doc.name ? guess : undefined, key: doc.name + count, volume: this })))))));
+                }) }, this.props.items.map(doc => react["createElement"]("li", { className: Object(lib_es2015["style"])(expandStyle) },
+                react["createElement"](panel_DocView, Object.assign({}, doc, { answer: answer && answer.names[1] == doc.name ? answer : undefined, guess: guess && guess.names[1] == doc.name ? guess : undefined, key: doc.name + count, volume: this })))))));
     }
 }
 let highlight = {
@@ -487,15 +532,15 @@ let highlight = {
 
 
 
-class view_AppView extends preact_compat_es["Component"] {
+class view_AppView extends react["Component"] {
     constructor(props) {
         super(props);
-        this.setState({
+        this.state = {
             count: 0,
             outcomes: [],
             quizLength: 5,
-        });
-        this.shuffle();
+        };
+        this.shuffle(true);
     }
     guess(guess) {
         this.setState({ guess });
@@ -503,9 +548,9 @@ class view_AppView extends preact_compat_es["Component"] {
     render() {
         let { actual, chapter, count, guess, showAnswer } = this.state;
         let answer = showAnswer ? actual : undefined;
-        return (preact_compat_es["createElement"]("div", { className: Object(lib_es2015["style"])(lib["fillParent"], lib["horizontal"], lib["someChildWillScroll"]) },
-            preact_compat_es["createElement"](excerpt_ExcerptScroller, Object.assign({}, { chapter })),
-            preact_compat_es["createElement"](panel_LibraryView, Object.assign({ app: this }, { answer, count, guess }, this.props.library))));
+        return (react["createElement"]("div", { className: Object(lib_es2015["style"])(lib["fillParent"], lib["horizontal"], lib["someChildWillScroll"]) },
+            react["createElement"](excerpt_ExcerptScroller, Object.assign({}, { chapter })),
+            react["createElement"](panel_LibraryView, Object.assign({ app: this }, { answer, count, guess }, this.props.library))));
     }
     showAnswer() {
         let { actual, guess, outcomes } = this.state;
@@ -514,7 +559,7 @@ class view_AppView extends preact_compat_es["Component"] {
         outcomes.push({ actual: actual, guess: guess, score });
         this.setState({ outcomes, showAnswer: true });
     }
-    shuffle() {
+    shuffle(first) {
         let { library } = this.props;
         let { outcomes, quizLength } = this.state;
         for (let volume of library.items) {
@@ -526,7 +571,7 @@ class view_AppView extends preact_compat_es["Component"] {
         let { index: docIndex, item: doc, offset } = findIndexOffset(volumeOffset, volume.items);
         let names = [volume.name, volume.items[docIndex].name];
         let { index: chapterIndex } = findIndexOffset(offset, doc.chapterSizes, size => size);
-        this.setState({
+        let newState = {
             actual: { chapterIndex, names },
             chapter: undefined,
             chapterIndex,
@@ -534,7 +579,13 @@ class view_AppView extends preact_compat_es["Component"] {
             guess: undefined,
             outcomes: outcomes.length < quizLength ? outcomes : [],
             showAnswer: false,
-        });
+        };
+        if (first) {
+            Object.assign(this.state, newState);
+        }
+        else {
+            this.setState(newState);
+        }
         let base = volume.uri.replace(/\/[^/]*$/, '');
         let chapterUri = [base, names[1], `ch${chapterIndex}.json`].join('/');
         fetch(chapterUri).then(response => {
@@ -568,6 +619,10 @@ function scoreGuess(library, actual, guess) {
 
 
 
+// EXTERNAL MODULE: ./node_modules/react-dom/index.js
+var react_dom = __webpack_require__(7);
+var react_dom_default = /*#__PURE__*/__webpack_require__.n(react_dom);
+
 // CONCATENATED MODULE: ./src/main.tsx
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -599,7 +654,7 @@ function init() {
         for (let volume of volumes.items) {
             volume.uri = uri;
         }
-        Object(preact_compat_es["render"])(preact_compat_es["createElement"](view_AppView, { library: volumes }), document.getElementById('root'));
+        Object(react_dom["render"])(react["createElement"](view_AppView, { library: volumes }), document.getElementById('root'));
     });
 }
 function load(uri) {
@@ -610,8 +665,20 @@ function load(uri) {
 
 
 /***/ }),
-
-/***/ 24:
+/* 10 */,
+/* 11 */,
+/* 12 */,
+/* 13 */,
+/* 14 */,
+/* 15 */,
+/* 16 */,
+/* 17 */,
+/* 18 */,
+/* 19 */,
+/* 20 */,
+/* 21 */,
+/* 22 */,
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -627,7 +694,7 @@ var _react = __webpack_require__(0);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _propTypes = __webpack_require__(4);
+var _propTypes = __webpack_require__(6);
 
 var _propTypes2 = _interopRequireDefault(_propTypes);
 
@@ -670,8 +737,199 @@ ChevronDown.defaultProps = {
 exports.default = ChevronDown;
 
 /***/ }),
+/* 24 */
+/***/ (function(module, exports, __webpack_require__) {
 
-/***/ 25:
+"use strict";
+/**
+ * Copyright 2013-present, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree. An additional grant
+ * of patent rights can be found in the PATENTS file in the same directory.
+ */
+
+
+
+var emptyFunction = __webpack_require__(25);
+var invariant = __webpack_require__(26);
+var ReactPropTypesSecret = __webpack_require__(27);
+
+module.exports = function() {
+  function shim(props, propName, componentName, location, propFullName, secret) {
+    if (secret === ReactPropTypesSecret) {
+      // It is still safe when called from React.
+      return;
+    }
+    invariant(
+      false,
+      'Calling PropTypes validators directly is not supported by the `prop-types` package. ' +
+      'Use PropTypes.checkPropTypes() to call them. ' +
+      'Read more at http://fb.me/use-check-prop-types'
+    );
+  };
+  shim.isRequired = shim;
+  function getShim() {
+    return shim;
+  };
+  // Important!
+  // Keep this list in sync with production version in `./factoryWithTypeCheckers.js`.
+  var ReactPropTypes = {
+    array: shim,
+    bool: shim,
+    func: shim,
+    number: shim,
+    object: shim,
+    string: shim,
+    symbol: shim,
+
+    any: shim,
+    arrayOf: getShim,
+    element: shim,
+    instanceOf: getShim,
+    node: shim,
+    objectOf: getShim,
+    oneOf: getShim,
+    oneOfType: getShim,
+    shape: getShim
+  };
+
+  ReactPropTypes.checkPropTypes = emptyFunction;
+  ReactPropTypes.PropTypes = ReactPropTypes;
+
+  return ReactPropTypes;
+};
+
+
+/***/ }),
+/* 25 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+/**
+ * Copyright (c) 2013-present, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree. An additional grant
+ * of patent rights can be found in the PATENTS file in the same directory.
+ *
+ * 
+ */
+
+function makeEmptyFunction(arg) {
+  return function () {
+    return arg;
+  };
+}
+
+/**
+ * This function accepts and discards inputs; it has no side effects. This is
+ * primarily useful idiomatically for overridable function endpoints which
+ * always need to be callable, since JS lacks a null-call idiom ala Cocoa.
+ */
+var emptyFunction = function emptyFunction() {};
+
+emptyFunction.thatReturns = makeEmptyFunction;
+emptyFunction.thatReturnsFalse = makeEmptyFunction(false);
+emptyFunction.thatReturnsTrue = makeEmptyFunction(true);
+emptyFunction.thatReturnsNull = makeEmptyFunction(null);
+emptyFunction.thatReturnsThis = function () {
+  return this;
+};
+emptyFunction.thatReturnsArgument = function (arg) {
+  return arg;
+};
+
+module.exports = emptyFunction;
+
+/***/ }),
+/* 26 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/**
+ * Copyright (c) 2013-present, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree. An additional grant
+ * of patent rights can be found in the PATENTS file in the same directory.
+ *
+ */
+
+
+
+/**
+ * Use invariant() to assert state which your program assumes to be true.
+ *
+ * Provide sprintf-style format (only %s is supported) and arguments
+ * to provide information about what broke and what you were
+ * expecting.
+ *
+ * The invariant message will be stripped in production, but the invariant
+ * will remain to ensure logic does not differ in production.
+ */
+
+var validateFormat = function validateFormat(format) {};
+
+if (false) {
+  validateFormat = function validateFormat(format) {
+    if (format === undefined) {
+      throw new Error('invariant requires an error message argument');
+    }
+  };
+}
+
+function invariant(condition, format, a, b, c, d, e, f) {
+  validateFormat(format);
+
+  if (!condition) {
+    var error;
+    if (format === undefined) {
+      error = new Error('Minified exception occurred; use the non-minified dev environment ' + 'for the full error message and additional helpful warnings.');
+    } else {
+      var args = [a, b, c, d, e, f];
+      var argIndex = 0;
+      error = new Error(format.replace(/%s/g, function () {
+        return args[argIndex++];
+      }));
+      error.name = 'Invariant Violation';
+    }
+
+    error.framesToPop = 1; // we don't care about invariant's own frame
+    throw error;
+  }
+}
+
+module.exports = invariant;
+
+/***/ }),
+/* 27 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/**
+ * Copyright 2013-present, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree. An additional grant
+ * of patent rights can be found in the PATENTS file in the same directory.
+ */
+
+
+
+var ReactPropTypesSecret = 'SECRET_DO_NOT_PASS_THIS_OR_YOU_WILL_BE_FIRED';
+
+module.exports = ReactPropTypesSecret;
+
+
+/***/ }),
+/* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -687,7 +945,7 @@ var _react = __webpack_require__(0);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _propTypes = __webpack_require__(4);
+var _propTypes = __webpack_require__(6);
 
 var _propTypes2 = _interopRequireDefault(_propTypes);
 
@@ -730,5 +988,4 @@ ChevronUp.defaultProps = {
 exports.default = ChevronUp;
 
 /***/ })
-
-},[12]);
+],[9]);
