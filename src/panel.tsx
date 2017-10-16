@@ -6,6 +6,9 @@ import {
 } from 'csstips';
 import * as React from 'react';
 import {Component} from 'react';
+import ChevronsLeft from 'react-feather/dist/icons/chevrons-left';
+import ChevronsRight from 'react-feather/dist/icons/chevrons-right';
+import Settings from 'react-feather/dist/icons/settings';
 import {style} from 'typestyle';
 
 class ChapterView extends Component<
@@ -162,10 +165,30 @@ export class LibraryView extends Component<
     }
     let last = outcomes.length == quizLength;
     let score = outcomes.length ? outcomes.slice(-1)[0].score : 0;
+    let iconSize = Math.min(screen.height, screen.width) / 16;
     return (
       <div className={style(
-        {fontSize: '150%'}, content, vertical, width('25%')
+        {fontSize: '150%', position: 'relative'},
+        content,
+        vertical,
+        width('25%'),
       )}>
+        <div className={style({
+          left: `-${iconSize}px`,
+          position: 'absolute',
+        })}>
+          <ChevronsLeft size={iconSize}/>
+        </div>
+        <div className={style(horizontal)}>
+          <h1 className={
+            style(flex, {borderBottom: '1px solid black', fontSize: `${iconSize * 0.4}px`, marginBottom: 0, paddingBottom: '0.1em'})}
+          >Scripture Track</h1>
+          <Settings
+            className={style({padding: `${iconSize * 0.2}px`, marginBottom: `-${iconSize * 0.5}px`})}
+            size={iconSize}
+          />
+          <ChevronsRight className={style({marginBottom: `-${iconSize * 0.5}px`})} size={iconSize}/>
+        </div>
         <div className={style(
           flex, margin(0), padding(0, '1em'), scrollY, {cursor: 'default'},
         )}>
