@@ -81,6 +81,8 @@ class ExcerptView extends PureComponent<
   render() {
     let {chapter} = this.props;
     let {ready} = this.state || {} as any;
+    let minScreen = Math.min(screen.height, screen.width);
+    let fontSize = minScreen / 24;
     return (
       <div
         className={style(
@@ -88,7 +90,7 @@ class ExcerptView extends PureComponent<
             // When I had 'sans-serif' as a fallback, Chrome used it, despite
             // the custom font being available.
             fontFamily: 'Excerpt',
-            fontSize: '250%',
+            fontSize: `${fontSize}px`,
             height: `${this.maxHeight}px`,
             letterSpacing: '-0.05em',
             overflow: 'hidden',

@@ -2,10 +2,7 @@ webpackJsonp([0],[
 /* 0 */,
 /* 1 */,
 /* 2 */,
-/* 3 */,
-/* 4 */,
-/* 5 */,
-/* 6 */
+/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -41,6 +38,9 @@ if (false) {
 
 
 /***/ }),
+/* 4 */,
+/* 5 */,
+/* 6 */,
 /* 7 */,
 /* 8 */,
 /* 9 */
@@ -201,9 +201,11 @@ class excerpt_ExcerptView extends react["PureComponent"] {
     render() {
         let { chapter } = this.props;
         let { ready } = this.state || {};
+        let minScreen = Math.min(screen.height, screen.width);
+        let fontSize = minScreen / 24;
         return (react["createElement"]("div", { className: Object(lib_es2015["style"])({
                 fontFamily: 'Excerpt',
-                fontSize: '250%',
+                fontSize: `${fontSize}px`,
                 height: `${this.maxHeight}px`,
                 letterSpacing: '-0.05em',
                 overflow: 'hidden',
@@ -360,7 +362,22 @@ function findLines(box) {
     return lines;
 }
 
+// EXTERNAL MODULE: ./node_modules/react-feather/dist/icons/chevrons-left.js
+var chevrons_left = __webpack_require__(29);
+var chevrons_left_default = /*#__PURE__*/__webpack_require__.n(chevrons_left);
+
+// EXTERNAL MODULE: ./node_modules/react-feather/dist/icons/chevrons-right.js
+var chevrons_right = __webpack_require__(30);
+var chevrons_right_default = /*#__PURE__*/__webpack_require__.n(chevrons_right);
+
+// EXTERNAL MODULE: ./node_modules/react-feather/dist/icons/settings.js
+var settings = __webpack_require__(31);
+var settings_default = /*#__PURE__*/__webpack_require__.n(settings);
+
 // CONCATENATED MODULE: ./src/panel.tsx
+
+
+
 
 
 
@@ -444,11 +461,15 @@ class panel_LibraryView extends react["Component"] {
         this.makeGuess = () => {
             let { answer, app } = this.props;
             if (answer) {
+                this.setState({ shown: false });
                 app.shuffle();
             }
             else {
                 app.showAnswer();
             }
+        };
+        this.togglePanel = () => {
+            this.setState({ shown: !(this.state || {}).shown });
         };
     }
     componentDidUpdate() {
@@ -460,13 +481,47 @@ class panel_LibraryView extends react["Component"] {
     render() {
         let { answer, app, count, guess } = this.props;
         let { outcomes, quizLength } = app.state;
+        let { shown } = this.state || {};
         if (!answer) {
             this.answerElement = undefined;
         }
         let last = outcomes.length == quizLength;
         let score = outcomes.length ? outcomes.slice(-1)[0].score : 0;
-        return (react["createElement"]("div", { className: Object(lib_es2015["style"])({ fontSize: '150%' }, lib["content"], lib["vertical"], Object(lib["width"])('25%')) },
-            react["createElement"]("div", { className: Object(lib_es2015["style"])(lib["flex"], Object(lib["margin"])(0), Object(lib["padding"])(0, '1em'), lib["scrollY"], { cursor: 'default' }) }, this.props.items.map(volume => react["createElement"](panel_VolumeView, Object.assign({ answer: answer && answer.names[0] == volume.name ? answer : undefined, guess: guess && guess.names[0] == volume.name ? guess : undefined, key: volume.name + count, library: this }, Object.assign({ count }, volume))))),
+        let minScreen = Math.min(screen.height, screen.width);
+        let iconSize = minScreen / 16;
+        let panelWidth = Math.min(0.9 * minScreen, window.innerWidth);
+        return (react["createElement"]("div", { className: Object(lib_es2015["style"])(lib["content"], lib["vertical"], {
+                background: 'white',
+                borderLeft: '1px solid black',
+                bottom: 0,
+                fontSize: `${iconSize / 2}px`,
+                left: shown ? `${window.innerWidth - panelWidth}px` : '100%',
+                position: 'fixed',
+                width: `${panelWidth}px`,
+                top: 0,
+            }), ref: panel => this.panel = panel },
+            react["createElement"]("div", { className: Object(lib_es2015["style"])({
+                    display: shown ? 'none' : 'block',
+                    left: `-${iconSize}px`,
+                    position: 'absolute',
+                }), onClick: this.togglePanel },
+                react["createElement"](chevrons_left_default.a, { size: iconSize })),
+            react["createElement"]("div", { className: Object(lib_es2015["style"])({
+                    background: 'rgba(255, 255, 255, 0.2)',
+                    position: 'absolute',
+                    right: 0,
+                }) },
+                react["createElement"]("div", { onClick: this.togglePanel },
+                    react["createElement"](chevrons_right_default.a, { size: iconSize })),
+                react["createElement"]("div", null,
+                    react["createElement"](settings_default.a, { className: Object(lib_es2015["style"])({
+                            marginTop: '0.5em', padding: `${iconSize * 0.2}px`,
+                        }), color: '#bbb', size: iconSize }))),
+            react["createElement"]("div", { className: Object(lib_es2015["style"])(lib["flex"], Object(lib["margin"])(0), lib["scrollY"], {
+                    cursor: 'default',
+                    paddingLeft: '1em',
+                    paddingRight: `${iconSize}px`,
+                }) }, this.props.items.map(volume => react["createElement"](panel_VolumeView, Object.assign({ answer: answer && answer.names[0] == volume.name ? answer : undefined, guess: guess && guess.names[0] == volume.name ? guess : undefined, key: volume.name + count, library: this }, Object.assign({ count }, volume))))),
             react["createElement"]("div", { className: Object(lib_es2015["style"])(lib["content"], lib["horizontal"], {
                     borderTop: '1px solid black',
                     margin: '0 0.5em',
@@ -694,7 +749,7 @@ var _react = __webpack_require__(0);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _propTypes = __webpack_require__(6);
+var _propTypes = __webpack_require__(3);
 
 var _propTypes2 = _interopRequireDefault(_propTypes);
 
@@ -945,7 +1000,7 @@ var _react = __webpack_require__(0);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _propTypes = __webpack_require__(6);
+var _propTypes = __webpack_require__(3);
 
 var _propTypes2 = _interopRequireDefault(_propTypes);
 
@@ -986,6 +1041,214 @@ ChevronUp.defaultProps = {
 };
 
 exports.default = ChevronUp;
+
+/***/ }),
+/* 29 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var _react = __webpack_require__(0);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _propTypes = __webpack_require__(3);
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
+
+var ChevronsLeft = function ChevronsLeft(props) {
+  var color = props.color,
+      size = props.size,
+      otherProps = _objectWithoutProperties(props, ['color', 'size']);
+
+  return _react2.default.createElement(
+    'svg',
+    _extends({
+      xmlns: 'http://www.w3.org/2000/svg',
+      width: size,
+      height: size,
+      viewBox: '0 0 24 24'
+    }, otherProps),
+    _react2.default.createElement('polyline', {
+      points: '11 17 6 12 11 7',
+      fill: 'none',
+      stroke: color,
+      strokeLinecap: 'round',
+      strokeLinejoin: 'round',
+      strokeWidth: '2'
+    }),
+    _react2.default.createElement('polyline', {
+      points: '18 17 13 12 18 7',
+      fill: 'none',
+      stroke: color,
+      strokeLinecap: 'round',
+      strokeLinejoin: 'round',
+      strokeWidth: '2'
+    })
+  );
+};
+
+ChevronsLeft.propTypes = {
+  color: _propTypes2.default.string,
+  size: _propTypes2.default.oneOfType([_propTypes2.default.string, _propTypes2.default.number])
+};
+
+ChevronsLeft.defaultProps = {
+  color: 'currentColor',
+  size: '24'
+};
+
+exports.default = ChevronsLeft;
+
+/***/ }),
+/* 30 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var _react = __webpack_require__(0);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _propTypes = __webpack_require__(3);
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
+
+var ChevronsRight = function ChevronsRight(props) {
+  var color = props.color,
+      size = props.size,
+      otherProps = _objectWithoutProperties(props, ['color', 'size']);
+
+  return _react2.default.createElement(
+    'svg',
+    _extends({
+      xmlns: 'http://www.w3.org/2000/svg',
+      width: size,
+      height: size,
+      viewBox: '0 0 24 24'
+    }, otherProps),
+    _react2.default.createElement('polyline', {
+      points: '13 17 18 12 13 7',
+      fill: 'none',
+      stroke: color,
+      strokeLinecap: 'round',
+      strokeLinejoin: 'round',
+      strokeWidth: '2'
+    }),
+    _react2.default.createElement('polyline', {
+      points: '6 17 11 12 6 7',
+      fill: 'none',
+      stroke: color,
+      strokeLinecap: 'round',
+      strokeLinejoin: 'round',
+      strokeWidth: '2'
+    })
+  );
+};
+
+ChevronsRight.propTypes = {
+  color: _propTypes2.default.string,
+  size: _propTypes2.default.oneOfType([_propTypes2.default.string, _propTypes2.default.number])
+};
+
+ChevronsRight.defaultProps = {
+  color: 'currentColor',
+  size: '24'
+};
+
+exports.default = ChevronsRight;
+
+/***/ }),
+/* 31 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var _react = __webpack_require__(0);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _propTypes = __webpack_require__(3);
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
+
+var Settings = function Settings(props) {
+  var color = props.color,
+      size = props.size,
+      otherProps = _objectWithoutProperties(props, ['color', 'size']);
+
+  return _react2.default.createElement(
+    'svg',
+    _extends({
+      xmlns: 'http://www.w3.org/2000/svg',
+      width: size,
+      height: size,
+      viewBox: '0 0 24 24'
+    }, otherProps),
+    _react2.default.createElement('circle', {
+      cx: '12',
+      cy: '12',
+      r: '3',
+      fill: 'none',
+      stroke: color,
+      strokeLinecap: 'round',
+      strokeLinejoin: 'round',
+      strokeWidth: '2'
+    }),
+    _react2.default.createElement('path', {
+      d: 'M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z',
+      fill: 'none',
+      stroke: color,
+      strokeMiterlimit: '10',
+      strokeWidth: '2'
+    })
+  );
+};
+
+Settings.propTypes = {
+  color: _propTypes2.default.string,
+  size: _propTypes2.default.oneOfType([_propTypes2.default.string, _propTypes2.default.number])
+};
+
+Settings.defaultProps = {
+  color: 'currentColor',
+  size: '24'
+};
+
+exports.default = Settings;
 
 /***/ })
 ],[9]);

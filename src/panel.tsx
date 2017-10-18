@@ -136,7 +136,9 @@ export class LibraryView extends Component<
     app: AppView,
     count: number,
     guess?: Path,
-  }, {}
+  }, {
+    shown?: boolean,
+  }
 > {
 
   answerElement?: HTMLElement;
@@ -151,46 +153,79 @@ export class LibraryView extends Component<
   makeGuess = () => {
     let {answer, app} = this.props;
     if (answer) {
+      this.setState({shown: false});
       app.shuffle();
     } else {
       app.showAnswer();
     }
   };
 
+  panel: HTMLElement;
+
   render() {
     let {answer, app, count, guess} = this.props;
     let {outcomes, quizLength} = app.state;
+    let {shown} = this.state || {} as any;
     if (!answer) {
       this.answerElement = undefined;
     }
     let last = outcomes.length == quizLength;
     let score = outcomes.length ? outcomes.slice(-1)[0].score : 0;
-    let iconSize = Math.min(screen.height, screen.width) / 16;
+    let minScreen = Math.min(screen.height, screen.width);
+    let iconSize = minScreen / 16;
+    let panelWidth = Math.min(0.9 * minScreen, window.innerWidth);
     return (
-      <div className={style(
-        {fontSize: '150%', position: 'relative'},
-        content,
-        vertical,
-        width('25%'),
-      )}>
-        <div className={style({
-          left: `-${iconSize}px`,
-          position: 'absolute',
-        })}>
+      <div
+        className={style(
+          content,
+          vertical,
+          {
+            background: 'white',
+            borderLeft: '1px solid black',
+            bottom: 0,
+            fontSize: `${iconSize / 2}px`,
+            left: shown ? `${window.innerWidth - panelWidth}px` : '100%',
+            position: 'fixed',
+            width: `${panelWidth}px`,
+            top: 0,
+          },
+        )}
+        ref={panel => this.panel = panel!}
+      >
+        <div
+          className={style({
+            display: shown ? 'none' : 'block',
+            left: `-${iconSize}px`,
+            position: 'absolute',
+          })}
+          onClick={this.togglePanel}
+        >
           <ChevronsLeft size={iconSize}/>
         </div>
-        <div className={style(horizontal)}>
-          <h1 className={
-            style(flex, {borderBottom: '1px solid black', fontSize: `${iconSize * 0.4}px`, marginBottom: 0, paddingBottom: '0.1em'})}
-          >Scripture Track</h1>
-          <Settings
-            className={style({padding: `${iconSize * 0.2}px`, marginBottom: `-${iconSize * 0.5}px`})}
-            size={iconSize}
-          />
-          <ChevronsRight className={style({marginBottom: `-${iconSize * 0.5}px`})} size={iconSize}/>
+        <div className={style({
+          background: 'rgba(255, 255, 255, 0.2)',
+          position: 'absolute',
+          right: 0,
+        })}>
+          <div onClick={this.togglePanel}>
+            <ChevronsRight size={iconSize}/>
+          </div>
+          <div>
+            <Settings
+              className={style({
+                marginTop: '0.5em', padding: `${iconSize * 0.2}px`,
+              })}
+              color='#bbb'
+              size={iconSize}
+            />
+          </div>
         </div>
         <div className={style(
-          flex, margin(0), padding(0, '1em'), scrollY, {cursor: 'default'},
+          flex, margin(0), scrollY, {
+            cursor: 'default',
+            paddingLeft: '1em',
+            paddingRight: `${iconSize}px`,
+          },
         )}>
           {this.props.items.map(volume =>
             <VolumeView
@@ -243,6 +278,10 @@ export class LibraryView extends Component<
       </div>
     );
   }
+
+  togglePanel = () => {
+    this.setState({shown: !(this.state || {} as any).shown});
+  };
 
 }
 
