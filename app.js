@@ -201,8 +201,8 @@ class excerpt_ExcerptView extends react["PureComponent"] {
     render() {
         let { chapter } = this.props;
         let { ready } = this.state || {};
-        let minScreen = Math.min(screen.height, screen.width) / devicePixelRatio;
-        let fontSize = minScreen / 24;
+        let minScreen = Math.min(innerHeight, innerWidth);
+        let fontSize = minScreen / 20;
         return (react["createElement"]("div", { className: Object(lib_es2015["style"])({
                 fontFamily: 'Excerpt',
                 fontSize: `${fontSize}px`,
@@ -487,9 +487,9 @@ class panel_LibraryView extends react["Component"] {
         }
         let last = outcomes.length == quizLength;
         let score = outcomes.length ? outcomes.slice(-1)[0].score : 0;
-        let minScreen = Math.min(screen.height, screen.width) / devicePixelRatio;
-        let iconSize = minScreen / 16;
-        let panelWidth = Math.min(0.9 * minScreen, window.innerWidth);
+        let minScreen = Math.min(innerHeight, innerWidth) / devicePixelRatio;
+        let iconSize = minScreen / 14;
+        let panelWidth = 0.9 * minScreen;
         return (react["createElement"]("div", { className: Object(lib_es2015["style"])(lib["content"], lib["vertical"], {
                 background: 'white',
                 borderLeft: '1px solid black',

@@ -171,9 +171,9 @@ export class LibraryView extends Component<
     }
     let last = outcomes.length == quizLength;
     let score = outcomes.length ? outcomes.slice(-1)[0].score : 0;
-    let minScreen = Math.min(screen.height, screen.width) / devicePixelRatio;
-    let iconSize = minScreen / 16;
-    let panelWidth = Math.min(0.9 * minScreen, window.innerWidth);
+    let minScreen = Math.min(innerHeight, innerWidth) / devicePixelRatio;
+    let iconSize = minScreen / 14;
+    let panelWidth = 0.9 * minScreen;
     return (
       <div
         className={style(
