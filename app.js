@@ -502,13 +502,13 @@ class panel_LibraryView extends react["Component"] {
         let last = outcomes.length == quizLength;
         let score = outcomes.length ? outcomes.slice(-1)[0].score : 0;
         let minScreen = Math.min(innerHeight, innerWidth);
-        let iconSize = minScreen / 14;
+        let iconSize = Math.max(innerHeight, innerWidth) / 16;
         let panelWidth = 0.9 * minScreen;
         return (react["createElement"]("div", { className: Object(lib_es2015["style"])(lib["content"], lib["vertical"], {
                 background: 'white',
                 borderLeft: '1px solid black',
                 bottom: 0,
-                fontSize: `${iconSize / 2}px`,
+                fontSize: `${iconSize * 0.45}px`,
                 left: shown ? `${window.innerWidth - panelWidth}px` : '100%',
                 position: 'fixed',
                 width: `${panelWidth}px`,
