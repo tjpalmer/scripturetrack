@@ -471,11 +471,25 @@ class panel_LibraryView extends react["Component"] {
         this.togglePanel = () => {
             this.setState({ shown: !(this.state || {}).shown });
         };
+        this.watchingResize = false;
     }
     componentDidUpdate() {
-        let { answerElement } = this;
+        let { answerElement, panel, watchingResize } = this;
         if (answerElement) {
             answerElement.scrollIntoView({ behavior: 'smooth' });
+        }
+        if (panel) {
+            if (!watchingResize) {
+                let listener = () => {
+                    if (!(this.panel && document.contains(this.panel))) {
+                        window.removeEventListener('resize', listener);
+                        this.watchingResize = false;
+                    }
+                    let screenSize = Math.min(innerHeight, innerWidth);
+                    this.setState({ screenSize });
+                };
+                window.addEventListener('resize', listener);
+            }
         }
     }
     render() {
@@ -487,7 +501,7 @@ class panel_LibraryView extends react["Component"] {
         }
         let last = outcomes.length == quizLength;
         let score = outcomes.length ? outcomes.slice(-1)[0].score : 0;
-        let minScreen = Math.min(innerHeight, innerWidth) / devicePixelRatio;
+        let minScreen = Math.min(innerHeight, innerWidth);
         let iconSize = minScreen / 14;
         let panelWidth = 0.9 * minScreen;
         return (react["createElement"]("div", { className: Object(lib_es2015["style"])(lib["content"], lib["vertical"], {
