@@ -81,7 +81,7 @@ class ExcerptView extends PureComponent<
   render() {
     let {chapter} = this.props;
     let {ready} = this.state || {} as any;
-    let minScreen = Math.min(screen.height, screen.width);
+    let minScreen = Math.min(screen.height, screen.width) / devicePixelRatio;
     let fontSize = minScreen / 24;
     return (
       <div
