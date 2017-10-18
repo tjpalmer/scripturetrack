@@ -187,7 +187,7 @@ export class LibraryView extends Component<
     let last = outcomes.length == quizLength;
     let score = outcomes.length ? outcomes.slice(-1)[0].score : 0;
     let minScreen = Math.min(innerHeight, innerWidth);
-    let iconSize = Math.max(innerHeight, innerWidth) / 16;
+    let iconSize = innerHeight / 16;
     let panelWidth = 0.9 * minScreen;
     return (
       <div
@@ -198,7 +198,7 @@ export class LibraryView extends Component<
             background: 'white',
             borderLeft: '1px solid black',
             bottom: 0,
-            fontSize: `${iconSize * 0.45}px`,
+            fontSize: `${iconSize * 0.5}px`,
             left: shown ? `${window.innerWidth - panelWidth}px` : '100%',
             position: 'fixed',
             width: `${panelWidth}px`,
@@ -210,7 +210,8 @@ export class LibraryView extends Component<
         <div
           className={style({
             display: shown ? 'none' : 'block',
-            left: `-${iconSize}px`,
+            left: `-${iconSize * 6 / 4}px`,
+            padding: `${iconSize / 4}px`,
             position: 'absolute',
           })}
           onClick={this.togglePanel}
@@ -222,14 +223,12 @@ export class LibraryView extends Component<
           position: 'absolute',
           right: 0,
         })}>
-          <div onClick={this.togglePanel}>
+          <div className={style({padding: '0.5em'})} onClick={this.togglePanel}>
             <ChevronsRight size={iconSize}/>
           </div>
-          <div>
+          <div className={style({padding: '0.5em'})}>
             <Settings
-              className={style({
-                marginTop: '0.5em', padding: `${iconSize * 0.2}px`,
-              })}
+              className={style({padding: `${iconSize * 0.2}px`})}
               color='#bbb'
               size={iconSize}
             />
