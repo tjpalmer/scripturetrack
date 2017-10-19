@@ -1,5 +1,5 @@
 import {
-  AppView, Chapter, CSSProperties, Doc, Library, Path, Volume, sum,
+  AppView, Chapter, CSSProperties, Doc, Library, Outcome, Path, Volume, sum,
 } from './';
 import {
   content, flex, horizontal, margin, padding, scrollY, vertical, width,
@@ -178,7 +178,7 @@ export class LibraryView extends Component<
   panel: HTMLElement;
 
   render() {
-    let {answer, app, count, guess} = this.props;
+    let {answer, app, count, guess, items: volumes} = this.props;
     let {outcomes, quizLength} = app.state;
     let {shown} = this.state || {} as any;
     if (!answer) {
@@ -289,6 +289,7 @@ export class LibraryView extends Component<
             }())}
           </div>
         </div>
+        {last && <SummaryView {...{outcomes, volumes}}/>}
       </div>
     );
   }
@@ -298,6 +299,48 @@ export class LibraryView extends Component<
   };
 
   watchingResize = false;
+
+}
+
+class SummaryView extends Component<
+  {outcomes: Outcome[], volumes: Volume[]}, {}
+> {
+
+  render() {
+    let {outcomes, volumes} = this.props;
+    let thClass = style({textAlign: 'left'});
+    let Head = ({text}: {text: string}) => <th className={thClass}>{text}</th>;
+    let renderPath = (path: Path) => {
+      let volume = volumes.find(volume => volume.name == path.names[0])!;
+      let doc = volume.items.find(doc => doc.name == path.names[1])!;
+      return <td>{doc.title} {path.chapterIndex + 1}</td>;
+    };
+    return (
+      <div className={style({padding: '0 1em 1em'})}>
+        <table className={style(
+          flex,
+          {
+            borderCollapse: 'separate',
+            borderSpacing: '1em 0.5em',
+            width: '100%',
+          },
+        )}>
+          <thead>
+            <tr>
+              <Head text='Actual'/><Head text='Guess'/><Head text='Score'/>
+            </tr>
+          </thead>
+          <tbody>{
+            outcomes.map(outcome => <tr>
+              {renderPath(outcome.actual)}
+              {renderPath(outcome.guess)}
+              <td>+ {outcome.score}</td>
+            </tr>)
+          }</tbody>
+        </table>
+      </div>
+    );
+  }
 
 }
 

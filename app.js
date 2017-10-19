@@ -493,7 +493,7 @@ class panel_LibraryView extends react["Component"] {
         }
     }
     render() {
-        let { answer, app, count, guess } = this.props;
+        let { answer, app, count, guess, items: volumes } = this.props;
         let { outcomes, quizLength } = app.state;
         let { shown } = this.state || {};
         if (!answer) {
@@ -559,7 +559,40 @@ class panel_LibraryView extends react["Component"] {
                         for (let outcome of outcomes) {
                             yield outcome.score;
                         }
-                    }())))));
+                    }()))),
+            last && react["createElement"](panel_SummaryView, Object.assign({}, { outcomes, volumes }))));
+    }
+}
+class panel_SummaryView extends react["Component"] {
+    render() {
+        let { outcomes, volumes } = this.props;
+        let thClass = Object(lib_es2015["style"])({ textAlign: 'left' });
+        let Head = ({ text }) => react["createElement"]("th", { className: thClass }, text);
+        let renderPath = (path) => {
+            let volume = volumes.find(volume => volume.name == path.names[0]);
+            let doc = volume.items.find(doc => doc.name == path.names[1]);
+            return react["createElement"]("td", null,
+                doc.title,
+                " ",
+                path.chapterIndex + 1);
+        };
+        return (react["createElement"]("div", { className: Object(lib_es2015["style"])({ padding: '0 1em 1em' }) },
+            react["createElement"]("table", { className: Object(lib_es2015["style"])(lib["flex"], {
+                    borderCollapse: 'separate',
+                    borderSpacing: '1em 0.5em',
+                    width: '100%',
+                }) },
+                react["createElement"]("thead", null,
+                    react["createElement"]("tr", null,
+                        react["createElement"](Head, { text: 'Actual' }),
+                        react["createElement"](Head, { text: 'Guess' }),
+                        react["createElement"](Head, { text: 'Score' }))),
+                react["createElement"]("tbody", null, outcomes.map(outcome => react["createElement"]("tr", null,
+                    renderPath(outcome.actual),
+                    renderPath(outcome.guess),
+                    react["createElement"]("td", null,
+                        "+ ",
+                        outcome.score)))))));
     }
 }
 class panel_VolumeView extends react["Component"] {
