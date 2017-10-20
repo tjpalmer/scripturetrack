@@ -2,8 +2,7 @@ import {Chapter, Indexed, arrayify, random} from './';
 import {flex, padding, vertical} from 'csstips';
 import * as React from 'react';
 import {Component, PureComponent} from 'react';
-import ChevronDown from 'react-feather/dist/icons/chevron-down';
-import ChevronUp from 'react-feather/dist/icons/chevron-up';
+import {ChevronDown, ChevronUp} from './feather';
 import {style} from 'typestyle';
 
 export class ExcerptScroller
@@ -81,8 +80,6 @@ class ExcerptView extends PureComponent<
   render() {
     let {chapter} = this.props;
     let {ready} = this.state || {} as any;
-    let minScreen = Math.min(innerHeight, innerWidth);
-    let fontSize = minScreen / 20;
     return (
       <div
         className={style(
@@ -90,8 +87,8 @@ class ExcerptView extends PureComponent<
             // When I had 'sans-serif' as a fallback, Chrome used it, despite
             // the custom font being available.
             fontFamily: 'Excerpt',
-            fontSize: `${fontSize}px`,
-            height: `${this.maxHeight}px`,
+            fontSize: `5vmin`,
+            height: `62.5vh`,
             letterSpacing: '-0.05em',
             overflow: 'hidden',
             position: 'relative',
@@ -182,7 +179,6 @@ class ScrollButton extends Component<
 
   render() {
     let {dir, end, scroller} = this.props;
-    let size = window.innerHeight / 16;
     return (
       <div
         className={style(
@@ -198,12 +194,10 @@ class ScrollButton extends Component<
         <div className={style(flex)}></div>
         <div className={style(flex)}>
           <span
-            className={style({cursor: 'default', padding: '1em'})}
+            className={style({cursor: 'default', padding: '6.25vh'})}
             onClick={() => !end && scroller.scroll(dir)}
           >{
-            dir == 'up' ?
-              <ChevronUp size={size}/> :
-              <ChevronDown size={size}/>
+            dir == 'up' ? <ChevronUp/> : <ChevronDown/>
           }</span>
         </div>
         <div className={style(flex)}></div>

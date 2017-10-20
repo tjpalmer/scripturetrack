@@ -24,7 +24,6 @@
     "preact-compat": "^3.17.0",
     "react": "^16.0.0",
     "react-dom": "^16.0.0",
-    "react-feather": "^1.0.7",
     "typestyle": "^1.4.1"
   },
   "scripts": {

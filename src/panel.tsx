@@ -6,9 +6,7 @@ import {
 } from 'csstips';
 import * as React from 'react';
 import {Component} from 'react';
-import ChevronsLeft from 'react-feather/dist/icons/chevrons-left';
-import ChevronsRight from 'react-feather/dist/icons/chevrons-right';
-import Settings from 'react-feather/dist/icons/settings';
+import {ChevronsLeft, ChevronsRight, Settings} from './feather';
 import {style} from 'typestyle';
 
 class ChapterView extends Component<
@@ -138,30 +136,15 @@ export class LibraryView extends Component<
     guess?: Path,
   }, {
     shown?: boolean,
-    screenSize?: number,
   }
 > {
 
   answerElement?: HTMLElement;
 
   componentDidUpdate() {
-    let {answerElement, panel, watchingResize} = this;
+    let {answerElement} = this;
     if (answerElement) {
       answerElement.scrollIntoView({behavior: 'smooth'});
-    }
-    if (panel) {
-      if (!watchingResize) {
-        let listener = () => {
-          if (!(this.panel && document.contains(this.panel))) {
-            // Just as a failsafe.
-            window.removeEventListener('resize', listener);
-            this.watchingResize = false;
-          }
-          let screenSize = Math.min(innerHeight, innerWidth);
-          this.setState({screenSize});
-        }
-        window.addEventListener('resize', listener);
-      }
     }
   }
 
@@ -175,8 +158,6 @@ export class LibraryView extends Component<
     }
   };
 
-  panel: HTMLElement;
-
   render() {
     let {answer, app, count, guess, items: volumes} = this.props;
     let {outcomes, quizLength} = app.state;
@@ -186,9 +167,7 @@ export class LibraryView extends Component<
     }
     let last = outcomes.length == quizLength;
     let score = outcomes.length ? outcomes.slice(-1)[0].score : 0;
-    let minScreen = Math.min(innerHeight, innerWidth);
-    let iconSize = innerHeight / 16;
-    let panelWidth = 0.9 * minScreen;
+    let iconSize = 6.25;
     return (
       <div
         className={style(
@@ -198,25 +177,24 @@ export class LibraryView extends Component<
             background: 'white',
             borderLeft: '1px solid black',
             bottom: 0,
-            fontSize: `${iconSize * 0.5}px`,
-            left: shown ? `${window.innerWidth - panelWidth}px` : '100%',
+            fontSize: `3.125vh`,
+            right: shown ? 0 : '-90vmin',
             position: 'fixed',
-            width: `${panelWidth}px`,
+            width: `90vmin`,
             top: 0,
           },
         )}
-        ref={panel => this.panel = panel!}
       >
         <div
           className={style({
             display: shown ? 'none' : 'block',
-            left: `-${iconSize * 6 / 4}px`,
-            padding: `${iconSize / 4}px`,
+            left: `-${iconSize * 6 / 4}vh`,
+            padding: `${iconSize / 4}vh`,
             position: 'absolute',
           })}
           onClick={this.togglePanel}
         >
-          <ChevronsLeft size={iconSize}/>
+          <ChevronsLeft/>
         </div>
         <div className={style({
           background: 'rgba(255, 255, 255, 0.2)',
@@ -224,13 +202,12 @@ export class LibraryView extends Component<
           right: 0,
         })}>
           <div className={style({padding: '0.5em'})} onClick={this.togglePanel}>
-            <ChevronsRight size={iconSize}/>
+            <ChevronsRight/>
           </div>
           <div className={style({padding: '0.5em'})}>
             <Settings
-              className={style({padding: `${iconSize * 0.2}px`})}
               color='#bbb'
-              size={iconSize}
+              className={style({padding: '0.9375vh'})}
             />
           </div>
         </div>
@@ -238,7 +215,7 @@ export class LibraryView extends Component<
           flex, margin(0), scrollY, {
             cursor: 'default',
             paddingLeft: '1em',
-            paddingRight: `${iconSize}px`,
+            paddingRight: `${iconSize}vh`,
           },
         )}>
           {this.props.items.map(volume =>
@@ -297,8 +274,6 @@ export class LibraryView extends Component<
   togglePanel = () => {
     this.setState({shown: !(this.state || {} as any).shown});
   };
-
-  watchingResize = false;
 
 }
 

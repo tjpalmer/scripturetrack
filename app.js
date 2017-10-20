@@ -1,49 +1,6 @@
-webpackJsonp([0],[
-/* 0 */,
-/* 1 */,
-/* 2 */,
-/* 3 */
-/***/ (function(module, exports, __webpack_require__) {
+webpackJsonp([0],{
 
-/**
- * Copyright 2013-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
-
-if (false) {
-  var REACT_ELEMENT_TYPE = (typeof Symbol === 'function' &&
-    Symbol.for &&
-    Symbol.for('react.element')) ||
-    0xeac7;
-
-  var isValidElement = function(object) {
-    return typeof object === 'object' &&
-      object !== null &&
-      object.$$typeof === REACT_ELEMENT_TYPE;
-  };
-
-  // By explicitly using `prop-types` you are opting into new development behavior.
-  // http://fb.me/prop-types-in-prod
-  var throwOnDirectAccess = true;
-  module.exports = require('./factoryWithTypeCheckers')(isValidElement, throwOnDirectAccess);
-} else {
-  // By explicitly using `prop-types` you are opting into new production behavior.
-  // http://fb.me/prop-types-in-prod
-  module.exports = __webpack_require__(24)();
-}
-
-
-/***/ }),
-/* 4 */,
-/* 5 */,
-/* 6 */,
-/* 7 */,
-/* 8 */,
-/* 9 */
+/***/ 8:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -128,19 +85,49 @@ var lib_default = /*#__PURE__*/__webpack_require__.n(lib);
 var react = __webpack_require__(0);
 var react_default = /*#__PURE__*/__webpack_require__.n(react);
 
-// EXTERNAL MODULE: ./node_modules/react-feather/dist/icons/chevron-down.js
-var chevron_down = __webpack_require__(23);
-var chevron_down_default = /*#__PURE__*/__webpack_require__.n(chevron_down);
+// CONCATENATED MODULE: ./src/feather/icons.tsx
 
-// EXTERNAL MODULE: ./node_modules/react-feather/dist/icons/chevron-up.js
-var chevron_up = __webpack_require__(28);
-var chevron_up_default = /*#__PURE__*/__webpack_require__.n(chevron_up);
+function Icon(props) {
+    let color = props.color || 'currentColor';
+    let className = 'icon';
+    if (props.className) {
+        className += ' ' + props.className;
+    }
+    return (react["createElement"]("svg", { className: className, fill: "none", stroke: color, strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", viewBox: "0 0 24 24" }, props.children));
+}
+;
+function ChevronDown(props) {
+    return react["createElement"](Icon, Object.assign({}, props),
+        react["createElement"]("polyline", { points: "6 9 12 15 18 9" }));
+}
+function ChevronUp(props) {
+    return react["createElement"](Icon, Object.assign({}, props),
+        react["createElement"]("polyline", { points: "18 15 12 9 6 15" }));
+}
+;
+function ChevronsLeft(props) {
+    return react["createElement"](Icon, Object.assign({}, props),
+        react["createElement"]("polyline", { points: "11 17 6 12 11 7" }),
+        react["createElement"]("polyline", { points: "18 17 13 12 18 7" }));
+}
+function ChevronsRight(props) {
+    return react["createElement"](Icon, Object.assign({}, props),
+        react["createElement"]("polyline", { points: "13 17 18 12 13 7" }),
+        react["createElement"]("polyline", { points: "6 17 11 12 6 7" }));
+}
+function Settings(props) {
+    return react["createElement"](Icon, Object.assign({}, props),
+        react["createElement"]("circle", { cx: "12", cy: "12", r: "3" }),
+        react["createElement"]("path", { strokeMiterlimit: "10", d: "M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" }));
+}
+
+// CONCATENATED MODULE: ./src/feather/index.tsx
+
 
 // EXTERNAL MODULE: ./node_modules/typestyle/lib.es2015/index.js + 3 modules
 var lib_es2015 = __webpack_require__(1);
 
 // CONCATENATED MODULE: ./src/excerpt.tsx
-
 
 
 
@@ -201,12 +188,10 @@ class excerpt_ExcerptView extends react["PureComponent"] {
     render() {
         let { chapter } = this.props;
         let { ready } = this.state || {};
-        let minScreen = Math.min(innerHeight, innerWidth);
-        let fontSize = minScreen / 20;
         return (react["createElement"]("div", { className: Object(lib_es2015["style"])({
                 fontFamily: 'Excerpt',
-                fontSize: `${fontSize}px`,
-                height: `${this.maxHeight}px`,
+                fontSize: `5vmin`,
+                height: `62.5vh`,
                 letterSpacing: '-0.05em',
                 overflow: 'hidden',
                 position: 'relative',
@@ -260,7 +245,6 @@ class excerpt_ExcerptView extends react["PureComponent"] {
 class excerpt_ScrollButton extends react["Component"] {
     render() {
         let { dir, end, scroller } = this.props;
-        let size = window.innerHeight / 16;
         return (react["createElement"]("div", { className: Object(lib_es2015["style"])(lib["flex"], lib["vertical"], {
                 color: end ? '#bbb' : 'black',
                 fontSize: '4em',
@@ -268,9 +252,7 @@ class excerpt_ScrollButton extends react["Component"] {
             }) },
             react["createElement"]("div", { className: Object(lib_es2015["style"])(lib["flex"]) }),
             react["createElement"]("div", { className: Object(lib_es2015["style"])(lib["flex"]) },
-                react["createElement"]("span", { className: Object(lib_es2015["style"])({ cursor: 'default', padding: '1em' }), onClick: () => !end && scroller.scroll(dir) }, dir == 'up' ?
-                    react["createElement"](chevron_up_default.a, { size: size }) :
-                    react["createElement"](chevron_down_default.a, { size: size }))),
+                react["createElement"]("span", { className: Object(lib_es2015["style"])({ cursor: 'default', padding: '6.25vh' }), onClick: () => !end && scroller.scroll(dir) }, dir == 'up' ? react["createElement"](ChevronUp, null) : react["createElement"](ChevronDown, null))),
             react["createElement"]("div", { className: Object(lib_es2015["style"])(lib["flex"]) })));
     }
 }
@@ -362,21 +344,7 @@ function findLines(box) {
     return lines;
 }
 
-// EXTERNAL MODULE: ./node_modules/react-feather/dist/icons/chevrons-left.js
-var chevrons_left = __webpack_require__(29);
-var chevrons_left_default = /*#__PURE__*/__webpack_require__.n(chevrons_left);
-
-// EXTERNAL MODULE: ./node_modules/react-feather/dist/icons/chevrons-right.js
-var chevrons_right = __webpack_require__(30);
-var chevrons_right_default = /*#__PURE__*/__webpack_require__.n(chevrons_right);
-
-// EXTERNAL MODULE: ./node_modules/react-feather/dist/icons/settings.js
-var settings = __webpack_require__(31);
-var settings_default = /*#__PURE__*/__webpack_require__.n(settings);
-
 // CONCATENATED MODULE: ./src/panel.tsx
-
-
 
 
 
@@ -471,25 +439,11 @@ class panel_LibraryView extends react["Component"] {
         this.togglePanel = () => {
             this.setState({ shown: !(this.state || {}).shown });
         };
-        this.watchingResize = false;
     }
     componentDidUpdate() {
-        let { answerElement, panel, watchingResize } = this;
+        let { answerElement } = this;
         if (answerElement) {
             answerElement.scrollIntoView({ behavior: 'smooth' });
-        }
-        if (panel) {
-            if (!watchingResize) {
-                let listener = () => {
-                    if (!(this.panel && document.contains(this.panel))) {
-                        window.removeEventListener('resize', listener);
-                        this.watchingResize = false;
-                    }
-                    let screenSize = Math.min(innerHeight, innerWidth);
-                    this.setState({ screenSize });
-                };
-                window.addEventListener('resize', listener);
-            }
         }
     }
     render() {
@@ -501,39 +455,37 @@ class panel_LibraryView extends react["Component"] {
         }
         let last = outcomes.length == quizLength;
         let score = outcomes.length ? outcomes.slice(-1)[0].score : 0;
-        let minScreen = Math.min(innerHeight, innerWidth);
-        let iconSize = innerHeight / 16;
-        let panelWidth = 0.9 * minScreen;
+        let iconSize = 6.25;
         return (react["createElement"]("div", { className: Object(lib_es2015["style"])(lib["content"], lib["vertical"], {
                 background: 'white',
                 borderLeft: '1px solid black',
                 bottom: 0,
-                fontSize: `${iconSize * 0.5}px`,
-                left: shown ? `${window.innerWidth - panelWidth}px` : '100%',
+                fontSize: `3.125vh`,
+                right: shown ? 0 : '-90vmin',
                 position: 'fixed',
-                width: `${panelWidth}px`,
+                width: `90vmin`,
                 top: 0,
-            }), ref: panel => this.panel = panel },
+            }) },
             react["createElement"]("div", { className: Object(lib_es2015["style"])({
                     display: shown ? 'none' : 'block',
-                    left: `-${iconSize * 6 / 4}px`,
-                    padding: `${iconSize / 4}px`,
+                    left: `-${iconSize * 6 / 4}vh`,
+                    padding: `${iconSize / 4}vh`,
                     position: 'absolute',
                 }), onClick: this.togglePanel },
-                react["createElement"](chevrons_left_default.a, { size: iconSize })),
+                react["createElement"](ChevronsLeft, null)),
             react["createElement"]("div", { className: Object(lib_es2015["style"])({
                     background: 'rgba(255, 255, 255, 0.2)',
                     position: 'absolute',
                     right: 0,
                 }) },
                 react["createElement"]("div", { className: Object(lib_es2015["style"])({ padding: '0.5em' }), onClick: this.togglePanel },
-                    react["createElement"](chevrons_right_default.a, { size: iconSize })),
+                    react["createElement"](ChevronsRight, null)),
                 react["createElement"]("div", { className: Object(lib_es2015["style"])({ padding: '0.5em' }) },
-                    react["createElement"](settings_default.a, { className: Object(lib_es2015["style"])({ padding: `${iconSize * 0.2}px` }), color: '#bbb', size: iconSize }))),
+                    react["createElement"](Settings, { color: '#bbb', className: Object(lib_es2015["style"])({ padding: '0.9375vh' }) }))),
             react["createElement"]("div", { className: Object(lib_es2015["style"])(lib["flex"], Object(lib["margin"])(0), lib["scrollY"], {
                     cursor: 'default',
                     paddingLeft: '1em',
-                    paddingRight: `${iconSize}px`,
+                    paddingRight: `${iconSize}vh`,
                 }) }, this.props.items.map(volume => react["createElement"](panel_VolumeView, Object.assign({ answer: answer && answer.names[0] == volume.name ? answer : undefined, guess: guess && guess.names[0] == volume.name ? guess : undefined, key: volume.name + count, library: this }, Object.assign({ count }, volume))))),
             react["createElement"]("div", { className: Object(lib_es2015["style"])(lib["content"], lib["horizontal"], {
                     borderTop: '1px solid black',
@@ -649,7 +601,7 @@ class view_AppView extends react["Component"] {
     render() {
         let { actual, chapter, count, guess, showAnswer } = this.state;
         let answer = showAnswer ? actual : undefined;
-        return (react["createElement"]("div", { className: Object(lib_es2015["style"])(lib["fillParent"], lib["horizontal"], lib["someChildWillScroll"]) },
+        return (react["createElement"]("div", { className: Object(lib_es2015["style"])(lib["fillParent"], lib["horizontal"], lib["someChildWillScroll"], { $nest: { '& .icon': { height: '6.25vh' } } }) },
             react["createElement"](excerpt_ExcerptScroller, Object.assign({}, { chapter })),
             react["createElement"](panel_LibraryView, Object.assign({ app: this }, { answer, count, guess }, this.props.library))));
     }
@@ -721,7 +673,7 @@ function scoreGuess(library, actual, guess) {
 
 
 // EXTERNAL MODULE: ./node_modules/react-dom/index.js
-var react_dom = __webpack_require__(7);
+var react_dom = __webpack_require__(6);
 var react_dom_default = /*#__PURE__*/__webpack_require__.n(react_dom);
 
 // CONCATENATED MODULE: ./src/main.tsx
@@ -765,536 +717,6 @@ function load(uri) {
 }
 
 
-/***/ }),
-/* 10 */,
-/* 11 */,
-/* 12 */,
-/* 13 */,
-/* 14 */,
-/* 15 */,
-/* 16 */,
-/* 17 */,
-/* 18 */,
-/* 19 */,
-/* 20 */,
-/* 21 */,
-/* 22 */,
-/* 23 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
-var _react = __webpack_require__(0);
-
-var _react2 = _interopRequireDefault(_react);
-
-var _propTypes = __webpack_require__(3);
-
-var _propTypes2 = _interopRequireDefault(_propTypes);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
-
-var ChevronDown = function ChevronDown(props) {
-  var color = props.color,
-      size = props.size,
-      otherProps = _objectWithoutProperties(props, ['color', 'size']);
-
-  return _react2.default.createElement(
-    'svg',
-    _extends({
-      xmlns: 'http://www.w3.org/2000/svg',
-      width: size,
-      height: size,
-      viewBox: '0 0 24 24',
-      fill: 'none',
-      stroke: color,
-      strokeWidth: '2',
-      strokeLinecap: 'round',
-      strokeLinejoin: 'round'
-    }, otherProps),
-    _react2.default.createElement('polyline', { points: '6 9 12 15 18 9' })
-  );
-};
-
-ChevronDown.propTypes = {
-  color: _propTypes2.default.string,
-  size: _propTypes2.default.oneOfType([_propTypes2.default.string, _propTypes2.default.number])
-};
-
-ChevronDown.defaultProps = {
-  color: 'currentColor',
-  size: '24'
-};
-
-exports.default = ChevronDown;
-
-/***/ }),
-/* 24 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/**
- * Copyright 2013-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
-
-
-
-var emptyFunction = __webpack_require__(25);
-var invariant = __webpack_require__(26);
-var ReactPropTypesSecret = __webpack_require__(27);
-
-module.exports = function() {
-  function shim(props, propName, componentName, location, propFullName, secret) {
-    if (secret === ReactPropTypesSecret) {
-      // It is still safe when called from React.
-      return;
-    }
-    invariant(
-      false,
-      'Calling PropTypes validators directly is not supported by the `prop-types` package. ' +
-      'Use PropTypes.checkPropTypes() to call them. ' +
-      'Read more at http://fb.me/use-check-prop-types'
-    );
-  };
-  shim.isRequired = shim;
-  function getShim() {
-    return shim;
-  };
-  // Important!
-  // Keep this list in sync with production version in `./factoryWithTypeCheckers.js`.
-  var ReactPropTypes = {
-    array: shim,
-    bool: shim,
-    func: shim,
-    number: shim,
-    object: shim,
-    string: shim,
-    symbol: shim,
-
-    any: shim,
-    arrayOf: getShim,
-    element: shim,
-    instanceOf: getShim,
-    node: shim,
-    objectOf: getShim,
-    oneOf: getShim,
-    oneOfType: getShim,
-    shape: getShim
-  };
-
-  ReactPropTypes.checkPropTypes = emptyFunction;
-  ReactPropTypes.PropTypes = ReactPropTypes;
-
-  return ReactPropTypes;
-};
-
-
-/***/ }),
-/* 25 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-/**
- * Copyright (c) 2013-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- *
- * 
- */
-
-function makeEmptyFunction(arg) {
-  return function () {
-    return arg;
-  };
-}
-
-/**
- * This function accepts and discards inputs; it has no side effects. This is
- * primarily useful idiomatically for overridable function endpoints which
- * always need to be callable, since JS lacks a null-call idiom ala Cocoa.
- */
-var emptyFunction = function emptyFunction() {};
-
-emptyFunction.thatReturns = makeEmptyFunction;
-emptyFunction.thatReturnsFalse = makeEmptyFunction(false);
-emptyFunction.thatReturnsTrue = makeEmptyFunction(true);
-emptyFunction.thatReturnsNull = makeEmptyFunction(null);
-emptyFunction.thatReturnsThis = function () {
-  return this;
-};
-emptyFunction.thatReturnsArgument = function (arg) {
-  return arg;
-};
-
-module.exports = emptyFunction;
-
-/***/ }),
-/* 26 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/**
- * Copyright (c) 2013-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- *
- */
-
-
-
-/**
- * Use invariant() to assert state which your program assumes to be true.
- *
- * Provide sprintf-style format (only %s is supported) and arguments
- * to provide information about what broke and what you were
- * expecting.
- *
- * The invariant message will be stripped in production, but the invariant
- * will remain to ensure logic does not differ in production.
- */
-
-var validateFormat = function validateFormat(format) {};
-
-if (false) {
-  validateFormat = function validateFormat(format) {
-    if (format === undefined) {
-      throw new Error('invariant requires an error message argument');
-    }
-  };
-}
-
-function invariant(condition, format, a, b, c, d, e, f) {
-  validateFormat(format);
-
-  if (!condition) {
-    var error;
-    if (format === undefined) {
-      error = new Error('Minified exception occurred; use the non-minified dev environment ' + 'for the full error message and additional helpful warnings.');
-    } else {
-      var args = [a, b, c, d, e, f];
-      var argIndex = 0;
-      error = new Error(format.replace(/%s/g, function () {
-        return args[argIndex++];
-      }));
-      error.name = 'Invariant Violation';
-    }
-
-    error.framesToPop = 1; // we don't care about invariant's own frame
-    throw error;
-  }
-}
-
-module.exports = invariant;
-
-/***/ }),
-/* 27 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/**
- * Copyright 2013-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
-
-
-
-var ReactPropTypesSecret = 'SECRET_DO_NOT_PASS_THIS_OR_YOU_WILL_BE_FIRED';
-
-module.exports = ReactPropTypesSecret;
-
-
-/***/ }),
-/* 28 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
-var _react = __webpack_require__(0);
-
-var _react2 = _interopRequireDefault(_react);
-
-var _propTypes = __webpack_require__(3);
-
-var _propTypes2 = _interopRequireDefault(_propTypes);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
-
-var ChevronUp = function ChevronUp(props) {
-  var color = props.color,
-      size = props.size,
-      otherProps = _objectWithoutProperties(props, ['color', 'size']);
-
-  return _react2.default.createElement(
-    'svg',
-    _extends({
-      xmlns: 'http://www.w3.org/2000/svg',
-      width: size,
-      height: size,
-      viewBox: '0 0 24 24',
-      fill: 'none',
-      stroke: color,
-      strokeWidth: '2',
-      strokeLinecap: 'round',
-      strokeLinejoin: 'round'
-    }, otherProps),
-    _react2.default.createElement('polyline', { points: '18 15 12 9 6 15' })
-  );
-};
-
-ChevronUp.propTypes = {
-  color: _propTypes2.default.string,
-  size: _propTypes2.default.oneOfType([_propTypes2.default.string, _propTypes2.default.number])
-};
-
-ChevronUp.defaultProps = {
-  color: 'currentColor',
-  size: '24'
-};
-
-exports.default = ChevronUp;
-
-/***/ }),
-/* 29 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
-var _react = __webpack_require__(0);
-
-var _react2 = _interopRequireDefault(_react);
-
-var _propTypes = __webpack_require__(3);
-
-var _propTypes2 = _interopRequireDefault(_propTypes);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
-
-var ChevronsLeft = function ChevronsLeft(props) {
-  var color = props.color,
-      size = props.size,
-      otherProps = _objectWithoutProperties(props, ['color', 'size']);
-
-  return _react2.default.createElement(
-    'svg',
-    _extends({
-      xmlns: 'http://www.w3.org/2000/svg',
-      width: size,
-      height: size,
-      viewBox: '0 0 24 24'
-    }, otherProps),
-    _react2.default.createElement('polyline', {
-      points: '11 17 6 12 11 7',
-      fill: 'none',
-      stroke: color,
-      strokeLinecap: 'round',
-      strokeLinejoin: 'round',
-      strokeWidth: '2'
-    }),
-    _react2.default.createElement('polyline', {
-      points: '18 17 13 12 18 7',
-      fill: 'none',
-      stroke: color,
-      strokeLinecap: 'round',
-      strokeLinejoin: 'round',
-      strokeWidth: '2'
-    })
-  );
-};
-
-ChevronsLeft.propTypes = {
-  color: _propTypes2.default.string,
-  size: _propTypes2.default.oneOfType([_propTypes2.default.string, _propTypes2.default.number])
-};
-
-ChevronsLeft.defaultProps = {
-  color: 'currentColor',
-  size: '24'
-};
-
-exports.default = ChevronsLeft;
-
-/***/ }),
-/* 30 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
-var _react = __webpack_require__(0);
-
-var _react2 = _interopRequireDefault(_react);
-
-var _propTypes = __webpack_require__(3);
-
-var _propTypes2 = _interopRequireDefault(_propTypes);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
-
-var ChevronsRight = function ChevronsRight(props) {
-  var color = props.color,
-      size = props.size,
-      otherProps = _objectWithoutProperties(props, ['color', 'size']);
-
-  return _react2.default.createElement(
-    'svg',
-    _extends({
-      xmlns: 'http://www.w3.org/2000/svg',
-      width: size,
-      height: size,
-      viewBox: '0 0 24 24'
-    }, otherProps),
-    _react2.default.createElement('polyline', {
-      points: '13 17 18 12 13 7',
-      fill: 'none',
-      stroke: color,
-      strokeLinecap: 'round',
-      strokeLinejoin: 'round',
-      strokeWidth: '2'
-    }),
-    _react2.default.createElement('polyline', {
-      points: '6 17 11 12 6 7',
-      fill: 'none',
-      stroke: color,
-      strokeLinecap: 'round',
-      strokeLinejoin: 'round',
-      strokeWidth: '2'
-    })
-  );
-};
-
-ChevronsRight.propTypes = {
-  color: _propTypes2.default.string,
-  size: _propTypes2.default.oneOfType([_propTypes2.default.string, _propTypes2.default.number])
-};
-
-ChevronsRight.defaultProps = {
-  color: 'currentColor',
-  size: '24'
-};
-
-exports.default = ChevronsRight;
-
-/***/ }),
-/* 31 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
-var _react = __webpack_require__(0);
-
-var _react2 = _interopRequireDefault(_react);
-
-var _propTypes = __webpack_require__(3);
-
-var _propTypes2 = _interopRequireDefault(_propTypes);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
-
-var Settings = function Settings(props) {
-  var color = props.color,
-      size = props.size,
-      otherProps = _objectWithoutProperties(props, ['color', 'size']);
-
-  return _react2.default.createElement(
-    'svg',
-    _extends({
-      xmlns: 'http://www.w3.org/2000/svg',
-      width: size,
-      height: size,
-      viewBox: '0 0 24 24'
-    }, otherProps),
-    _react2.default.createElement('circle', {
-      cx: '12',
-      cy: '12',
-      r: '3',
-      fill: 'none',
-      stroke: color,
-      strokeLinecap: 'round',
-      strokeLinejoin: 'round',
-      strokeWidth: '2'
-    }),
-    _react2.default.createElement('path', {
-      d: 'M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z',
-      fill: 'none',
-      stroke: color,
-      strokeMiterlimit: '10',
-      strokeWidth: '2'
-    })
-  );
-};
-
-Settings.propTypes = {
-  color: _propTypes2.default.string,
-  size: _propTypes2.default.oneOfType([_propTypes2.default.string, _propTypes2.default.number])
-};
-
-Settings.defaultProps = {
-  color: 'currentColor',
-  size: '24'
-};
-
-exports.default = Settings;
-
 /***/ })
-],[9]);
+
+},[8]);

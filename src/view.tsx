@@ -61,7 +61,10 @@ export class AppView extends Component<App, AppState> {
     let {actual, chapter, count, guess, showAnswer} = this.state;
     let answer = showAnswer ? actual : undefined;
     return (
-      <div className={style(fillParent, horizontal, someChildWillScroll)}>
+      <div className={style(
+        fillParent, horizontal, someChildWillScroll,
+        {$nest: {'& .icon': {height: '6.25vh'}}},
+      )}>
         <ExcerptScroller {...{chapter}}/>
         <LibraryView
           app={this}
