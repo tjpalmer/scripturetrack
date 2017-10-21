@@ -12,7 +12,7 @@ async function init() {
   normalize();
   setupPage('#root');
   // Figure out where our default volume is.
-  let uri = '/kjv.st/volumes.json';
+  let uri = 'https://tjpalmer.github.io/kjv.st/volumes.json';
   let volumes: Library;
   try {
     volumes = await load(uri);

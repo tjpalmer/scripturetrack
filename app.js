@@ -701,7 +701,7 @@ function init() {
         document.getElementById('preload').remove();
         Object(lib["normalize"])();
         Object(lib["setupPage"])('#root');
-        let uri = '/kjv.st/volumes.json';
+        let uri = 'https://tjpalmer.github.io/kjv.st/volumes.json';
         let volumes;
         try {
             volumes = yield load(uri);
