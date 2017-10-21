@@ -296,8 +296,13 @@ class SummaryView extends Component<
           flex,
           {
             borderCollapse: 'separate',
-            borderSpacing: '1em 0.5em',
             width: '100%',
+            $nest: {
+              '& td:not(:last-child), & th:not(:last-child)': {
+                paddingRight: '1em',
+              },
+              '& th, & tr:not(:last-child) td': {paddingBottom: '0.5em'},
+            }
           },
         )}>
           <thead>
@@ -309,7 +314,7 @@ class SummaryView extends Component<
             outcomes.map(outcome => <tr>
               {renderPath(outcome.actual)}
               {renderPath(outcome.guess)}
-              <td>+ {outcome.score}</td>
+              <td>{outcome.score}</td>
             </tr>)
           }</tbody>
         </table>
