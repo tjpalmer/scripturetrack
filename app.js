@@ -533,6 +533,9 @@ class panel_SummaryView extends react["Component"] {
                     borderCollapse: 'separate',
                     width: '100%',
                     $nest: {
+                        '& td:last-child, & th:last-child': {
+                            textAlign: 'right',
+                        },
                         '& td:not(:last-child), & th:not(:last-child)': {
                             paddingRight: '1em',
                         },
