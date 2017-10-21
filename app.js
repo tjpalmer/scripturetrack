@@ -531,8 +531,13 @@ class panel_SummaryView extends react["Component"] {
         return (react["createElement"]("div", { className: Object(lib_es2015["style"])({ padding: '0 1em 1em' }) },
             react["createElement"]("table", { className: Object(lib_es2015["style"])(lib["flex"], {
                     borderCollapse: 'separate',
-                    borderSpacing: '1em 0.5em',
                     width: '100%',
+                    $nest: {
+                        '& td:not(:last-child), & th:not(:last-child)': {
+                            paddingRight: '1em',
+                        },
+                        '& th, & tr:not(:last-child) td': { paddingBottom: '0.5em' },
+                    }
                 }) },
                 react["createElement"]("thead", null,
                     react["createElement"]("tr", null,
@@ -542,9 +547,7 @@ class panel_SummaryView extends react["Component"] {
                 react["createElement"]("tbody", null, outcomes.map(outcome => react["createElement"]("tr", null,
                     renderPath(outcome.actual),
                     renderPath(outcome.guess),
-                    react["createElement"]("td", null,
-                        "+ ",
-                        outcome.score)))))));
+                    react["createElement"]("td", null, outcome.score)))))));
     }
 }
 class panel_VolumeView extends react["Component"] {
