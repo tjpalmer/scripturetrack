@@ -115,6 +115,14 @@ function ChevronsRight(props) {
         react["createElement"]("polyline", { points: "13 17 18 12 13 7" }),
         react["createElement"]("polyline", { points: "6 17 11 12 6 7" }));
 }
+function Maximize(props) {
+    return react["createElement"](Icon, Object.assign({}, props),
+        react["createElement"]("path", { d: "M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" }));
+}
+function Minimize(props) {
+    return react["createElement"](Icon, Object.assign({}, props),
+        react["createElement"]("path", { d: "M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3" }));
+}
 function Settings(props) {
     return react["createElement"](Icon, Object.assign({}, props),
         react["createElement"]("circle", { cx: "12", cy: "12", r: "3" }),
@@ -395,6 +403,45 @@ class panel_ChapterView extends react["Component"] {
             }, onClick: this.onClick }), index + 1);
     }
 }
+class panel_Controls extends react["Component"] {
+    constructor() {
+        super(...arguments);
+        this.fullScreen = false;
+        this.toggleFullScreen = () => {
+            if (this.isFullScreen()) {
+                let exitFullscreen = (document.exitFullscreen || document.mozCancelFullScreen ||
+                    document.webkitExitFullscreen);
+                exitFullscreen.call(document);
+                this.fullScreen = false;
+            }
+            else {
+                let { box } = this.props.panel.props.app;
+                let requestFullScreen = (box.mozRequestFullScreen || box.requestFullscreen ||
+                    box.webkitRequestFullScreen);
+                requestFullScreen.call(box);
+                this.fullScreen = true;
+            }
+            this.setState({ fullScreen: this.fullScreen });
+        };
+    }
+    isFullScreen() {
+        return !!(document.fullscreenElement || document.mozFullScreenElement ||
+            document.webkitFullscreenElement);
+    }
+    render() {
+        let { iconSize, panel } = this.props;
+        return react["createElement"]("div", { className: Object(lib_es2015["style"])({ $nest: { '& > div': {
+                        padding: `${iconSize / 4}vh`,
+                        position: 'fixed',
+                        right: 0,
+                    } } }) },
+            react["createElement"]("div", { className: Object(lib_es2015["style"])({ top: 0 }), onClick: panel.togglePanel },
+                react["createElement"](ChevronsLeft, null)),
+            react["createElement"]("div", { className: Object(lib_es2015["style"])({ bottom: 0 }), onClick: this.toggleFullScreen }, this.fullScreen ?
+                react["createElement"](Minimize, { className: Object(lib_es2015["style"])({ padding: `${0.15 * iconSize}vh` }) }) :
+                react["createElement"](Maximize, { className: Object(lib_es2015["style"])({ padding: `${0.15 * iconSize}vh` }) })));
+    }
+}
 class panel_DocView extends react["Component"] {
     constructor(props) {
         super(props);
@@ -456,63 +503,58 @@ class panel_LibraryView extends react["Component"] {
         let last = outcomes.length == quizLength;
         let score = outcomes.length ? outcomes.slice(-1)[0].score : 0;
         let iconSize = 6.25;
-        return (react["createElement"]("div", { className: Object(lib_es2015["style"])(lib["content"], lib["vertical"], {
-                background: 'white',
-                borderLeft: '1px solid black',
-                bottom: 0,
-                fontSize: `3.125vh`,
-                right: shown ? 0 : '-90vmin',
-                position: 'fixed',
-                width: `90vmin`,
-                top: 0,
-            }) },
-            react["createElement"]("div", { className: Object(lib_es2015["style"])({
-                    display: shown ? 'none' : 'block',
-                    left: `-${iconSize * 6 / 4}vh`,
-                    padding: `${iconSize / 4}vh`,
-                    position: 'absolute',
-                }), onClick: this.togglePanel },
-                react["createElement"](ChevronsLeft, null)),
-            react["createElement"]("div", { className: Object(lib_es2015["style"])({
-                    background: 'rgba(255, 255, 255, 0.2)',
-                    position: 'absolute',
-                    right: 0,
+        return react["createElement"]("div", null,
+            react["createElement"](panel_Controls, Object.assign({}, { iconSize }, { panel: this })),
+            react["createElement"]("div", { className: Object(lib_es2015["style"])(lib["content"], lib["vertical"], {
+                    background: 'white',
+                    borderLeft: '1px solid black',
+                    bottom: 0,
+                    fontSize: `3.125vh`,
+                    right: shown ? 0 : '-90vmin',
+                    position: 'fixed',
+                    width: `90vmin`,
+                    top: 0,
                 }) },
-                react["createElement"]("div", { className: Object(lib_es2015["style"])({ padding: '0.5em' }), onClick: this.togglePanel },
-                    react["createElement"](ChevronsRight, null)),
-                react["createElement"]("div", { className: Object(lib_es2015["style"])({ padding: '0.5em' }) },
-                    react["createElement"](Settings, { color: '#bbb', className: Object(lib_es2015["style"])({ padding: '0.9375vh' }) }))),
-            react["createElement"]("div", { className: Object(lib_es2015["style"])(lib["flex"], Object(lib["margin"])(0), lib["scrollY"], {
-                    cursor: 'default',
-                    paddingLeft: '1em',
-                    paddingRight: `${iconSize}vh`,
-                }) }, this.props.items.map(volume => react["createElement"](panel_VolumeView, Object.assign({ answer: answer && answer.names[0] == volume.name ? answer : undefined, guess: guess && guess.names[0] == volume.name ? guess : undefined, key: volume.name + count, library: this }, Object.assign({ count }, volume))))),
-            react["createElement"]("div", { className: Object(lib_es2015["style"])(lib["content"], lib["horizontal"], {
-                    borderTop: '1px solid black',
-                    margin: '0 0.5em',
-                    padding: '1em 0.5em 0',
-                }) },
-                react["createElement"]("div", { className: Object(lib_es2015["style"])(lib["flex"]) },
-                    "Round ",
-                    outcomes.length + (answer ? 0 : 1),
-                    " / ",
-                    quizLength),
-                react["createElement"]("div", null, answer &&
-                    react["createElement"]("span", null,
-                        "+ ",
-                        outcomes.slice(-1)[0].score))),
-            react["createElement"]("div", { className: Object(lib_es2015["style"])(lib["content"], lib["horizontal"], { padding: '1em' }) },
-                react["createElement"]("div", { className: Object(lib_es2015["style"])(lib["flex"]) },
-                    react["createElement"]("button", { disabled: !guess, onClick: this.makeGuess, type: 'button' }, answer ? (last ? 'New Game!' : 'Next Excerpt') : 'Make Guess')),
-                react["createElement"]("div", null,
-                    last ? 'Final ' : '',
-                    "Score ",
-                    sum(function* score() {
-                        for (let outcome of outcomes) {
-                            yield outcome.score;
-                        }
-                    }()))),
-            last && react["createElement"](panel_SummaryView, Object.assign({}, { outcomes, volumes }))));
+                react["createElement"]("div", { className: Object(lib_es2015["style"])({
+                        background: 'rgba(255, 255, 255, 0.2)',
+                        position: 'absolute',
+                        right: 0,
+                    }) },
+                    react["createElement"]("div", { className: Object(lib_es2015["style"])({ padding: '0.5em' }), onClick: this.togglePanel },
+                        react["createElement"](ChevronsRight, null)),
+                    react["createElement"]("div", { className: Object(lib_es2015["style"])({ padding: '0.5em' }) },
+                        react["createElement"](Settings, { color: '#bbb', className: Object(lib_es2015["style"])({ padding: `${0.15 * iconSize}vh` }) }))),
+                react["createElement"]("div", { className: Object(lib_es2015["style"])(lib["flex"], Object(lib["margin"])(0), lib["scrollY"], {
+                        cursor: 'default',
+                        paddingLeft: '1em',
+                        paddingRight: `${iconSize}vh`,
+                    }) }, this.props.items.map(volume => react["createElement"](panel_VolumeView, Object.assign({ answer: answer && answer.names[0] == volume.name ? answer : undefined, guess: guess && guess.names[0] == volume.name ? guess : undefined, key: volume.name + count, library: this }, Object.assign({ count }, volume))))),
+                react["createElement"]("div", { className: Object(lib_es2015["style"])(lib["content"], lib["horizontal"], {
+                        borderTop: '1px solid black',
+                        margin: '0 0.5em',
+                        padding: '1em 0.5em 0',
+                    }) },
+                    react["createElement"]("div", { className: Object(lib_es2015["style"])(lib["flex"]) },
+                        "Round ",
+                        outcomes.length + (answer ? 0 : 1),
+                        " / ",
+                        quizLength),
+                    react["createElement"]("div", null, answer &&
+                        react["createElement"]("span", null,
+                            "+ ",
+                            outcomes.slice(-1)[0].score))),
+                react["createElement"]("div", { className: Object(lib_es2015["style"])(lib["content"], lib["horizontal"], { padding: '1em' }) },
+                    react["createElement"]("div", { className: Object(lib_es2015["style"])(lib["flex"]) },
+                        react["createElement"]("button", { disabled: !guess, onClick: this.makeGuess, type: 'button' }, answer ? (last ? 'New Game!' : 'Next Excerpt') : 'Make Guess')),
+                    react["createElement"]("div", null,
+                        last ? 'Final ' : '',
+                        "Score ",
+                        sum(function* score() {
+                            for (let outcome of outcomes) {
+                                yield outcome.score;
+                            }
+                        }()))),
+                last && react["createElement"](panel_SummaryView, Object.assign({}, { outcomes, volumes }))));
     }
 }
 class panel_SummaryView extends react["Component"] {
@@ -607,7 +649,10 @@ class view_AppView extends react["Component"] {
     render() {
         let { actual, chapter, count, guess, showAnswer } = this.state;
         let answer = showAnswer ? actual : undefined;
-        return (react["createElement"]("div", { className: Object(lib_es2015["style"])(lib["fillParent"], lib["horizontal"], lib["someChildWillScroll"], { $nest: { '& .icon': { height: '6.25vh' } } }) },
+        return (react["createElement"]("div", { className: Object(lib_es2015["style"])(lib["fillParent"], lib["horizontal"], lib["someChildWillScroll"], {
+                background: 'white',
+                $nest: { '& .icon': { height: '6.25vh' } },
+            }), ref: box => this.box = box },
             react["createElement"](excerpt_ExcerptScroller, Object.assign({}, { chapter })),
             react["createElement"](panel_LibraryView, Object.assign({ app: this }, { answer, count, guess }, this.props.library))));
     }

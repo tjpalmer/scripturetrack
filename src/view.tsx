@@ -53,6 +53,8 @@ export class AppView extends Component<App, AppState> {
     this.shuffle(true);
   }
 
+  box: HTMLElement;
+
   guess(guess?: Path) {
     this.setState({guess});
   }
@@ -61,10 +63,16 @@ export class AppView extends Component<App, AppState> {
     let {actual, chapter, count, guess, showAnswer} = this.state;
     let answer = showAnswer ? actual : undefined;
     return (
-      <div className={style(
-        fillParent, horizontal, someChildWillScroll,
-        {$nest: {'& .icon': {height: '6.25vh'}}},
-      )}>
+      <div
+        className={style(
+          fillParent, horizontal, someChildWillScroll,
+          {
+            background: 'white',
+            $nest: {'& .icon': {height: '6.25vh'}},
+          },
+        )}
+        ref={box => this.box = box!}
+      >
         <ExcerptScroller {...{chapter}}/>
         <LibraryView
           app={this}

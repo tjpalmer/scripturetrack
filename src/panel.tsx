@@ -6,7 +6,9 @@ import {
 } from 'csstips';
 import * as React from 'react';
 import {Component} from 'react';
-import {ChevronsLeft, ChevronsRight, Settings} from './feather';
+import {
+  ChevronsLeft, ChevronsRight, Maximize, Minimize, Settings,
+} from './feather';
 import {style} from 'typestyle';
 
 class ChapterView extends Component<
@@ -64,6 +66,71 @@ class ChapterView extends Component<
       }}
       onClick={this.onClick}
     >{index + 1}</li>;    
+  }
+
+}
+
+class Controls extends Component<
+  {iconSize: number, panel: LibraryView}, {fullScreen?: boolean}
+> {
+
+  fullScreen = false;
+
+  isFullScreen() {
+    return !!(
+      document.fullscreenElement || (document as any).mozFullScreenElement ||
+      document.webkitFullscreenElement
+    );
+  }
+
+  render() {
+    let {iconSize, panel} = this.props;
+    return <div
+      className={style({$nest: {'& > div': {
+        padding: `${iconSize / 4}vh`,
+        position: 'fixed',
+        right: 0,
+      }}})}
+    >
+      <div
+        className={style({top: 0})}
+        onClick={panel.togglePanel}
+      >
+        <ChevronsLeft/>
+      </div>
+      <div
+        className={style({bottom: 0})}
+        onClick={this.toggleFullScreen}
+      >
+        {this.fullScreen ?
+          // Branch on separate var because browser state lags.
+          <Minimize className={style({padding: `${0.15 * iconSize}vh`})}/> :
+          <Maximize className={style({padding: `${0.15 * iconSize}vh`})}/>
+        }
+      </div>
+    </div>;
+  }
+
+  toggleFullScreen = () => {
+    if (this.isFullScreen()) {
+      // Restore.
+      let exitFullscreen = (
+        document.exitFullscreen || (document as any).mozCancelFullScreen ||
+        document.webkitExitFullscreen
+      );
+      exitFullscreen.call(document);
+      this.fullScreen = false;
+    } else {
+      // Go full screen.
+      let {box} = this.props.panel.props.app;
+      let requestFullScreen = (
+        (box as any).mozRequestFullScreen || box.requestFullscreen ||
+        box.webkitRequestFullScreen
+      );
+      requestFullScreen.call(box);
+      this.fullScreen = true;
+    }
+    this.setState({fullScreen: this.fullScreen});
   }
 
 }
@@ -168,7 +235,8 @@ export class LibraryView extends Component<
     let last = outcomes.length == quizLength;
     let score = outcomes.length ? outcomes.slice(-1)[0].score : 0;
     let iconSize = 6.25;
-    return (
+    return <div>
+      <Controls {...{iconSize}} panel={this}/>
       <div
         className={style(
           content,
@@ -185,17 +253,6 @@ export class LibraryView extends Component<
           },
         )}
       >
-        <div
-          className={style({
-            display: shown ? 'none' : 'block',
-            left: `-${iconSize * 6 / 4}vh`,
-            padding: `${iconSize / 4}vh`,
-            position: 'absolute',
-          })}
-          onClick={this.togglePanel}
-        >
-          <ChevronsLeft/>
-        </div>
         <div className={style({
           background: 'rgba(255, 255, 255, 0.2)',
           position: 'absolute',
@@ -207,7 +264,7 @@ export class LibraryView extends Component<
           <div className={style({padding: '0.5em'})}>
             <Settings
               color='#bbb'
-              className={style({padding: '0.9375vh'})}
+              className={style({padding: `${0.15 * iconSize}vh`})}
             />
           </div>
         </div>
@@ -268,7 +325,7 @@ export class LibraryView extends Component<
         </div>
         {last && <SummaryView {...{outcomes, volumes}}/>}
       </div>
-    );
+    </div>;
   }
 
   togglePanel = () => {
