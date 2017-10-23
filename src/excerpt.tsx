@@ -56,7 +56,6 @@ class ExcerptView extends PureComponent<
         let listener = () => {
           if (!(this.container && document.contains(this.container))) {
             // Just as a failsafe.
-            this.maxHeight = window.innerHeight * 5 / 8;
             window.removeEventListener('resize', listener);
             this.watchingResize = false;
           }
@@ -74,8 +73,6 @@ class ExcerptView extends PureComponent<
   }
 
   container?: HTMLElement;
-
-  maxHeight = window.innerHeight * 5 / 8;
 
   render() {
     let {chapter} = this.props;
@@ -128,7 +125,8 @@ class ExcerptView extends PureComponent<
   split() {
     // Actually, watch repeatedly until things stop changing.
     setTimeout(() => {
-      let {container, maxHeight, props, splits} = this;
+      let maxHeight = window.innerHeight * 5 / 8;
+      let {container, props, splits} = this;
       // TODO Check for changed splits rather than any splits or chapter change.
       let splitIndex: number | undefined = this.props.page;
       if (container && !(
