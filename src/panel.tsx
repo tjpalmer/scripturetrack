@@ -89,17 +89,17 @@ class Controls extends Component<
       className={style({$nest: {'& > div': {
         padding: `${iconSize / 4}vh`,
         position: 'fixed',
-        right: 0,
+        top: 0,
       }}})}
     >
       <div
-        className={style({top: 0})}
+        className={style({right: 0})}
         onClick={panel.togglePanel}
       >
         <ChevronsLeft/>
       </div>
       <div
-        className={style({bottom: 0})}
+        className={style({left: 0})}
         onClick={this.toggleFullScreen}
       >
         {this.fullScreen ?

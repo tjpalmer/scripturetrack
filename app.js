@@ -432,11 +432,11 @@ class panel_Controls extends react["Component"] {
         return react["createElement"]("div", { className: Object(lib_es2015["style"])({ $nest: { '& > div': {
                         padding: `${iconSize / 4}vh`,
                         position: 'fixed',
-                        right: 0,
+                        top: 0,
                     } } }) },
-            react["createElement"]("div", { className: Object(lib_es2015["style"])({ top: 0 }), onClick: panel.togglePanel },
+            react["createElement"]("div", { className: Object(lib_es2015["style"])({ right: 0 }), onClick: panel.togglePanel },
                 react["createElement"](ChevronsLeft, null)),
-            react["createElement"]("div", { className: Object(lib_es2015["style"])({ bottom: 0 }), onClick: this.toggleFullScreen }, this.fullScreen ?
+            react["createElement"]("div", { className: Object(lib_es2015["style"])({ left: 0 }), onClick: this.toggleFullScreen }, this.fullScreen ?
                 react["createElement"](Minimize, { className: Object(lib_es2015["style"])({ padding: `${0.15 * iconSize}vh` }) }) :
                 react["createElement"](Maximize, { className: Object(lib_es2015["style"])({ padding: `${0.15 * iconSize}vh` }) })));
     }
