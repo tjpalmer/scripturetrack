@@ -167,7 +167,6 @@ class excerpt_ExcerptScroller extends react["PureComponent"] {
 class excerpt_ExcerptView extends react["PureComponent"] {
     constructor() {
         super(...arguments);
-        this.maxHeight = window.innerHeight * 5 / 8;
         this.splits = [];
         this.watchingResize = false;
     }
@@ -178,7 +177,6 @@ class excerpt_ExcerptView extends react["PureComponent"] {
             if (!this.watchingResize) {
                 let listener = () => {
                     if (!(this.container && document.contains(this.container))) {
-                        this.maxHeight = window.innerHeight * 5 / 8;
                         window.removeEventListener('resize', listener);
                         this.watchingResize = false;
                     }
@@ -224,7 +222,8 @@ class excerpt_ExcerptView extends react["PureComponent"] {
     }
     split() {
         setTimeout(() => {
-            let { container, maxHeight, props, splits } = this;
+            let maxHeight = window.innerHeight * 5 / 8;
+            let { container, props, splits } = this;
             let splitIndex = this.props.page;
             if (container && !(splits.length && this.splitChapter == this.props.chapter)) {
                 this.splitChapter = this.props.chapter;
