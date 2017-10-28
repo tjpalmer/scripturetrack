@@ -261,12 +261,12 @@ export class LibraryView extends Component<
           <div className={style({padding: '0.5em'})} onClick={this.togglePanel}>
             <ChevronsRight/>
           </div>
-          <div className={style({padding: '0.5em'})}>
+          {/* <div className={style({padding: '0.5em'})}>
             <Settings
               color='#bbb'
               className={style({padding: `${0.15 * iconSize}vh`})}
             />
-          </div>
+          </div> */}
         </div>
         <div className={style(
           flex, margin(0), scrollY, {

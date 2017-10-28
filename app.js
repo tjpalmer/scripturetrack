@@ -520,9 +520,7 @@ class panel_LibraryView extends react["Component"] {
                         right: 0,
                     }) },
                     react["createElement"]("div", { className: Object(lib_es2015["style"])({ padding: '0.5em' }), onClick: this.togglePanel },
-                        react["createElement"](ChevronsRight, null)),
-                    react["createElement"]("div", { className: Object(lib_es2015["style"])({ padding: '0.5em' }) },
-                        react["createElement"](Settings, { color: '#bbb', className: Object(lib_es2015["style"])({ padding: `${0.15 * iconSize}vh` }) }))),
+                        react["createElement"](ChevronsRight, null))),
                 react["createElement"]("div", { className: Object(lib_es2015["style"])(lib["flex"], Object(lib["margin"])(0), lib["scrollY"], {
                         cursor: 'default',
                         paddingLeft: '1em',
@@ -745,24 +743,39 @@ function init() {
         document.getElementById('preload').remove();
         Object(lib["normalize"])();
         Object(lib["setupPage"])('#root');
-        let uri = 'https://tjpalmer.github.io/kjv.st/volumes.json';
-        let volumes;
+        let hash = window.location.hash;
+        let lds = !!hash.match('lds');
+        let uris = ['https://tjpalmer.github.io/kjv.st/volumes.json'];
+        if (lds) {
+            uris.push('https://tjpalmer.github.io/mbo.st/volumes.json');
+        }
+        let volumes = { items: [] };
+        let loadVolumes = (uris) => __awaiter(this, void 0, void 0, function* () {
+            let libs = yield Promise.all(uris.map(uri => load(uri)));
+            for (let lib of libs) {
+                volumes.items.push(...lib.items);
+            }
+        });
         try {
-            volumes = yield load(uri);
+            yield loadVolumes(uris);
         }
         catch (_a) {
-            uri = 'http://localhost:52119/volumes.json';
-            volumes = yield load(uri);
-        }
-        for (let volume of volumes.items) {
-            volume.uri = uri;
+            uris = ['http://localhost:52119/volumes.json'];
+            if (lds) {
+                uris.push('http://localhost:52120/volumes.json');
+            }
+            yield loadVolumes(uris);
         }
         Object(react_dom["render"])(react["createElement"](view_AppView, { library: volumes }), document.getElementById('root'));
     });
 }
 function load(uri) {
     return __awaiter(this, void 0, void 0, function* () {
-        return yield (yield fetch(uri)).json();
+        let lib = yield (yield fetch(uri)).json();
+        for (let volume of lib.items) {
+            volume.uri = uri;
+        }
+        return lib;
     });
 }
 
