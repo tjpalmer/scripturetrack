@@ -423,6 +423,21 @@ class panel_Controls extends react["Component"] {
             this.setState({ fullScreen: this.fullScreen });
         };
     }
+    componentWillUnmount() {
+        if (this.resizeListener) {
+            window.removeEventListener('resize', this.resizeListener);
+            this.resizeListener = undefined;
+        }
+    }
+    componentDidUpdate() {
+        if (!this.resizeListener) {
+            this.resizeListener = () => {
+                this.fullScreen = this.isFullScreen();
+                this.setState({ fullScreen: this.fullScreen });
+            };
+            window.addEventListener('resize', this.resizeListener);
+        }
+    }
     isFullScreen() {
         return !!(document.fullscreenElement || document.mozFullScreenElement ||
             document.webkitFullscreenElement);

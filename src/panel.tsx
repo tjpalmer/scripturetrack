@@ -74,6 +74,23 @@ class Controls extends Component<
   {iconSize: number, panel: LibraryView}, {fullScreen?: boolean}
 > {
 
+  componentWillUnmount() {
+    if (this.resizeListener) {
+      window.removeEventListener('resize', this.resizeListener);
+      this.resizeListener = undefined;
+    }
+  }
+
+  componentDidUpdate() {
+    if (!this.resizeListener) {
+      this.resizeListener = () => {
+        this.fullScreen = this.isFullScreen();
+        this.setState({fullScreen: this.fullScreen});
+      };
+      window.addEventListener('resize', this.resizeListener);
+    }
+  }
+
   fullScreen = false;
 
   isFullScreen() {
@@ -111,6 +128,8 @@ class Controls extends Component<
     </div>;
   }
 
+  resizeListener?: () => void;
+  
   toggleFullScreen = () => {
     if (this.isFullScreen()) {
       // Restore.
