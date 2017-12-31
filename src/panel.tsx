@@ -234,6 +234,30 @@ export class LibraryView extends Component<
     }
   }
 
+  handleAction(action: string) {
+    let {state} = this;
+    switch (action) {
+      case 'advance': {
+        if (!(state && state.shown)) {
+          // Show it.
+          this.togglePanel();
+          return;
+        }
+        break;
+      }
+      case 'back': {
+        // TODO First see if someone else has focus.
+        if (state && state.shown) {
+          // Hide it.
+          this.togglePanel();
+          return;
+        }
+        break;
+      }
+      default: break;
+    }
+  }
+
   makeGuess = () => {
     let {answer, app} = this.props;
     if (answer) {

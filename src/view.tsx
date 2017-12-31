@@ -79,14 +79,17 @@ export class AppView extends Component<App, AppState> {
     switch (action) {
       case 'down':
       case 'up': {
-        this.scroller && this.scroller.scroll(action);
+        if (!(this.libraryView.state && this.libraryView.state.shown)) {
+          // No library view, so we have control.
+          this.scroller.scroll(action);
+          return;
+        }
         break;
       }
-      default: {
-        console.log('unhandled', action);
-        break;
-      }
+      default: break;
     }
+    // If we get this far, we need to pass the action down.
+    this.libraryView.handleAction(action);
   }
 
   handleAnimation?: () => void;
