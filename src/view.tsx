@@ -55,9 +55,43 @@ export class AppView extends Component<App, AppState> {
 
   box: HTMLElement;
 
+  componentDidMount() {
+    this.handleAnimation = () => {
+      this.control.update(this);
+      if (this.handleAnimation) {
+        requestAnimationFrame(this.handleAnimation);
+      }
+    };
+    this.handleAnimation();
+  }
+
+  componentWillUnmount() {
+    this.handleAnimation = undefined;
+  }
+
+  control = new Control();
+
   guess(guess?: Path) {
     this.setState({guess});
   }
+
+  handleAction(action: string) {
+    switch (action) {
+      case 'down':
+      case 'up': {
+        this.scroller && this.scroller.scroll(action);
+        break;
+      }
+      default: {
+        console.log('unhandled', action);
+        break;
+      }
+    }
+  }
+
+  handleAnimation?: () => void;
+
+  libraryView: LibraryView;
 
   render() {
     let {actual, chapter, count, guess, showAnswer} = this.state;
@@ -73,15 +107,19 @@ export class AppView extends Component<App, AppState> {
         )}
         ref={box => this.box = box!}
       >
-        <ExcerptScroller {...{chapter}}/>
+        <ExcerptScroller
+          {...{chapter}} ref={scroller => this.scroller = scroller!}
+        />
         <LibraryView
-          app={this}
+          app={this} ref={libraryView => this.libraryView = libraryView!}
           {...{answer, count, guess}}
           {...this.props.library}
         />
       </div>
     );
   }
+
+  scroller: ExcerptScroller;
 
   showAnswer() {
     let {actual, guess, outcomes} = this.state;
@@ -133,6 +171,90 @@ export class AppView extends Component<App, AppState> {
         this.setState({chapter: JSON.parse(text), chapterIndex});
       });
     });
+  }
+
+}
+
+class Control {
+
+  advance = false;
+
+  back = false;
+
+  down = false;
+
+  left = false;
+
+  right = false;
+
+  up = false;
+
+  update(app: AppView) {
+    let axisEdge = 0.5;
+    // Check for a gamepad.
+    let pads = window.navigator.getGamepads();
+    let pad: Gamepad;
+    if (pads && pads.length > 0 && pads[0] && pads[0].mapping == 'standard') {
+      pad = pads[0];
+    } else {
+      this.advance = this.back = this.down = this.left = this.right = this.up =
+        false;
+      return;
+    }
+    // Check current state.
+    let {axes, buttons} = pad;
+    let advance =
+      buttons[0].pressed || buttons[2].pressed || buttons[4].pressed ||
+      buttons[6].pressed;
+    let back =
+      buttons[1].pressed || buttons[3].pressed || buttons[5].pressed ||
+      buttons[7].pressed;
+    let down =
+      axes[1] > axisEdge || axes[3] > axisEdge || buttons[13].pressed;
+    let left =
+      axes[0] < -axisEdge || axes[2] < -axisEdge || buttons[14].pressed;
+    let right =
+      axes[0] > axisEdge || axes[2] > axisEdge || buttons[15].pressed;
+    let up =
+      // Up is negative.
+      axes[1] < -axisEdge || axes[3] < -axisEdge || buttons[12].pressed;
+    // See if we have changes.
+    if (advance != this.advance) {
+      this.advance = advance;
+      if (advance) {
+        app.handleAction('advance');
+      }
+    }
+    if (back != this.back) {
+      this.back = back;
+      if (back) {
+        app.handleAction('back');
+      }
+    }
+    if (down != this.down) {
+      this.down = down;
+      if (down) {
+        app.handleAction('down');
+      }
+    }
+    if (left != this.left) {
+      this.left = left;
+      if (left) {
+        app.handleAction('left');
+      }
+    }
+    if (right != this.right) {
+      this.right = right;
+      if (right) {
+        app.handleAction('right');
+      }
+    }
+    if (up != this.up) {
+      this.up = up;
+      if (up) {
+        app.handleAction('up');
+      }
+    }
   }
 
 }

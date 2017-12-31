@@ -31,6 +31,8 @@ export class ExcerptScroller
 
   scroll(dir: 'up' | 'down'): void {
     if (this.state.page != undefined) {
+      if (dir == 'up' && this.state.top) return;
+      if (dir == 'down' && this.state.bottom) return;
       let offset = dir == 'up' ? -1 : 1;
       this.setState({page: this.state.page! + offset});
     }
